@@ -15,14 +15,14 @@ class WebhookEvent(ABC):
         # Not present in GitHubAppAuthorizationEvent, InstallationEvent, SponsorshipEvent
         try:
             self.repository = Repository(payload.get('repository'))
-        except KeyError:
-            self.__dict__.pop('repository')
+        except AttributeError:
+            pass
 
         # Only present in some events
         try:
             self.organization = Organization(payload.get('organization'))
-        except KeyError:
-            self.__dict__.pop('organization')
+        except AttributeError:
+            pass
 
 
 class CheckRunEvent(WebhookEvent):

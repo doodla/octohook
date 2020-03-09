@@ -3,14 +3,14 @@ This document tracks the presence of all the test cases making up the different 
 
 ## CheckRunEvent
 
-- [ ] created
+- [x] created
 - [ ] completed
 - [ ] rerequested
 - [ ] requested_action
 
 ## CheckSuiteEvent
 
-- [ ] completed
+- [x] completed
 - [ ] requested
 - [ ] rerequested
 
@@ -210,16 +210,16 @@ Covered
 
 ## ReleaseEvent
 
-- [ ] published
-- [ ] unpublished
-- [ ] created
-- [ ] edited
-- [ ] deleted
-- [ ] prereleased
+- [x] published
+- [ ] unpublished ( Can't figure out how to trigger this one. )
+- [x] created
+- [x] edited
+- [x] deleted
+- [x] prereleased
 
 ## RepositoryDispatchEvent
 
-- [ ] on-demand-test
+- [x] on-demand-test
 
 ## RepositoryEvent
 
@@ -229,7 +229,7 @@ Covered
 - [ ] renamed
 - [ ] edited
 - [ ] transferred
-- [ ] publicized
+- [x] publicized
 - [ ] privatized
 - [ ] deleted
 
@@ -238,24 +238,24 @@ Covered
 
 ## RepositoryVulnerabilityAlertEvent
 
-- [ ] create
+- [x] create
 - [ ] dismiss
 - [ ] resolve
 
 ## SecurityAdvisoryEvent
 
-- [ ] published
+- [x] published
 - [ ] updated
 - [ ] performed
 
 ## SponsorshipEvent
 
-- [ ] created
+- [x] created
 - [ ] cancelled
 - [ ] edited
 - [ ] tier_changed
 - [ ] pending_cancellation
-- [ ] pending_tier_change
+- [x] pending_tier_change
 
 
 ## StarEvent
@@ -264,6 +264,7 @@ Covered
 - [x] deleted
 
 ## StatusEvent
+Completed
 
 Seems like this one has no variations(?)
 
@@ -272,7 +273,7 @@ Seems like this one has no variations(?)
 - [ ] created
 - [ ] deleted
 - [ ] edited
-- [ ] added_to_repository
+- [x] added_to_repository
 - [ ] removed_from_repository
 
 ## TeamAddEvent
