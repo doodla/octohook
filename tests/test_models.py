@@ -63,7 +63,7 @@ testcases = [
 
 
 @pytest.mark.parametrize('event_name, class_type', testcases)
-def test_models_load(event_name, class_type):
+def test_model_loads(event_name, class_type):
     for path in paths:
         try:
             with open(f"{path}/{event_name}.json") as file:
