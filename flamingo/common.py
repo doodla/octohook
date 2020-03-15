@@ -1,5 +1,7 @@
 class User:
     def __init__(self, payload: dict):
+        if not payload:
+            payload = {}
         self._payload = payload
         self.login = payload.get('login')
         self.id = payload.get('id')
@@ -363,6 +365,8 @@ class Label:
 
 class Milestone:
     def __init__(self, payload):
+        if not payload:
+            payload = {}
         self.url = payload.get('url')
         self.html_url = payload.get('html_url')
         self.labels_url = payload.get('labels_url')
@@ -720,6 +724,8 @@ class SecurityAdvisory:
 
 class SponsorshipTier:
     def __init__(self, payload):
+        if not payload:
+            payload = {}
         self.node_id = payload.get('node_id')
         self.created_at = payload.get('created_at')
         self.description = payload.get('description')
@@ -740,7 +746,9 @@ class Sponsorship:
 
 class SponsorshipChanges:
     def __init__(self, payload):
-        self.tier_from = SponsorshipTier(payload.get('tier').get('from'))
+        if not payload:
+            payload = {}
+        self.tier_from = SponsorshipTier(payload.get('tier', {}).get('from'))
 
 
 class StatusBranchCommit:

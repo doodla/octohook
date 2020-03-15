@@ -63,9 +63,6 @@ class ContentReferenceEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.content_reference = payload.get('content_reference')
-        self.repository = Repository(payload.get('repository'))
-        self.sender = User(payload.get('sender'))
-        self.installation = Installation(payload.get('installation'))
 
 
 class CreateEvent(WebhookEvent):
@@ -153,7 +150,7 @@ class GollumEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
 
-        self.pages = Page([page for page in payload.get('pages')])
+        self.pages = [Page(page) for page in payload.get('pages')]
 
 
 class InstallationEvent(WebhookEvent):
