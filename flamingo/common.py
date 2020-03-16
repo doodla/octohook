@@ -3,7 +3,9 @@ class User:
         if not payload:
             payload = {}
         self._payload = payload
+        self.name = payload.get('name')
         self.login = payload.get('login')
+        self.email = payload.get('email')
         self.id = payload.get('id')
         self.node_id = payload.get('node_id')
         self.avatar_url = payload.get('avatar_url')
@@ -12,8 +14,9 @@ class User:
         self.html_url = payload.get('html_url')
         self.followers_url = payload.get('followers_url')
         self.subscriptions_url = payload.get('subscriptions_url')
+        self.organization_url = payload.get('organizations_url')
         self.repos_url = payload.get('repos_url')
-        self.organization_url = payload.get('organization_url')
+        self.organizations_url = payload.get('organizations_url')
         self.received_events_url = payload.get('received_events_url')
         self.type = payload.get('type')
         self.site_admin = payload.get('site_admin')
@@ -86,15 +89,17 @@ class Repository:
         self.forks_count = payload.get('forks_count')
         self.mirror_url = payload.get('mirror_url')
         self.archived = payload.get('archived')
+        self.disabled = payload.get('disabled')
         self.open_issues_count = payload.get('open_issues_count')
         self.license = payload.get('license')
         self.forks = payload.get('forks')
         self.open_issues = payload.get('open_issues')
         self.watchers = payload.get('watchers')
         self.default_branch = payload.get('default_branch')
-
-        # ForkEvent
-        self.public = payload.get('public', None)
+        self.stargazers = payload.get('stargazers')
+        self.public = payload.get('public')
+        self.master_branch = payload.get('master_branch')
+        self.permissions = Permissions(payload.get('permissions'))
 
     def keys_url(self, key_id):
         pass
@@ -135,7 +140,7 @@ class Repository:
     def comments_url(self, number):
         pass
 
-    def issue_comments_url(self, number):
+    def issue_comment_url(self, number):
         pass
 
     def contents_url(self, path):
@@ -156,7 +161,6 @@ class Repository:
     def milestones_url(self, number):
         pass
 
-    # TODO
     def notifications_url(self, params):
         pass
 
@@ -177,6 +181,7 @@ class Organization:
         self.repos_url = payload.get('repos_url')
         self.events_url = payload.get('events_url')
         self.hooks_url = payload.get('hooks_url')
+        self.issues_url = payload.get('issues_url')
         self.public_members_url = payload.get('public_members_url')
         self.avatar_url = payload.get('avatar_url')
         self.description = payload.get('description')
@@ -192,7 +197,13 @@ class Comment:
     def __init__(self, payload):
         self.url = payload.get('url')
         self.html_url = payload.get('html_url')
+        self.issue_url = payload.get('issue_url')
         self.id = payload.get('id')
+        self.pull_request_review_id = payload.get('pull_request_review_id')
+        self.original_position = payload.get('original_position')
+        self.original_commit_id = payload.get('original_commit_id')
+        self.pull_request_url = payload.get('pull_request_url')
+        self.diff_hunk = payload.get('diff_hunk')
         self.node_id = payload.get('node_id')
         self.user = User(payload.get('user'))
         self.position = payload.get('position')
@@ -203,11 +214,22 @@ class Comment:
         self.updated_at = payload.get('updated_at')
         self.author_association = payload.get('author_association')
         self.body = payload.get('body')
+        self._links = RawDict(payload.get('_links'))
 
 
 class ChecksApp:
     def __init__(self, payload):
-        pass
+        self.id = payload.get('id')
+        self.node_id = payload.get('node_id')
+        self.owner = User(payload.get('owner'))
+        self.name = payload.get('name')
+        self.description = payload.get('description')
+        self.external_url = payload.get('external_url')
+        self.html_url = payload.get('html_url')
+        self.created_at = payload.get('created_at')
+        self.updated_at = payload.get('updated_at')
+        self.permissions = Permissions(payload.get('permissions'))
+        self.events = payload.get('events')
 
 
 class ChecksPullRequest:
@@ -217,18 +239,28 @@ class ChecksPullRequest:
 
 class CommitUser:
     def __init__(self, payload):
+        if not payload:
+            payload = {}
         self.name = payload.get('name')
         self.email = payload.get('email')
+        self.username = payload.get('username')
 
 
 class Commit:
     def __init__(self, payload: dict):
+        if not payload:
+            payload = {}
         self.id = payload.get('id')
         self.tree_id = payload.get('tree_id')
+        self.distinct = payload.get('distinct')
         self.message = payload.get('message')
+        self.url = payload.get('url')
         self.timestamp = payload.get('timestamp')
         self.author = CommitUser(payload.get('author'))
         self.committer = CommitUser(payload.get('committer'))
+        self.added = payload.get('added')
+        self.removed = payload.get('removed')
+        self.modified = payload.get('modified')
 
 
 class CheckSuite:
@@ -246,13 +278,18 @@ class CheckSuite:
         self.app = ChecksApp(payload.get('app'))
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
+        self.latest_check_runs_count = payload.get('latest_check_runs_count')
+        self.check_runs_url = payload.get('check_runs_url')
+        self.head_commit = Commit(payload.get('head_commit'))
 
-        try:
-            self.latest_check_runs_count = payload.get('latest_check_runs_count')
-            self.check_runs_url = payload.get('check_runs_url')
-            self.head_commit = Commit(payload.get('head_commit'))
-        except KeyError:
-            pass
+
+class CheckRunOutput:
+    def __init__(self, payload):
+        self.title = payload.get('title')
+        self.summary = payload.get('summary')
+        self.text = payload.get('text')
+        self.annotations_count = payload.get('annotations_count')
+        self.annotations_url = payload.get('annotations_url')
 
 
 class CheckRun:
@@ -268,33 +305,58 @@ class CheckRun:
         self.conclusion = payload.get('conclusion')
         self.started_at = payload.get('started_at')
         self.completed_at = payload.get('completed_at')
-        self.output = payload.get('output')
+        self.output = CheckRunOutput(payload.get('output'))
         self.name = payload.get('name')
-        self.check_suite = payload.get('check_suite')
+        self.check_suite = CheckSuite(payload.get('check_suite'))
         self.app = ChecksApp(payload.get('app'))
         self.pull_requests = [ChecksPullRequest(pr) for pr in payload.get('pull_requests')]
+
+
+class Permissions:
+    def __init__(self, payload):
+        if not payload:
+            payload = {}
+        self.metadata = payload.get('metadata')
+        self.contents = payload.get('contents')
+        self.issues = payload.get('issues')
+        self.administration = payload.get('administration')
+        self.statuses = payload.get('statuses')
+        self.repository_projects = payload.get('repository_projects')
+        self.members = payload.get('members')
+        self.repository_hooks = payload.get('repository_hooks')
+        self.pull_requests = payload.get('pull_requests')
+        self.pull = payload.get('pull')
+        self.push = payload.get('push')
+        self.admin = payload.get('admin')
+        self.pages = payload.get('pages')
+        self.deployments = payload.get('deployments')
+        self.checks = payload.get('checks')
+        self.vulnerability_alerts = payload.get('vulnerability_alerts')
+        self.organization_administration = payload.get('organization_administration')
+        self.organization_hooks = payload.get('organization_hooks')
+        self.organization_plan = payload.get('organization_plan')
+        self.organization_projects = payload.get('organization_projects')
+        self.organization_user_blocking = payload.get('organization_user_blocking')
+        self.team_discussions = payload.get('team_discussions')
 
 
 class Installation:
     def __init__(self, payload):
         self.id = payload.get('id')
         self.node_id = payload.get('node_id', None)
-
-        try:
-            self.account = User(payload.get('account'))
-            self.repository_selection = payload.get('repository_selection')
-            self.access_tokens_url = payload.get('access_tokens_url')
-            self.repositories_url = payload.get('repositories_url')
-            self.html_url = payload.get('html_url')
-            self.app_id = payload.get('app_id')
-            self.target_id = payload.get('target_id')
-            self.permissions = payload.get('permissions')
-            self.events = payload.get('events')
-            self.created_at = payload.get('created_at')
-            self.updated_at = payload.get('updated_at')
-            self.single_file_name = payload.get('single_file_name')
-        except KeyError:
-            pass
+        self.account = User(payload.get('account'))
+        self.repository_selection = payload.get('repository_selection')
+        self.access_tokens_url = payload.get('access_tokens_url')
+        self.repositories_url = payload.get('repositories_url')
+        self.html_url = payload.get('html_url')
+        self.app_id = payload.get('app_id')
+        self.target_id = payload.get('target_id')
+        self.permissions = Permissions(payload.get('permissions'))
+        self.events = payload.get('events')
+        self.created_at = payload.get('created_at')
+        self.updated_at = payload.get('updated_at')
+        self.single_file_name = payload.get('single_file_name')
+        self.target_type = payload.get('target_type')
 
 
 class DeployKey:
@@ -316,7 +378,7 @@ class Deployment:
         self.sha = payload.get('sha')
         self.ref = payload.get('ref')
         self.task = payload.get('task')
-        self.payload = payload.get('payload')
+        self.payload = RawDict(payload.get('payload'))
         self.original_environment = payload.get('original_environment')
         self.environment = payload.get('environment')
         self.description = payload.get('description')
@@ -355,11 +417,14 @@ class Page:
 
 class Label:
     def __init__(self, payload):
+        if not payload:
+            payload = {}
         self.id = payload.get('id')
         self.node_id = payload.get('node_id')
         self.url = payload.get('url')
         self.name = payload.get('name')
         self.color = payload.get('color')
+        self.description = payload.get('description')
         self.default = payload.get('default')
 
 
@@ -385,6 +450,13 @@ class Milestone:
         self.closed_at = payload.get('closed_at')
 
 
+class RawDict(dict):
+    def __init__(self, payload):
+        if not payload:
+            payload = {}
+        super().__init__(payload)
+
+
 class Issue:
     def __init__(self, payload):
         self.url = payload.get('url')
@@ -407,8 +479,11 @@ class Issue:
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
         self.closed_at = payload.get('closed_at')
-        self.author_associations = payload.get('author_associations')
+        self.author_association = payload.get('author_association')
         self.body = payload.get('body')
+
+    def labels_url(self, name):
+        pass
 
 
 class PurchaseAccount:
@@ -416,7 +491,7 @@ class PurchaseAccount:
         self.type = payload.get('type')
         self.id = payload.get('id')
         self.login = payload.get('login')
-        self.organization_billing_address = payload.get('organization_billing_address')
+        self.organization_billing_email = payload.get('organization_billing_email')
 
 
 class Plan:
@@ -426,7 +501,11 @@ class Plan:
         self.description = payload.get('description')
         self.monthly_price_in_cents = payload.get('monthly_price_in_cents')
         self.yearly_price_in_cents = payload.get('yearly_price_in_cents')
-        self.yearly_pric = payload.get('yearly_pric')
+        self.yearly_price = payload.get('yearly_price')
+        self.price_model = payload.get('price_model')
+        self.has_free_trial = payload.get('has_free_trial')
+        self.unit_name = payload.get('unit_name')
+        self.bullets = payload.get('bullets')
 
 
 class MarketplacePurcahase:
@@ -465,7 +544,7 @@ class Hook:
         self.name = payload.get('name')
         self.active = payload.get('active')
         self.events = payload.get('events')
-        self.config = payload.get('config')
+        self.config = RawDict(payload.get('config'))
         self.updated_at = payload.get('updated_at')
         self.created_at = payload.get('created_at')
 
@@ -539,6 +618,15 @@ class PackageVersion:
         self.installation_command = payload.get('installation_command')
 
 
+class Registry:
+    def __init__(self, payload):
+        self.about_url = payload.get('about_url')
+        self.name = payload.get('name')
+        self.type = payload.get('type')
+        self.url = payload.get('url')
+        self.vendor = payload.get('vendor')
+
+
 class Package:
     def __init__(self, payload):
         self.id = payload.get('id')
@@ -549,14 +637,14 @@ class Package:
         self.updated_at = payload.get('updated_at')
         self.owner = User(payload.get('owner'))
         self.package_version = PackageVersion(payload.get('package_version'))
-        self.registry = payload.get('registry')
+        self.registry = Registry(payload.get('registry'))
 
 
 class PageBuild:
     def __init__(self, payload):
         self.url = payload.get('url')
         self.status = payload.get('status')
-        self.error = payload.get('error')
+        self.error = RawDict(payload.get('error'))
         self.pusher = User(payload.get('pusher'))
         self.commit = payload.get('commit')
         self.duration = payload.get('duration')
@@ -574,9 +662,11 @@ class ProjectCard:
         self.node_id = payload.get('node_id')
         self.note = payload.get('note')
         self.archived = payload.get('archived')
+        self.after_id = payload.get('after_id')
         self.creator = User(payload.get('creator'))
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
+        self.content_url = payload.get('content_url')
 
 
 class ProjectColumn:
@@ -589,6 +679,7 @@ class ProjectColumn:
         self.name = payload.get('name')
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
+        self.after_id = payload.get('after_id')
 
 
 class Project:
@@ -637,8 +728,8 @@ class PullRequest:
         self.closed_at = payload.get('closed_at')
         self.merged_at = payload.get('merged_at')
         self.merge_commit_sha = payload.get('merge_commit_sha')
-        self.assignee = payload.get('assignee')
-        self.assignees = payload.get('assignees')
+        self.assignee = User(payload.get('assignee'))
+        self.assignees = [User(assignee) for assignee in payload.get('assignees')]
         self.requested_reviewers = payload.get('requested_reviewers')
         self.requested_teams = payload.get('requested_teams')
         self.labels = payload.get('labels')
@@ -649,7 +740,7 @@ class PullRequest:
         self.statuses_url = payload.get('statuses_url')
         self.head = Ref(payload.get('head'))
         self.base = Ref(payload.get('base'))
-        self._links = payload.get('_links')
+        self._links = RawDict(payload.get('_links'))
         self.author_association = payload.get('author_association')
         self.draft = payload.get('draft')
         self.merged = payload.get('merged')
@@ -663,7 +754,7 @@ class PullRequest:
         self.commits = payload.get('commits')
         self.additions = payload.get('additions')
         self.deletions = payload.get('deletions')
-        self.changes_files = payload.get('changes_files')
+        self.changed_files = payload.get('changed_files')
 
     def review_comment_url(self, number):
         pass
@@ -681,7 +772,7 @@ class Review:
         self.html_url = payload.get('html_url')
         self.pull_request_url = payload.get('pull_request_url')
         self.author_association = payload.get('author_association')
-        self._links = payload.get('_links')
+        self._links = RawDict(payload.get('_links'))
 
 
 class VulnerabilityAlert:
@@ -744,13 +835,6 @@ class Sponsorship:
         self.tier = SponsorshipTier(payload.get('tier'))
 
 
-class SponsorshipChanges:
-    def __init__(self, payload):
-        if not payload:
-            payload = {}
-        self.tier_from = SponsorshipTier(payload.get('tier', {}).get('from'))
-
-
 class StatusBranchCommit:
     def __init__(self, payload):
         self.sha = payload.get('sha')
@@ -799,6 +883,13 @@ class StatusCommit:
         self.url = payload.get('url')
         self.html_url = payload.get('html_url')
         self.comments_url = payload.get('comments_url')
-        self.author = payload.get('author')
-        self.committer = payload.get('committer')
+        self.author = User(payload.get('author'))
+        self.committer = User(payload.get('committer'))
         self.parents = [StatusBranchCommit(parent) for parent in payload.get('parents')]
+
+
+class ContentReference:
+    def __init__(self, payload):
+        self.id = payload.get('id')
+        self.node_id = payload.get('node_id')
+        self.reference = payload.get('reference')
