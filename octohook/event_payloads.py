@@ -4,7 +4,7 @@ from octohook.common import Repository, Organization, User, Comment, CheckRun, C
     Deployment, DeploymentStatus, Page, ShortRepository, Issue, Label, MarketplacePurcahase, Team, Hook, Milestone, \
     Membership, Package, PageBuild, ProjectCard, ProjectColumn, Project, PullRequest, Review, Release, \
     VulnerabilityAlert, SecurityAdvisory, Sponsorship, Branch, StatusCommit, RawDict, \
-    ContentReference, Commit, CommitUser
+    ContentReference, Commit, CommitUser, optional
 
 
 class WebhookEvent(ABC):
@@ -189,7 +189,7 @@ class IssueCommentEvent(WebhookEvent):
         super().__init__(payload)
         self.issue = Issue(payload.get('issue'))
         self.comment = Comment(payload.get('comment'))
-        self.changes = RawDict(payload.get('changes'))
+        self.changes = optional(payload, 'changes', RawDict)
 
 
 class IssuesEvent(WebhookEvent):
@@ -200,10 +200,10 @@ class IssuesEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.issue = Issue(payload.get('issue'))
-        self.changes = RawDict(payload.get('changes'))
-        self.label = Label(payload.get('label'))
-        self.assignee = User(payload.get('assignee'))
-        self.milestone = Milestone(payload.get('milestone'))
+        self.changes = optional(payload, 'changes', RawDict)
+        self.label = optional(payload, 'label', Label)
+        self.assignee = optional(payload, 'assignee', User)
+        self.milestone = optional(payload, 'milestone', Milestone)
 
 
 class LabelEvent(WebhookEvent):
@@ -214,7 +214,7 @@ class LabelEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.label = Label(payload.get('label'))
-        self.changes = RawDict(payload.get('changes'))
+        self.changes = optional(payload, 'changes', RawDict)
 
 
 class MarketplacePurchaseEvent(WebhookEvent):
@@ -269,7 +269,7 @@ class MilestoneEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.milestone = Milestone(payload.get('milestone'))
-        self.changes = RawDict(payload.get('changes'))
+        self.changes = optional(payload, 'changes', RawDict)
 
 
 class OrganizationEvent(WebhookEvent):
@@ -322,7 +322,7 @@ class ProjectCardEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.project_card = ProjectCard(payload.get('project_card'))
-        self.changes = RawDict(payload.get('changes'))
+        self.changes = optional(payload, 'changes', RawDict)
 
 
 class ProjectColumnEvent(WebhookEvent):
@@ -333,7 +333,7 @@ class ProjectColumnEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.project_column = ProjectColumn(payload.get('project_column'))
-        self.changes = RawDict(payload.get('changes'))
+        self.changes = optional(payload, 'changes', RawDict)
 
 
 class ProjectEvent(WebhookEvent):
@@ -364,12 +364,12 @@ class PullRequestEvent(WebhookEvent):
         super().__init__(payload)
         self.number = payload.get('number')
         self.pull_request = PullRequest(payload.get('pull_request'))
-        self.assignee = User(payload.get('assignee'))
-        self.label = Label(payload.get('label'))
-        self.changes = RawDict(payload.get('changes'))
+        self.assignee = optional(payload, 'assignee', User)
+        self.label = optional(payload, 'label', Label)
+        self.changes = optional(payload, 'changes', RawDict)
         self.before = payload.get('before')
         self.after = payload.get('after')
-        self.requested_reviewer = User(payload.get('requested_reviewer'))
+        self.requested_reviewer = optional(payload, 'requested_reviewer', User)
 
 
 class PullRequestReviewEvent(WebhookEvent):
@@ -393,7 +393,7 @@ class PullRequestReviewCommentEvent(WebhookEvent):
         super().__init__(payload)
         self.comment = Comment(payload.get('comment'))
         self.pull_request = PullRequest(payload.get('pull_request'))
-        self.changes = RawDict(payload.get('changes'))
+        self.changes = optional(payload, 'changes', RawDict)
 
 
 class PushEvent(WebhookEvent):
@@ -412,7 +412,7 @@ class PushEvent(WebhookEvent):
         self.base_ref = payload.get('base_ref')
         self.compare = payload.get('compare')
         self.commits = [Commit(commit) for commit in payload.get('commits')]
-        self.head_commit = Commit(payload.get('head_commit'))
+        self.head_commit = optional(payload, 'head_commit', Commit)
         self.pusher = CommitUser(payload.get('pusher'))
 
 
@@ -487,7 +487,7 @@ class SponsorshipEvent(WebhookEvent):
         super().__init__(payload)
         self.sponsorship = Sponsorship(payload.get('sponsorship'))
         try:
-            self.changes = RawDict(payload.get('changes'))
+            self.changes = optional(payload, 'changes', RawDict)
             self.effective_date = payload.get('effective_date', None)
         except KeyError:
             pass

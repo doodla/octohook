@@ -81,6 +81,11 @@ def test_model_loads(event_name, class_type):
 
 
 def validate_model(data, obj):
+    """
+    Checks if every key in the json is represented either as a RawDict or a nested object.
+    :param data: The JSON dictionary
+    :param obj: The Class Object for the dictionary
+    """
     for key in data:
         json_value = data[key]
         try:
@@ -96,6 +101,10 @@ def validate_model(data, obj):
                 raise AttributeError(f"Object is a plain dictionary for {key}")
             else:
                 validate_model(json_value, obj_value)
+
+        # Validate the values
+        if json_value is None or (isinstance(json_value, str) and not callable(obj_value)):
+            assert json_value == obj_value
 
 
 @pytest.mark.parametrize('event_name, class_type', testcases)

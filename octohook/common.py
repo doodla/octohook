@@ -1,7 +1,17 @@
+from typing import TypeVar, Optional
+
+T = TypeVar("T")
+
+
+def optional(payload, key, class_type: T) -> Optional[T]:
+    if payload.get(key):
+        return class_type(payload[key])
+    else:
+        return None
+
+
 class User:
     def __init__(self, payload: dict):
-        if not payload:
-            payload = {}
         self._payload = payload
         self.name = payload.get('name')
         self.login = payload.get('login')
@@ -99,7 +109,7 @@ class Repository:
         self.stargazers = payload.get('stargazers')
         self.public = payload.get('public')
         self.master_branch = payload.get('master_branch')
-        self.permissions = Permissions(payload.get('permissions'))
+        self.permissions = optional(payload, 'permissions', Permissions)
 
     def keys_url(self, key_id):
         pass
@@ -214,7 +224,7 @@ class Comment:
         self.updated_at = payload.get('updated_at')
         self.author_association = payload.get('author_association')
         self.body = payload.get('body')
-        self._links = RawDict(payload.get('_links'))
+        self._links = optional(payload, '_links', RawDict)
 
 
 class ChecksApp:
@@ -239,8 +249,6 @@ class ChecksPullRequest:
 
 class CommitUser:
     def __init__(self, payload):
-        if not payload:
-            payload = {}
         self.name = payload.get('name')
         self.email = payload.get('email')
         self.username = payload.get('username')
@@ -248,8 +256,6 @@ class CommitUser:
 
 class Commit:
     def __init__(self, payload: dict):
-        if not payload:
-            payload = {}
         self.id = payload.get('id')
         self.tree_id = payload.get('tree_id')
         self.distinct = payload.get('distinct')
@@ -280,7 +286,7 @@ class CheckSuite:
         self.updated_at = payload.get('updated_at')
         self.latest_check_runs_count = payload.get('latest_check_runs_count')
         self.check_runs_url = payload.get('check_runs_url')
-        self.head_commit = Commit(payload.get('head_commit'))
+        self.head_commit = optional(payload, 'head_commit', Commit)
 
 
 class CheckRunOutput:
@@ -314,8 +320,6 @@ class CheckRun:
 
 class Permissions:
     def __init__(self, payload):
-        if not payload:
-            payload = {}
         self.metadata = payload.get('metadata')
         self.contents = payload.get('contents')
         self.issues = payload.get('issues')
@@ -344,14 +348,14 @@ class Installation:
     def __init__(self, payload):
         self.id = payload.get('id')
         self.node_id = payload.get('node_id', None)
-        self.account = User(payload.get('account'))
+        self.account = optional(payload, 'account', User)
         self.repository_selection = payload.get('repository_selection')
         self.access_tokens_url = payload.get('access_tokens_url')
         self.repositories_url = payload.get('repositories_url')
         self.html_url = payload.get('html_url')
         self.app_id = payload.get('app_id')
         self.target_id = payload.get('target_id')
-        self.permissions = Permissions(payload.get('permissions'))
+        self.permissions = optional(payload, 'permissions', Permissions)
         self.events = payload.get('events')
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
@@ -417,8 +421,6 @@ class Page:
 
 class Label:
     def __init__(self, payload):
-        if not payload:
-            payload = {}
         self.id = payload.get('id')
         self.node_id = payload.get('node_id')
         self.url = payload.get('url')
@@ -430,8 +432,6 @@ class Label:
 
 class Milestone:
     def __init__(self, payload):
-        if not payload:
-            payload = {}
         self.url = payload.get('url')
         self.html_url = payload.get('html_url')
         self.labels_url = payload.get('labels_url')
@@ -440,7 +440,7 @@ class Milestone:
         self.number = payload.get('number')
         self.title = payload.get('title')
         self.description = payload.get('description')
-        self.creator = User(payload.get('creator'))
+        self.creator = optional(payload, 'creator', User)
         self.open_issues = payload.get('open_issues')
         self.closed_issues = payload.get('closed_issues')
         self.state = payload.get('state')
@@ -452,8 +452,6 @@ class Milestone:
 
 class RawDict(dict):
     def __init__(self, payload):
-        if not payload:
-            payload = {}
         super().__init__(payload)
 
 
@@ -472,9 +470,9 @@ class Issue:
         self.labels = [Label(label) for label in payload.get('labels')]
         self.state = payload.get('state')
         self.locked = payload.get('locked')
-        self.assignee = User(payload.get('assignee'))
+        self.assignee = optional(payload, 'assignee', User)
         self.assignees = [User(assignee) for assignee in payload.get('assignees')]
-        self.milestone = Milestone(payload.get('milestone'))
+        self.milestone = optional(payload, 'milestone', Milestone)
         self.comments = payload.get('comments')
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
@@ -728,7 +726,7 @@ class PullRequest:
         self.closed_at = payload.get('closed_at')
         self.merged_at = payload.get('merged_at')
         self.merge_commit_sha = payload.get('merge_commit_sha')
-        self.assignee = User(payload.get('assignee'))
+        self.assignee = optional(payload, 'assignee', User)
         self.assignees = [User(assignee) for assignee in payload.get('assignees')]
         self.requested_reviewers = payload.get('requested_reviewers')
         self.requested_teams = payload.get('requested_teams')
@@ -815,8 +813,6 @@ class SecurityAdvisory:
 
 class SponsorshipTier:
     def __init__(self, payload):
-        if not payload:
-            payload = {}
         self.node_id = payload.get('node_id')
         self.created_at = payload.get('created_at')
         self.description = payload.get('description')
