@@ -1,6 +1,6 @@
 from abc import ABC
 
-from flamingo.common import Repository, Organization, User, Comment, CheckRun, CheckSuite, Installation, DeployKey, \
+from octohook.common import Repository, Organization, User, Comment, CheckRun, CheckSuite, Installation, DeployKey, \
     Deployment, DeploymentStatus, Page, ShortRepository, Issue, Label, MarketplacePurcahase, Team, Hook, Milestone, \
     Membership, Package, PageBuild, ProjectCard, ProjectColumn, Project, PullRequest, Review, Release, \
     VulnerabilityAlert, SecurityAdvisory, Sponsorship, Branch, StatusCommit, RawDict, \

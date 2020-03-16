@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from flamingo.common import RawDict
-from flamingo.event_payloads import PushEvent, TeamAddEvent, DeploymentStatusEvent, DeleteEvent, MilestoneEvent, \
+from octohook.common import RawDict
+from octohook.event_payloads import PushEvent, TeamAddEvent, DeploymentStatusEvent, DeleteEvent, MilestoneEvent, \
     DeploymentEvent, ProjectEvent, IssueCommentEvent, PullRequestReviewCommentEvent, DeployKeyEvent, \
     ContentReferenceEvent, ProjectColumnEvent, RepositoryDispatchEvent, PageBuildEvent, IssuesEvent, \
     GitHubAppAuthorizationEvent, CreateEvent, PullRequestReviewEvent, PublicEvent, WatchEvent, ForkEvent, \
