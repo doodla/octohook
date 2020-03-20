@@ -3,7 +3,7 @@ from typing import TypeVar, Optional
 T = TypeVar("T")
 
 
-def optional(payload, key, class_type: T) -> Optional[T]:
+def _optional(payload, key, class_type: T) -> Optional[T]:
     if payload.get(key):
         return class_type(payload[key])
     else:
@@ -109,7 +109,7 @@ class Repository:
         self.stargazers = payload.get('stargazers')
         self.public = payload.get('public')
         self.master_branch = payload.get('master_branch')
-        self.permissions = optional(payload, 'permissions', Permissions)
+        self.permissions = _optional(payload, 'permissions', Permissions)
 
     def keys_url(self, key_id):
         pass
@@ -224,7 +224,7 @@ class Comment:
         self.updated_at = payload.get('updated_at')
         self.author_association = payload.get('author_association')
         self.body = payload.get('body')
-        self._links = optional(payload, '_links', RawDict)
+        self._links = _optional(payload, '_links', RawDict)
 
 
 class ChecksApp:
@@ -286,7 +286,7 @@ class CheckSuite:
         self.updated_at = payload.get('updated_at')
         self.latest_check_runs_count = payload.get('latest_check_runs_count')
         self.check_runs_url = payload.get('check_runs_url')
-        self.head_commit = optional(payload, 'head_commit', Commit)
+        self.head_commit = _optional(payload, 'head_commit', Commit)
 
 
 class CheckRunOutput:
@@ -348,14 +348,14 @@ class Installation:
     def __init__(self, payload):
         self.id = payload.get('id')
         self.node_id = payload.get('node_id', None)
-        self.account = optional(payload, 'account', User)
+        self.account = _optional(payload, 'account', User)
         self.repository_selection = payload.get('repository_selection')
         self.access_tokens_url = payload.get('access_tokens_url')
         self.repositories_url = payload.get('repositories_url')
         self.html_url = payload.get('html_url')
         self.app_id = payload.get('app_id')
         self.target_id = payload.get('target_id')
-        self.permissions = optional(payload, 'permissions', Permissions)
+        self.permissions = _optional(payload, 'permissions', Permissions)
         self.events = payload.get('events')
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
@@ -440,7 +440,7 @@ class Milestone:
         self.number = payload.get('number')
         self.title = payload.get('title')
         self.description = payload.get('description')
-        self.creator = optional(payload, 'creator', User)
+        self.creator = _optional(payload, 'creator', User)
         self.open_issues = payload.get('open_issues')
         self.closed_issues = payload.get('closed_issues')
         self.state = payload.get('state')
@@ -470,9 +470,9 @@ class Issue:
         self.labels = [Label(label) for label in payload.get('labels')]
         self.state = payload.get('state')
         self.locked = payload.get('locked')
-        self.assignee = optional(payload, 'assignee', User)
+        self.assignee = _optional(payload, 'assignee', User)
         self.assignees = [User(assignee) for assignee in payload.get('assignees')]
-        self.milestone = optional(payload, 'milestone', Milestone)
+        self.milestone = _optional(payload, 'milestone', Milestone)
         self.comments = payload.get('comments')
         self.created_at = payload.get('created_at')
         self.updated_at = payload.get('updated_at')
@@ -726,7 +726,7 @@ class PullRequest:
         self.closed_at = payload.get('closed_at')
         self.merged_at = payload.get('merged_at')
         self.merge_commit_sha = payload.get('merge_commit_sha')
-        self.assignee = optional(payload, 'assignee', User)
+        self.assignee = _optional(payload, 'assignee', User)
         self.assignees = [User(assignee) for assignee in payload.get('assignees')]
         self.requested_reviewers = payload.get('requested_reviewers')
         self.requested_teams = payload.get('requested_teams')
