@@ -1,26 +1,60 @@
 from abc import ABC
 
-from octohook.models import Repository, Organization, User, Comment, CheckRun, CheckSuite, Installation, DeployKey, \
-    Deployment, DeploymentStatus, Page, ShortRepository, Issue, Label, MarketplacePurcahase, Team, Hook, Milestone, \
-    Membership, Package, PageBuild, ProjectCard, ProjectColumn, Project, PullRequest, Review, Release, \
-    VulnerabilityAlert, SecurityAdvisory, Sponsorship, Branch, StatusCommit, RawDict, \
-    ContentReference, Commit, CommitUser, _optional
+from octohook.models import (
+    Repository,
+    Organization,
+    User,
+    Comment,
+    CheckRun,
+    CheckSuite,
+    Installation,
+    DeployKey,
+    Deployment,
+    DeploymentStatus,
+    Page,
+    ShortRepository,
+    Issue,
+    Label,
+    MarketplacePurcahase,
+    Team,
+    Hook,
+    Milestone,
+    Membership,
+    Package,
+    PageBuild,
+    ProjectCard,
+    ProjectColumn,
+    Project,
+    PullRequest,
+    Review,
+    Release,
+    VulnerabilityAlert,
+    SecurityAdvisory,
+    Sponsorship,
+    Branch,
+    StatusCommit,
+    RawDict,
+    ContentReference,
+    Commit,
+    CommitUser,
+    _optional,
+)
 
 
 class WebhookEvent(ABC):
     def __init__(self, payload: dict):
-        self.action = payload.get('action')
-        self.sender = User(payload.get('sender'))
+        self.action = payload.get("action")
+        self.sender = User(payload.get("sender"))
 
         # Not present in GitHubAppAuthorizationEvent, InstallationEvent, SponsorshipEvent
         try:
-            self.repository = Repository(payload.get('repository'))
+            self.repository = Repository(payload.get("repository"))
         except AttributeError:
             pass
 
         # Only present in some events
         try:
-            self.organization = Organization(payload.get('organization'))
+            self.organization = Organization(payload.get("organization"))
         except AttributeError:
             pass
 
@@ -32,7 +66,7 @@ class CheckRunEvent(WebhookEvent):
 
     def __init__(self, payload: dict):
         super().__init__(payload)
-        self.check_run = CheckRun(payload.get('check_run'))
+        self.check_run = CheckRun(payload.get("check_run"))
 
 
 class CheckSuiteEvent(WebhookEvent):
@@ -42,7 +76,7 @@ class CheckSuiteEvent(WebhookEvent):
 
     def __init__(self, payload: dict):
         super().__init__(payload)
-        self.check_suite = CheckSuite(payload.get('check_suite'))
+        self.check_suite = CheckSuite(payload.get("check_suite"))
 
 
 class CommitCommentEvent(WebhookEvent):
@@ -52,7 +86,7 @@ class CommitCommentEvent(WebhookEvent):
 
     def __init__(self, payload: dict):
         super().__init__(payload)
-        self.comment = Comment(payload.get('comment'))
+        self.comment = Comment(payload.get("comment"))
 
 
 class ContentReferenceEvent(WebhookEvent):
@@ -62,8 +96,8 @@ class ContentReferenceEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.content_reference = ContentReference(payload.get('content_reference'))
-        self.installation = Installation(payload.get('installation'))
+        self.content_reference = ContentReference(payload.get("content_reference"))
+        self.installation = Installation(payload.get("installation"))
 
 
 class CreateEvent(WebhookEvent):
@@ -73,11 +107,11 @@ class CreateEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.ref = payload.get('ref')
-        self.ref_type = payload.get('ref_type')
-        self.master_branch = payload.get('master_branch')
-        self.description = payload.get('description')
-        self.pusher_type = payload.get('pusher_type')
+        self.ref = payload.get("ref")
+        self.ref_type = payload.get("ref_type")
+        self.master_branch = payload.get("master_branch")
+        self.description = payload.get("description")
+        self.pusher_type = payload.get("pusher_type")
 
 
 class DeleteEvent(WebhookEvent):
@@ -87,9 +121,9 @@ class DeleteEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.ref = payload.get('ref')
-        self.ref_type = payload.get('ref_type')
-        self.pusher_type = payload.get('pusher_type')
+        self.ref = payload.get("ref")
+        self.ref_type = payload.get("ref_type")
+        self.pusher_type = payload.get("pusher_type")
 
 
 class DeployKeyEvent(WebhookEvent):
@@ -99,7 +133,7 @@ class DeployKeyEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.key = DeployKey(payload.get('key'))
+        self.key = DeployKey(payload.get("key"))
 
 
 class DeploymentEvent(WebhookEvent):
@@ -110,7 +144,7 @@ class DeploymentEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
 
-        self.deployment = Deployment(payload.get('deployment'))
+        self.deployment = Deployment(payload.get("deployment"))
 
 
 class DeploymentStatusEvent(WebhookEvent):
@@ -120,8 +154,8 @@ class DeploymentStatusEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.deployment_status = DeploymentStatus(payload.get('deployment_status'))
-        self.deployment = Deployment(payload.get('deployment'))
+        self.deployment_status = DeploymentStatus(payload.get("deployment_status"))
+        self.deployment = Deployment(payload.get("deployment"))
 
 
 class ForkEvent(WebhookEvent):
@@ -131,7 +165,7 @@ class ForkEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.forkee = Repository(payload.get('forkee'))
+        self.forkee = Repository(payload.get("forkee"))
 
 
 class GitHubAppAuthorizationEvent(WebhookEvent):
@@ -151,7 +185,7 @@ class GollumEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
 
-        self.pages = [Page(page) for page in payload.get('pages')]
+        self.pages = [Page(page) for page in payload.get("pages")]
 
 
 class InstallationEvent(WebhookEvent):
@@ -161,9 +195,11 @@ class InstallationEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.installation = Installation(payload.get('installation'))
+        self.installation = Installation(payload.get("installation"))
 
-        self.repositories = [ShortRepository(repo) for repo in payload.get('repositories')]
+        self.repositories = [
+            ShortRepository(repo) for repo in payload.get("repositories")
+        ]
 
 
 class InstallationRepositoriesEvent(WebhookEvent):
@@ -174,10 +210,14 @@ class InstallationRepositoriesEvent(WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
 
-        self.installation = Installation(payload.get('installation'))
-        self.repository_selection = payload.get('repository_selection')
-        self.repositories_added = [ShortRepository(repo) for repo in payload.get('repositories_added')]
-        self.repositories_removed = [ShortRepository(repo) for repo in payload.get('repositories_removed')]
+        self.installation = Installation(payload.get("installation"))
+        self.repository_selection = payload.get("repository_selection")
+        self.repositories_added = [
+            ShortRepository(repo) for repo in payload.get("repositories_added")
+        ]
+        self.repositories_removed = [
+            ShortRepository(repo) for repo in payload.get("repositories_removed")
+        ]
 
 
 class IssueCommentEvent(WebhookEvent):
@@ -187,9 +227,9 @@ class IssueCommentEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.issue = Issue(payload.get('issue'))
-        self.comment = Comment(payload.get('comment'))
-        self.changes = _optional(payload, 'changes', RawDict)
+        self.issue = Issue(payload.get("issue"))
+        self.comment = Comment(payload.get("comment"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class IssuesEvent(WebhookEvent):
@@ -199,11 +239,11 @@ class IssuesEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.issue = Issue(payload.get('issue'))
-        self.changes = _optional(payload, 'changes', RawDict)
-        self.label = _optional(payload, 'label', Label)
-        self.assignee = _optional(payload, 'assignee', User)
-        self.milestone = _optional(payload, 'milestone', Milestone)
+        self.issue = Issue(payload.get("issue"))
+        self.changes = _optional(payload, "changes", RawDict)
+        self.label = _optional(payload, "label", Label)
+        self.assignee = _optional(payload, "assignee", User)
+        self.milestone = _optional(payload, "milestone", Milestone)
 
 
 class LabelEvent(WebhookEvent):
@@ -213,8 +253,8 @@ class LabelEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.label = Label(payload.get('label'))
-        self.changes = _optional(payload, 'changes', RawDict)
+        self.label = Label(payload.get("label"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class MarketplacePurchaseEvent(WebhookEvent):
@@ -224,8 +264,10 @@ class MarketplacePurchaseEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.effective_date = payload.get('effective_date')
-        self.marketplace_purchase = MarketplacePurcahase(payload.get('marketplace_purchase'))
+        self.effective_date = payload.get("effective_date")
+        self.marketplace_purchase = MarketplacePurcahase(
+            payload.get("marketplace_purchase")
+        )
 
 
 class MemberEvent(WebhookEvent):
@@ -235,7 +277,7 @@ class MemberEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.member = User(payload.get('member'))
+        self.member = User(payload.get("member"))
 
 
 class MembershipEvent(WebhookEvent):
@@ -245,9 +287,9 @@ class MembershipEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.scope = payload.get('scope')
-        self.member = User(payload.get('member'))
-        self.team = Team(payload.get('team'))
+        self.scope = payload.get("scope")
+        self.member = User(payload.get("member"))
+        self.team = Team(payload.get("team"))
 
 
 class MetaEvent(WebhookEvent):
@@ -257,8 +299,8 @@ class MetaEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.hook_id = payload.get('hook_id')
-        self.hook = Hook(payload.get('hook'))
+        self.hook_id = payload.get("hook_id")
+        self.hook = Hook(payload.get("hook"))
 
 
 class MilestoneEvent(WebhookEvent):
@@ -268,8 +310,8 @@ class MilestoneEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.milestone = Milestone(payload.get('milestone'))
-        self.changes = _optional(payload, 'changes', RawDict)
+        self.milestone = Milestone(payload.get("milestone"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class OrganizationEvent(WebhookEvent):
@@ -279,8 +321,8 @@ class OrganizationEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.invitation = payload.get('invitation')  # TODO: What does this look like?
-        self.membership = Membership(payload.get('membership'))
+        self.invitation = payload.get("invitation")  # TODO: What does this look like?
+        self.membership = Membership(payload.get("membership"))
 
 
 class OrgBlockEvent(WebhookEvent):
@@ -290,7 +332,7 @@ class OrgBlockEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.blocked_user = User(payload.get('blocked_user'))
+        self.blocked_user = User(payload.get("blocked_user"))
 
 
 class PackageEvent(WebhookEvent):
@@ -300,7 +342,7 @@ class PackageEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.package = Package(payload.get('package'))
+        self.package = Package(payload.get("package"))
 
 
 class PageBuildEvent(WebhookEvent):
@@ -310,8 +352,8 @@ class PageBuildEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.id = payload.get('id')
-        self.build = PageBuild(payload.get('build'))
+        self.id = payload.get("id")
+        self.build = PageBuild(payload.get("build"))
 
 
 class ProjectCardEvent(WebhookEvent):
@@ -321,8 +363,8 @@ class ProjectCardEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.project_card = ProjectCard(payload.get('project_card'))
-        self.changes = _optional(payload, 'changes', RawDict)
+        self.project_card = ProjectCard(payload.get("project_card"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class ProjectColumnEvent(WebhookEvent):
@@ -332,8 +374,8 @@ class ProjectColumnEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.project_column = ProjectColumn(payload.get('project_column'))
-        self.changes = _optional(payload, 'changes', RawDict)
+        self.project_column = ProjectColumn(payload.get("project_column"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class ProjectEvent(WebhookEvent):
@@ -343,7 +385,7 @@ class ProjectEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.project = Project(payload.get('project'))
+        self.project = Project(payload.get("project"))
 
 
 class PublicEvent(WebhookEvent):
@@ -362,14 +404,14 @@ class PullRequestEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.number = payload.get('number')
-        self.pull_request = PullRequest(payload.get('pull_request'))
-        self.assignee = _optional(payload, 'assignee', User)
-        self.label = _optional(payload, 'label', Label)
-        self.changes = _optional(payload, 'changes', RawDict)
-        self.before = payload.get('before')
-        self.after = payload.get('after')
-        self.requested_reviewer = _optional(payload, 'requested_reviewer', User)
+        self.number = payload.get("number")
+        self.pull_request = PullRequest(payload.get("pull_request"))
+        self.assignee = _optional(payload, "assignee", User)
+        self.label = _optional(payload, "label", Label)
+        self.changes = _optional(payload, "changes", RawDict)
+        self.before = payload.get("before")
+        self.after = payload.get("after")
+        self.requested_reviewer = _optional(payload, "requested_reviewer", User)
 
 
 class PullRequestReviewEvent(WebhookEvent):
@@ -379,9 +421,9 @@ class PullRequestReviewEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.review = Review(payload.get('review'))
-        self.pull_request = PullRequest(payload.get('pull_request'))
-        self.changes = RawDict(payload.get('pull_request'))
+        self.review = Review(payload.get("review"))
+        self.pull_request = PullRequest(payload.get("pull_request"))
+        self.changes = RawDict(payload.get("pull_request"))
 
 
 class PullRequestReviewCommentEvent(WebhookEvent):
@@ -391,9 +433,9 @@ class PullRequestReviewCommentEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.comment = Comment(payload.get('comment'))
-        self.pull_request = PullRequest(payload.get('pull_request'))
-        self.changes = _optional(payload, 'changes', RawDict)
+        self.comment = Comment(payload.get("comment"))
+        self.pull_request = PullRequest(payload.get("pull_request"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class PushEvent(WebhookEvent):
@@ -403,17 +445,17 @@ class PushEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.ref = payload.get('ref')
-        self.before = payload.get('before')
-        self.after = payload.get('after')
-        self.created = payload.get('created')
-        self.deleted = payload.get('deleted')
-        self.forced = payload.get('forced')
-        self.base_ref = payload.get('base_ref')
-        self.compare = payload.get('compare')
-        self.commits = [Commit(commit) for commit in payload.get('commits')]
-        self.head_commit = _optional(payload, 'head_commit', Commit)
-        self.pusher = CommitUser(payload.get('pusher'))
+        self.ref = payload.get("ref")
+        self.before = payload.get("before")
+        self.after = payload.get("after")
+        self.created = payload.get("created")
+        self.deleted = payload.get("deleted")
+        self.forced = payload.get("forced")
+        self.base_ref = payload.get("base_ref")
+        self.compare = payload.get("compare")
+        self.commits = [Commit(commit) for commit in payload.get("commits")]
+        self.head_commit = _optional(payload, "head_commit", Commit)
+        self.pusher = CommitUser(payload.get("pusher"))
 
 
 class ReleaseEvent(WebhookEvent):
@@ -423,8 +465,8 @@ class ReleaseEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.release = Release(payload.get('release'))
-        self.changes = RawDict(payload.get('release'))
+        self.release = Release(payload.get("release"))
+        self.changes = RawDict(payload.get("release"))
 
 
 class RepositoryDispatchEvent(WebhookEvent):
@@ -434,9 +476,9 @@ class RepositoryDispatchEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.branch = payload.get('branch')
-        self.client_payload = RawDict(payload.get('client_payload'))
-        self.installation = Installation(payload.get('installation'))
+        self.branch = payload.get("branch")
+        self.client_payload = RawDict(payload.get("client_payload"))
+        self.installation = Installation(payload.get("installation"))
 
 
 class RepositoryEvent(WebhookEvent):
@@ -455,7 +497,7 @@ class RepositoryImportEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.status = payload.get('status')
+        self.status = payload.get("status")
 
 
 class RepositoryVulnerabilityAlertEvent(WebhookEvent):
@@ -465,7 +507,7 @@ class RepositoryVulnerabilityAlertEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.alert = VulnerabilityAlert(payload.get('alert'))
+        self.alert = VulnerabilityAlert(payload.get("alert"))
 
 
 class SecurityAdvisoryEvent:
@@ -474,8 +516,8 @@ class SecurityAdvisoryEvent:
     """
 
     def __init__(self, payload):
-        self.action = payload.get('action')
-        self.security_advisory = SecurityAdvisory(payload.get('security_advisory'))
+        self.action = payload.get("action")
+        self.security_advisory = SecurityAdvisory(payload.get("security_advisory"))
 
 
 class SponsorshipEvent(WebhookEvent):
@@ -485,10 +527,10 @@ class SponsorshipEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.sponsorship = Sponsorship(payload.get('sponsorship'))
+        self.sponsorship = Sponsorship(payload.get("sponsorship"))
         try:
-            self.changes = _optional(payload, 'changes', RawDict)
-            self.effective_date = payload.get('effective_date', None)
+            self.changes = _optional(payload, "changes", RawDict)
+            self.effective_date = payload.get("effective_date", None)
         except KeyError:
             pass
 
@@ -500,7 +542,7 @@ class StarEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.starred_at = payload.get('starred_at')
+        self.starred_at = payload.get("starred_at")
 
 
 class StatusEvent(WebhookEvent):
@@ -510,17 +552,17 @@ class StatusEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.id = payload.get('id')
-        self.sha = payload.get('sha')
-        self.name = payload.get('name')
-        self.target_url = payload.get('target_url')
-        self.context = payload.get('context')
-        self.description = payload.get('description')
-        self.state = payload.get('state')
-        self.commit = StatusCommit(payload.get('commit'))
-        self.branches = [Branch(branch) for branch in payload.get('branches')]
-        self.created_at = payload.get('created_at')
-        self.updated_at = payload.get('updated_at')
+        self.id = payload.get("id")
+        self.sha = payload.get("sha")
+        self.name = payload.get("name")
+        self.target_url = payload.get("target_url")
+        self.context = payload.get("context")
+        self.description = payload.get("description")
+        self.state = payload.get("state")
+        self.commit = StatusCommit(payload.get("commit"))
+        self.branches = [Branch(branch) for branch in payload.get("branches")]
+        self.created_at = payload.get("created_at")
+        self.updated_at = payload.get("updated_at")
 
 
 class TeamEvent(WebhookEvent):
@@ -530,7 +572,7 @@ class TeamEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.team = Team(payload.get('team'))
+        self.team = Team(payload.get("team"))
 
 
 class TeamAddEvent(WebhookEvent):
@@ -540,7 +582,7 @@ class TeamAddEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
-        self.team = Team(payload.get('team'))
+        self.team = Team(payload.get("team"))
 
 
 class WatchEvent(WebhookEvent):
