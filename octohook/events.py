@@ -592,3 +592,70 @@ class WatchEvent(WebhookEvent):
 
     def __init__(self, payload):
         super().__init__(payload)
+
+
+class PingEvent(WebhookEvent):
+    """
+    https://developer.github.com/webhooks/#ping-event
+    """
+
+    def __init__(self, payload):
+        super().__init__(payload)
+        self.zen = payload.get("zen")
+        self.hook_id = payload.get("hook_id")
+        self.hook = Hook(payload.get("hook"))
+
+
+event_map = {
+    "ping": PingEvent,
+    "team_add": TeamAddEvent,
+    "deployment_status": DeploymentStatusEvent,
+    "delete": DeleteEvent,
+    "milestone": MilestoneEvent,
+    "deployment": DeploymentEvent,
+    "project": ProjectEvent,
+    "issue_comment": IssueCommentEvent,
+    "pull_request_review_comment": PullRequestReviewCommentEvent,
+    "deploy_key": DeployKeyEvent,
+    "content_reference": ContentReferenceEvent,
+    "project_column": ProjectColumnEvent,
+    "repository_dispatch": RepositoryDispatchEvent,
+    "push": PushEvent,
+    "github_app_authorization": GitHubAppAuthorizationEvent,
+    "page_build": PageBuildEvent,
+    "issues": IssuesEvent,
+    "create": CreateEvent,
+    "pull_request_review": PullRequestReviewEvent,
+    "public": PublicEvent,
+    "watch": WatchEvent,
+    "fork": ForkEvent,
+    "commit_comment": CommitCommentEvent,
+    "star": StarEvent,
+    "repository_import": RepositoryImportEvent,
+    "label": LabelEvent,
+    "project_card": ProjectCardEvent,
+    "gollum": GollumEvent,
+    "status": StatusEvent,
+    "pull_request": PullRequestEvent,
+    "meta": MetaEvent,
+    "sponsorship": SponsorshipEvent,
+    "installation": InstallationEvent,
+    "membership": MembershipEvent,
+    "member": MemberEvent,
+    "repository": RepositoryEvent,
+    "installation_repositories": InstallationRepositoriesEvent,
+    "release": ReleaseEvent,
+    "org_block": OrgBlockEvent,
+    "package": PackageEvent,
+    "organization": OrganizationEvent,
+    "check_run": CheckRunEvent,
+    "repository_vulnerability_alert": RepositoryVulnerabilityAlertEvent,
+    "team": TeamEvent,
+    "check_suite": CheckSuiteEvent,
+    "marketplace_purchase": MarketplacePurchaseEvent,
+    "security_advisory": SecurityAdvisoryEvent,
+}
+
+
+def parse(event_name, payload):
+    return event_map[event_name](payload)
