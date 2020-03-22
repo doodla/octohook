@@ -10,6 +10,20 @@ def _optional(payload, key, class_type: T) -> Optional[T]:
         return None
 
 
+def _transform(url: str, local_variables):
+    local_variables.pop('self')
+
+    for key, value in local_variables.items():
+        if not value:
+            url = url.replace(f"{{/{key}}}", "")
+        elif f"{{{key}}}" in url:
+            url = url.replace(f"{{{key}}}", value)
+        elif f"{{/{key}}}" in url:
+            url = url.replace(f"{{/{key}}}", f"/{value}")
+
+    return url
+
+
 class User:
     def __init__(self, payload: dict):
         self._payload = payload
@@ -31,17 +45,17 @@ class User:
         self.type = payload.get('type')
         self.site_admin = payload.get('site_admin')
 
-    def following_url(self, other_user):
-        pass
+    def following_url(self, other_user: str = None):
+        return _transform(self._payload['following_url'], locals())
 
-    def gists_url(self, gist_id):
-        pass
+    def gists_url(self, gist_id: str = None):
+        return _transform(self._payload['gists_url'], locals())
 
-    def starred_url(self, owner, repo):
-        pass
+    def starred_url(self, owner: str = None, repo: str = None):
+        return _transform(self._payload['starred_url'], locals())
 
-    def events_url(self, privacy):
-        pass
+    def events_url(self, privacy: str = None):
+        return _transform(self._payload['events_url'], locals())
 
 
 class ShortRepository:
@@ -111,74 +125,78 @@ class Repository:
         self.master_branch = payload.get('master_branch')
         self.permissions = _optional(payload, 'permissions', Permissions)
 
-    def keys_url(self, key_id):
-        pass
+    def keys_url(self, key_id: str = None):
+        return _transform(self._payload["keys_url"], locals())
 
-    def collaborators_url(self, collaborator):
-        pass
+    def collaborators_url(self, collaborator: str = None):
+        return _transform(self._payload["collaborators_url"], locals())
 
-    def issue_events_url(self, number):
-        pass
+    def issue_events_url(self, number: int = None):
+        return _transform(self._payload["issue_events_url"], locals())
 
-    def assignees_url(self, user):
-        pass
+    def assignees_url(self, user: str = None):
+        return _transform(self._payload["assignees_url"], locals())
 
-    def branches_url(self, branch):
-        pass
+    def branches_url(self, branch: str = None):
+        return _transform(self._payload["branches_url"], locals())
 
-    def blobs_url(self, sha):
-        pass
+    def blobs_url(self, sha: str = None):
+        return _transform(self._payload["blobs_url"], locals())
 
-    def git_tags_url(self, sha):
-        pass
+    def git_tags_url(self, sha: str = None):
+        return _transform(self._payload["git_tags_url"], locals())
 
-    def git_refs_url(self, sha):
-        pass
+    def git_refs_url(self, sha: str = None):
+        return _transform(self._payload["git_refs_url"], locals())
 
-    def trees_url(self, sha):
-        pass
+    def trees_url(self, sha: str = None):
+        return _transform(self._payload["trees_url"], locals())
 
-    def statuses_url(self, sha):
-        pass
+    def statuses_url(self, sha: str):
+        return _transform(self._payload["statuses_url"], locals())
 
-    def commits_url(self, sha):
-        pass
+    def commits_url(self, sha: str = None):
+        return _transform(self._payload["commits_url"], locals())
 
-    def git_commits_url(self, sha):
-        pass
+    def git_commits_url(self, sha=None):
+        return _transform(self._payload["git_commits_url"], locals())
 
-    def comments_url(self, number):
-        pass
+    def comments_url(self, number: int = None):
+        return _transform(self._payload["comments_url"], locals())
 
-    def issue_comment_url(self, number):
-        pass
+    def issue_comment_url(self, number: int = None):
+        return _transform(self._payload["issue_comment_url"], locals())
 
-    def contents_url(self, path):
-        pass
+    def contents_url(self, path: str):
+        return _transform(self._payload["contents_url"].replace("+", ""), locals())
 
-    def compare_url(self, base, head):
-        pass
+    def compare_url(self, base: str, head: str):
+        return _transform(self._payload["compare_url"], locals())
 
-    def archive_url(self, archive_format, ref):
-        pass
+    def archive_url(self, archive_format: str, ref: str = None):
+        return _transform(self._payload["archive_url"], locals())
 
-    def issues_url(self, number):
-        pass
+    def issues_url(self, number: str = None):
+        return _transform(self._payload["issues_url"], locals())
 
-    def pulls_url(self, number):
-        pass
+    def pulls_url(self, number: str = None):
+        return _transform(self._payload["pulls_url"], locals())
 
-    def milestones_url(self, number):
-        pass
+    def milestones_url(self, number: str = None):
+        return _transform(self._payload["milestones_url"], locals())
 
-    def notifications_url(self, params):
-        pass
+    def notifications_url(self, params: str = None):
+        if params is not None:
+            if not params.startswith("?"):
+                raise AttributeError("Params must be a query string starting with ?")
+        replace_with = params if params else ""
+        return self._payload["notifications_url"].replace("{?since,all,participating}", replace_with)
 
-    def labels_url(self, name):
-        pass
+    def labels_url(self, name: str = None):
+        return _transform(self._payload["labels_url"], locals())
 
-    def releases_url(self, id):
-        pass
+    def releases_url(self, id: str = None):
+        return _transform(self._payload["releases_url"], locals())
 
 
 class Organization:
@@ -196,11 +214,11 @@ class Organization:
         self.avatar_url = payload.get('avatar_url')
         self.description = payload.get('description')
 
-    def members_url(self, member):
-        pass
+    def members_url(self, member: str = None):
+        return _transform(self._payload["members_url"], locals())
 
-    def public_members_url(self, member):
-        pass
+    def public_members_url(self, member: str = None):
+        return _transform(self._payload["public_members_url"], locals())
 
 
 class Comment:
@@ -457,6 +475,7 @@ class RawDict(dict):
 
 class Issue:
     def __init__(self, payload):
+        self._payload = payload
         self.url = payload.get('url')
         self.repository_url = payload.get('repository_url')
         self.comments_url = payload.get('comments_url')
@@ -480,8 +499,8 @@ class Issue:
         self.author_association = payload.get('author_association')
         self.body = payload.get('body')
 
-    def labels_url(self, name):
-        pass
+    def labels_url(self, name: str = None):
+        return _transform(self._payload["labels_url"], locals())
 
 
 class PurchaseAccount:
@@ -531,8 +550,8 @@ class Team:
         self.repositories_url = payload.get('repositories_url')
         self.permission = payload.get('permission')
 
-    def members_url(self, member):
-        pass
+    def members_url(self, member: str = None):
+        return _transform(self._payload["members_url"], locals())
 
 
 class Hook:
@@ -708,6 +727,7 @@ class Ref:
 
 class PullRequest:
     def __init__(self, payload):
+        self._payload = payload
         self.url = payload.get('url')
         self.id = payload.get('id')
         self.node_id = payload.get('node_id')
@@ -754,8 +774,8 @@ class PullRequest:
         self.deletions = payload.get('deletions')
         self.changed_files = payload.get('changed_files')
 
-    def review_comment_url(self, number):
-        pass
+    def review_comment_url(self, number: int = None):
+        return _transform(self._payload["review_comment_url"], locals())
 
 
 class Review:
