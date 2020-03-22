@@ -11,11 +11,13 @@ def _optional(payload, key, class_type: T) -> Optional[T]:
 
 
 def _transform(url: str, local_variables):
-    local_variables.pop('self')
+    local_variables.pop('self', None)
 
     for key, value in local_variables.items():
         if not value:
-            url = url.replace(f"{{/{key}}}", "")
+            url = url.split(f"{{/{key}}}")[0]
+            # If we find a None value, we shouldn't process the url any more.
+            break
         elif f"{{{key}}}" in url:
             url = url.replace(f"{{{key}}}", value)
         elif f"{{/{key}}}" in url:
