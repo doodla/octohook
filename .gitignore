@@ -2,3 +2,8 @@
 venv/
 
 *.pyc
+
+# Distribution
+dist/
+build/
+*.egg-info/
