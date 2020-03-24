@@ -958,8 +958,8 @@ class StatusCommit:
         self.url = payload.get("url")
         self.html_url = payload.get("html_url")
         self.comments_url = payload.get("comments_url")
-        self.author = User(payload.get("author"))
-        self.committer = User(payload.get("committer"))
+        self.author = _optional(payload, "author", User)
+        self.committer = _optional(payload, "committer", User)
         self.parents = [StatusBranchCommit(parent) for parent in payload.get("parents")]
 
 

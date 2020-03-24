@@ -642,6 +642,7 @@ class StatusEvent(WebhookEvent):
         self.sha = payload.get("sha")
         self.name = payload.get("name")
         self.target_url = payload.get("target_url")
+        self.avatar_url = payload.get("avatar_url")
         self.context = payload.get("context")
         self.description = payload.get("description")
         self.state = payload.get("state")
