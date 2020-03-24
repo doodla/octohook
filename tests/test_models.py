@@ -2,7 +2,6 @@ import json
 
 import pytest
 
-from octohook.models import RawDict
 from octohook.events import (
     PushEvent,
     TeamAddEvent,
@@ -51,6 +50,7 @@ from octohook.events import (
     MarketplacePurchaseEvent,
     SecurityAdvisoryEvent,
 )
+from octohook.models import RawDict
 
 paths = ["tests/fixtures/complete", "tests/fixtures/incomplete"]
 testcases = [
@@ -136,11 +136,20 @@ def validate_model(data, obj):
             if not callable(obj_value):
                 raise AttributeError(f"Couldn't find function or attribute for {key}")
 
+        # When the nested object is another dictionary
         if not isinstance(obj_value, RawDict) and isinstance(json_value, dict):
             if isinstance(obj_value, dict):
                 raise AttributeError(f"Object is a plain dictionary for {key}")
             else:
                 validate_model(json_value, obj_value)
+
+        # When the nested object is a list of objects
+        if isinstance(json_value, list):
+            for item_json, item_obj in zip(json_value, obj_value):
+                if isinstance(item_json, dict):
+                    validate_model(item_json, item_obj)
+                else:
+                    assert item_json == item_obj
 
         # Validate the values
         if json_value is None or (

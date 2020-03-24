@@ -266,7 +266,11 @@ class ChecksApp:
 
 class ChecksPullRequest:
     def __init__(self, payload):
-        pass
+        self.url = payload.get("url")
+        self.id = payload.get("id")
+        self.number = payload.get("number")
+        self.head = RawDict(payload.get("head"))
+        self.base = RawDict(payload.get("base"))
 
 
 class CommitUser:
@@ -583,6 +587,23 @@ class Membership:
         self.user = User(payload.get("user"))
 
 
+class Asset:
+    def __init__(self, payload):
+        self.url = payload.get("url")
+        self.id = payload.get("id")
+        self.node_id = payload.get("node_id")
+        self.name = payload.get("name")
+        self.label = payload.get("label")
+        self.uploader = User(payload.get("uploader"))
+        self.content_type = payload.get("content_type")
+        self.state = payload.get("state")
+        self.size = payload.get("size")
+        self.download_count = payload.get("download_count")
+        self.created_at = payload.get("created_at")
+        self.updated_at = payload.get("updated_at")
+        self.browser_download_url = payload.get("browser_download_url")
+
+
 class Release:
     def __init__(self, payload):
         self.url = payload.get("url")
@@ -599,7 +620,7 @@ class Release:
         self.prerelease = payload.get("prerelease")
         self.created_at = payload.get("created_at")
         self.published_at = payload.get("published_at")
-        self.assets = payload.get("assets", [])
+        self.assets = [Asset(asset) for asset in payload.get("assets", [])]
         self.tarball_url = payload.get("tarball_url", None)
         self.zipball_url = payload.get("zipball_url", None)
         self.body = payload.get("body", None)
@@ -758,9 +779,11 @@ class PullRequest:
         self.merge_commit_sha = payload.get("merge_commit_sha")
         self.assignee = _optional(payload, "assignee", User)
         self.assignees = [User(assignee) for assignee in payload.get("assignees")]
-        self.requested_reviewers = payload.get("requested_reviewers")
+        self.requested_reviewers = [
+            User(reviewer) for reviewer in payload.get("requested_reviewers")
+        ]
         self.requested_teams = payload.get("requested_teams")
-        self.labels = payload.get("labels")
+        self.labels = [Label(item) for item in payload.get("labels")]
         self.milestone = payload.get("milestone")
         self.commits_url = payload.get("commits_url")
         self.review_comments_url = payload.get("review_comments_url")
@@ -813,18 +836,36 @@ class VulnerabilityAlert:
         self.fixed_in = payload.get("fixed_in")
 
 
+class VulnerablePackage:
+    def __init__(self, payload):
+        self.ecosystem = payload.get("ecosystem")
+        self.name = payload.get("name")
+
+
+class PackageVersionInfo:
+    def __init__(self, payload):
+        self.identifier = payload.get("identifier")
+
+
 class Vulnerability:
     def __init__(self, payload):
-        self.package = payload.get("package")
+        self.package = VulnerablePackage(payload.get("package"))
         self.severity = payload.get("severity")
         self.vulnerable_version_range = payload.get("vulnerable_version_range")
-        self.first_patched_version = payload.get("first_patched_version")
+        self.first_patched_version = PackageVersionInfo(
+            payload.get("first_patched_version")
+        )
 
 
 class SecurityVulnerabilityIdentifier:
     def __init__(self, payload):
         self.value = payload.get("value")
         self.type = payload.get("type")
+
+
+class SecurityAdvisoryReference:
+    def __init__(self, payload):
+        self.url = payload.get("url")
 
 
 class SecurityAdvisory:
@@ -837,7 +878,9 @@ class SecurityAdvisory:
             SecurityVulnerabilityIdentifier(identifier)
             for identifier in payload.get("identifiers")
         ]
-        self.references = payload.get("references")
+        self.references = [
+            SecurityAdvisoryReference(item) for item in payload.get("references")
+        ]
         self.published_at = payload.get("published_at")
         self.updated_at = payload.get("updated_at")
         self.withdrawn_at = payload.get("withdrawn_at")
