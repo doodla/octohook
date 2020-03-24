@@ -64,6 +64,8 @@ class CheckRunEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#checkrunevent
     """
 
+    event = "check_run"
+
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.check_run = CheckRun(payload.get("check_run"))
@@ -73,6 +75,8 @@ class CheckSuiteEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#checksuiteevent
     """
+
+    event = "check_suite"
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -84,6 +88,8 @@ class CommitCommentEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#commitcommentevent
     """
 
+    event = "commit_comment"
+
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.comment = Comment(payload.get("comment"))
@@ -93,6 +99,8 @@ class ContentReferenceEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#contentreferenceevent
     """
+
+    event = "content_reference"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -104,6 +112,8 @@ class CreateEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#createevent
     """
+
+    event = "create"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -119,6 +129,8 @@ class DeleteEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deleteevent
     """
 
+    event = "delete"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.ref = payload.get("ref")
@@ -131,6 +143,8 @@ class DeployKeyEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deploykeyevent
     """
 
+    event = "deploy_key"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.key = DeployKey(payload.get("key"))
@@ -140,6 +154,8 @@ class DeploymentEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#deploymentevent
     """
+
+    event = "deployment"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -152,6 +168,8 @@ class DeploymentStatusEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deploymentstatusevent
     """
 
+    event = "deployment_status"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.deployment_status = DeploymentStatus(payload.get("deployment_status"))
@@ -163,6 +181,8 @@ class ForkEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#forkevent
     """
 
+    event = "fork"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.forkee = Repository(payload.get("forkee"))
@@ -173,6 +193,8 @@ class GitHubAppAuthorizationEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#forkapplyevent
     """
 
+    event = "github_app_authorization"
+
     def __init__(self, payload):
         super().__init__(payload)
 
@@ -181,6 +203,8 @@ class GollumEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#gollumevent
     """
+
+    event = "gollum"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -192,6 +216,8 @@ class InstallationEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#installationevent
     """
+
+    event = "installation"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -206,6 +232,8 @@ class InstallationRepositoriesEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#installationrepositoriesevent
     """
+
+    event = "installation_repositories"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -225,6 +253,8 @@ class IssueCommentEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#issuecommentevent
     """
 
+    event = "issue_comment"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.issue = Issue(payload.get("issue"))
@@ -236,6 +266,8 @@ class IssuesEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#issuesevent
     """
+
+    event = "issues"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -251,6 +283,8 @@ class LabelEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#labelevent
     """
 
+    event = "label"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.label = Label(payload.get("label"))
@@ -261,6 +295,8 @@ class MarketplacePurchaseEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#marketplacepurchaseevent
     """
+
+    event = "marketplace_purchase"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -275,6 +311,8 @@ class MemberEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#memberevent
     """
 
+    event = "member"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.member = User(payload.get("member"))
@@ -284,6 +322,8 @@ class MembershipEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#membershipevent
     """
+
+    event = "membership"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -297,6 +337,8 @@ class MetaEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#metaevent
     """
 
+    event = "meta"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.hook_id = payload.get("hook_id")
@@ -307,6 +349,8 @@ class MilestoneEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#milestoneevent
     """
+
+    event = "milestone"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -319,6 +363,8 @@ class OrganizationEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#organizationevent
     """
 
+    event = "organization"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.invitation = payload.get("invitation")  # TODO: What does this look like?
@@ -330,6 +376,8 @@ class OrgBlockEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#orgblockevent
     """
 
+    event = "org_block"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.blocked_user = User(payload.get("blocked_user"))
@@ -340,6 +388,8 @@ class PackageEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#packageevent
     """
 
+    event = "package"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.package = Package(payload.get("package"))
@@ -349,6 +399,8 @@ class PageBuildEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pagebuildevent
     """
+
+    event = "page_build"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -361,6 +413,8 @@ class ProjectCardEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#projectcardevent
     """
 
+    event = "project_card"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.project_card = ProjectCard(payload.get("project_card"))
@@ -371,6 +425,8 @@ class ProjectColumnEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#projectcolumnevent
     """
+
+    event = "project_column"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -383,6 +439,8 @@ class ProjectEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#projectevent
     """
 
+    event = "project"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.project = Project(payload.get("project"))
@@ -393,6 +451,8 @@ class PublicEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#publicevent
     """
 
+    event = "public"
+
     def __init__(self, payload):
         super().__init__(payload)
 
@@ -401,6 +461,8 @@ class PullRequestEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pullrequestevent
     """
+
+    event = "pull_request"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -419,6 +481,8 @@ class PullRequestReviewEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewevent
     """
 
+    event = "pull_request_review"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.review = Review(payload.get("review"))
@@ -431,6 +495,8 @@ class PullRequestReviewCommentEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewcommentevent
     """
 
+    event = "pull_request_review_comment"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.comment = Comment(payload.get("comment"))
@@ -442,6 +508,8 @@ class PushEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pushevent
     """
+
+    event = "push"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -463,6 +531,8 @@ class ReleaseEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#releaseevent
     """
 
+    event = "release"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.release = Release(payload.get("release"))
@@ -473,6 +543,8 @@ class RepositoryDispatchEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#repositorydispatchevent
     """
+
+    event = "repository_dispatch"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -486,6 +558,8 @@ class RepositoryEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#repositoryevent
     """
 
+    event = "repository"
+
     def __init__(self, payload):
         super().__init__(payload)
 
@@ -494,6 +568,8 @@ class RepositoryImportEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#repositoryimportevent
     """
+
+    event = "repository_import"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -505,6 +581,8 @@ class RepositoryVulnerabilityAlertEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#repositoryvulnerabilityalertevent
     """
 
+    event = "repository_vulnerability_alert"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.alert = VulnerabilityAlert(payload.get("alert"))
@@ -515,6 +593,8 @@ class SecurityAdvisoryEvent:
     https://developer.github.com/v3/activity/events/types/#securityadvisoryevent
     """
 
+    event = "security_advisory"
+
     def __init__(self, payload):
         self.action = payload.get("action")
         self.security_advisory = SecurityAdvisory(payload.get("security_advisory"))
@@ -524,6 +604,8 @@ class SponsorshipEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#sponsorshipevent
     """
+
+    event = "sponsorship"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -540,6 +622,8 @@ class StarEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#starevent
     """
 
+    event = "star"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.starred_at = payload.get("starred_at")
@@ -549,6 +633,8 @@ class StatusEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#statusevent
     """
+
+    event = "status"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -570,6 +656,8 @@ class TeamEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#teamevent
     """
 
+    event = "team"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.team = Team(payload.get("team"))
@@ -579,6 +667,8 @@ class TeamAddEvent(WebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#teamaddevent
     """
+
+    event = "team_add"
 
     def __init__(self, payload):
         super().__init__(payload)
@@ -590,6 +680,8 @@ class WatchEvent(WebhookEvent):
     https://developer.github.com/v3/activity/events/types/#watchevent
     """
 
+    event = "watch"
+
     def __init__(self, payload):
         super().__init__(payload)
 
@@ -599,6 +691,8 @@ class PingEvent(WebhookEvent):
     https://developer.github.com/webhooks/#ping-event
     """
 
+    event = "ping"
+
     def __init__(self, payload):
         super().__init__(payload)
         self.zen = payload.get("zen")
@@ -607,53 +701,53 @@ class PingEvent(WebhookEvent):
 
 
 event_map = {
-    "ping": PingEvent,
-    "team_add": TeamAddEvent,
-    "deployment_status": DeploymentStatusEvent,
-    "delete": DeleteEvent,
-    "milestone": MilestoneEvent,
-    "deployment": DeploymentEvent,
-    "project": ProjectEvent,
-    "issue_comment": IssueCommentEvent,
-    "pull_request_review_comment": PullRequestReviewCommentEvent,
-    "deploy_key": DeployKeyEvent,
-    "content_reference": ContentReferenceEvent,
-    "project_column": ProjectColumnEvent,
-    "repository_dispatch": RepositoryDispatchEvent,
-    "push": PushEvent,
-    "github_app_authorization": GitHubAppAuthorizationEvent,
-    "page_build": PageBuildEvent,
-    "issues": IssuesEvent,
-    "create": CreateEvent,
-    "pull_request_review": PullRequestReviewEvent,
-    "public": PublicEvent,
-    "watch": WatchEvent,
-    "fork": ForkEvent,
-    "commit_comment": CommitCommentEvent,
-    "star": StarEvent,
-    "repository_import": RepositoryImportEvent,
-    "label": LabelEvent,
-    "project_card": ProjectCardEvent,
-    "gollum": GollumEvent,
-    "status": StatusEvent,
-    "pull_request": PullRequestEvent,
-    "meta": MetaEvent,
-    "sponsorship": SponsorshipEvent,
-    "installation": InstallationEvent,
-    "membership": MembershipEvent,
-    "member": MemberEvent,
-    "repository": RepositoryEvent,
-    "installation_repositories": InstallationRepositoriesEvent,
-    "release": ReleaseEvent,
-    "org_block": OrgBlockEvent,
-    "package": PackageEvent,
-    "organization": OrganizationEvent,
-    "check_run": CheckRunEvent,
-    "repository_vulnerability_alert": RepositoryVulnerabilityAlertEvent,
-    "team": TeamEvent,
-    "check_suite": CheckSuiteEvent,
-    "marketplace_purchase": MarketplacePurchaseEvent,
-    "security_advisory": SecurityAdvisoryEvent,
+    PingEvent.event: PingEvent,
+    TeamAddEvent.event: TeamAddEvent,
+    DeploymentStatusEvent.event: DeploymentStatusEvent,
+    DeleteEvent.event: DeleteEvent,
+    MilestoneEvent.event: MilestoneEvent,
+    DeploymentEvent.event: DeploymentEvent,
+    ProjectEvent.event: ProjectEvent,
+    IssueCommentEvent.event: IssueCommentEvent,
+    PullRequestReviewCommentEvent.event: PullRequestReviewCommentEvent,
+    DeployKeyEvent.event: DeployKeyEvent,
+    ContentReferenceEvent.event: ContentReferenceEvent,
+    ProjectColumnEvent.event: ProjectColumnEvent,
+    RepositoryDispatchEvent.event: RepositoryDispatchEvent,
+    PushEvent.event: PushEvent,
+    GitHubAppAuthorizationEvent.event: GitHubAppAuthorizationEvent,
+    PageBuildEvent.event: PageBuildEvent,
+    IssuesEvent.event: IssuesEvent,
+    CreateEvent.event: CreateEvent,
+    PullRequestReviewEvent.event: PullRequestReviewEvent,
+    PublicEvent.event: PublicEvent,
+    WatchEvent.event: WatchEvent,
+    ForkEvent.event: ForkEvent,
+    CommitCommentEvent.event: CommitCommentEvent,
+    StarEvent.event: StarEvent,
+    RepositoryImportEvent.event: RepositoryImportEvent,
+    LabelEvent.event: LabelEvent,
+    ProjectCardEvent.event: ProjectCardEvent,
+    GollumEvent.event: GollumEvent,
+    StatusEvent.event: StatusEvent,
+    PullRequestEvent.event: PullRequestEvent,
+    MetaEvent.event: MetaEvent,
+    SponsorshipEvent.event: SponsorshipEvent,
+    InstallationEvent.event: InstallationEvent,
+    MembershipEvent.event: MembershipEvent,
+    MemberEvent.event: MemberEvent,
+    RepositoryEvent.event: RepositoryEvent,
+    InstallationRepositoriesEvent.event: InstallationRepositoriesEvent,
+    ReleaseEvent.event: ReleaseEvent,
+    OrgBlockEvent.event: OrgBlockEvent,
+    PackageEvent.event: PackageEvent,
+    OrganizationEvent.event: OrganizationEvent,
+    CheckRunEvent.event: CheckRunEvent,
+    RepositoryVulnerabilityAlertEvent.event: RepositoryVulnerabilityAlertEvent,
+    TeamEvent.event: TeamEvent,
+    CheckSuiteEvent.event: CheckSuiteEvent,
+    MarketplacePurchaseEvent.event: MarketplacePurchaseEvent,
+    SecurityAdvisoryEvent.event: SecurityAdvisoryEvent,
 }
 
 
