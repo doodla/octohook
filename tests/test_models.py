@@ -1,8 +1,9 @@
 import json
+import os
 
 import pytest
 
-from octohook.events import parse
+from octohook.events import parse, WebhookEventAction
 from octohook.models import RawDict
 
 paths = ["tests/fixtures/complete", "tests/fixtures/incomplete"]
@@ -126,3 +127,20 @@ def test_validate_models(event_name):
 
     if path_failures == 2:
         raise FileNotFoundError("The test fixtures were not loaded properly")
+
+
+@pytest.mark.parametrize("path", paths)
+def test_validate_event_action_enum(path):
+    actions = []
+    for file in os.listdir(path):
+        with open(f"{path}/{file}") as f:
+            actions.extend(
+                [
+                    event["action"]
+                    for event in json.load(f)
+                    if event.get("action") is not None
+                ]
+            )
+
+    for action in actions:
+        WebhookEventAction(action)
