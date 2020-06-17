@@ -537,7 +537,7 @@ class Plan:
         self.bullets = payload.get("bullets")
 
 
-class MarketplacePurcahase:
+class MarketplacePurchase:
     def __init__(self, payload):
         self.account = PurchaseAccount(payload.get("account"))
         self.billing_cycle = payload.get("billing_cycle")

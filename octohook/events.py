@@ -16,7 +16,7 @@ from octohook.models import (
     ShortRepository,
     Issue,
     Label,
-    MarketplacePurcahase,
+    MarketplacePurchase,
     Team,
     Hook,
     Milestone,
@@ -266,7 +266,7 @@ class MarketplacePurchaseEvent(__WebhookEvent):
     def __init__(self, payload):
         super().__init__(payload)
         self.effective_date = payload.get("effective_date")
-        self.marketplace_purchase = MarketplacePurcahase(
+        self.marketplace_purchase = MarketplacePurchase(
             payload.get("marketplace_purchase")
         )
 
