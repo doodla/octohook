@@ -95,7 +95,7 @@ import octohook
 
 app = Flask(__name__)
 
-octohook.load_hooks(['hooks']) # input: List of relative or absolute paths to the modules containing all your hook handlers
+octohook.load_hooks(["hooks"]) 
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -109,7 +109,7 @@ def webhook():
 **Note**
 
 `load_hooks` can only be called once and raises a `RuntimeError` if called multiple times. This is because every time it parses a given module structure, it creates new instances of the functions. So if you parse them multiple times, your handlers will get invoked multiple times.
-```pydocstring
+```python
 load_hooks(['module_a','module_b','path_a'])
 load_hooks(['path_a']) # RuntimeError
 ``` 
