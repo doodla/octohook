@@ -25,7 +25,7 @@ def test_load_hooks_parses_properly(mocker):
     decorator = _WebhookDecorator()
     mocker.patch("octohook.decorators.hook", side_effect=decorator.webhook)
 
-    load_hooks("tests/hooks")
+    load_hooks(["tests/hooks"])
 
     handlers = decorator.handlers
 
@@ -52,10 +52,10 @@ def test_load_hooks_parses_properly(mocker):
 def test_calling_load_hooks_multiple_times_raises_error(mocker):
     mocker.patch("octohook.decorators.hook")
 
-    load_hooks("tests/hooks")
+    load_hooks(["tests/hooks"])
 
     with pytest.raises(RuntimeError) as excinfo:
-        load_hooks("tests/hooks")
+        load_hooks(["tests/hooks"])
 
     assert "load_hooks should only be called once" in str(excinfo.value)
 
@@ -64,7 +64,7 @@ def test_handle_hooks(mocker):
     decorator = _WebhookDecorator()
     mocker.patch("octohook.decorators.hook", side_effect=decorator.webhook)
 
-    load_hooks("tests/hooks")
+    load_hooks(["tests/hooks"])
 
     assertions = {
         WebhookEvent.LABEL: {

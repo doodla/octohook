@@ -28,7 +28,7 @@ class _WebhookDecorator:
 
         return real_decorator
 
-    def handle_webhook(self, event_name, payload):
+    def handle_webhook(self, event_name: str, payload: dict):
         action_handlers = self.handlers[WebhookEvent(event_name)]
 
         handlers = action_handlers["*"].copy()
@@ -51,7 +51,7 @@ hook = _decorator.webhook
 handle_webhook = _decorator.handle_webhook
 
 
-def load_hooks(module_path):
+def load_hooks(module_path: List[str]):
     global _loaded
 
     if _loaded:
@@ -61,5 +61,5 @@ def load_hooks(module_path):
 
     import pkgutil
 
-    for loader, name, is_pkg in pkgutil.walk_packages([module_path]):
+    for loader, name, is_pkg in pkgutil.walk_packages(module_path):
         loader.find_module(name).load_module(name)
