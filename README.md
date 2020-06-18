@@ -40,7 +40,7 @@ Current coverage is documented [here](tests/TestCases.md). If you can provide an
 ## Sample Usage
 
 #### app.py
-```pydocstring
+```python
 from flask import Flask, request, Response
 import octohook
 from octohook.events import PullRequestEvent
@@ -64,7 +64,7 @@ Alternatively, you can also let `octohook` do the heavy lifting of finding and e
 
 The `@hook` decorator takes in two parameters, the `WebhookEvent` and a list of `WebhookEventAction`s. Any function this decorator is applied to is invoked whenever you receive an event with the specified `WebhookEvent` and a listed `WebhookEventAction`.
 
-```pydocstring
+```python
 @hook(WebhookEvent.PULL_REQUEST,[WebhookEventAction.CREATED, WebhookEventAction.EDITED])
 def work(event: PullRequestEvent):
     pass
@@ -88,7 +88,7 @@ def runs_when_pull_request_event_with_any_action_is_received(event: PullRequestE
     print(event.changes)
 ```
 #### app.py
-```pydocstring
+```python
 from flask import Flask, request, Response
 
 import octohook
