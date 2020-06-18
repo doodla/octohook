@@ -1,9 +1,9 @@
-from typing import TypeVar, Optional
+from typing import TypeVar, Optional, Type
 
 T = TypeVar("T")
 
 
-def _optional(payload, key, class_type: T) -> Optional[T]:
+def _optional(payload, key, class_type: Type[T]) -> Optional[T]:
     if payload.get(key):
         return class_type(payload[key])
     else:
