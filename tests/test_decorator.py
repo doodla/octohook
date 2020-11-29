@@ -16,7 +16,7 @@ def setup_function():
 def test_load_hooks_calls_hook(mocker):
     mock = mocker.patch("octohook.decorators.hook")
 
-    load_hooks("tests/hooks")
+    load_hooks(["tests/hooks"])
 
     assert mock.call_count == 16
 
