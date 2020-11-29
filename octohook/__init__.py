@@ -3,11 +3,12 @@ from .decorators import hook, load_hooks, handle_webhook
 from .events import parse, WebhookEvent, WebhookEventAction
 
 __all__ = [
-    "parse",
-    "models",
     "events",
-    "load_hooks",
     "handle_webhook",
+    "hook",
+    "load_hooks",
+    "models",
+    "parse",
     "WebhookEvent",
     "WebhookEventAction",
 ]
