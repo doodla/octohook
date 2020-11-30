@@ -42,7 +42,7 @@ from octohook.models import (
 )
 
 
-class __WebhookEvent(ABC):
+class BaseWebhookEvent:
     def __init__(self, payload: dict):
         self.action = payload.get("action")
         self.sender = User(payload.get("sender"))
@@ -60,7 +60,7 @@ class __WebhookEvent(ABC):
             pass
 
 
-class CheckRunEvent(__WebhookEvent):
+class CheckRunEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#checkrunevent
     """
@@ -70,7 +70,7 @@ class CheckRunEvent(__WebhookEvent):
         self.check_run = CheckRun(payload.get("check_run"))
 
 
-class CheckSuiteEvent(__WebhookEvent):
+class CheckSuiteEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#checksuiteevent
     """
@@ -80,7 +80,7 @@ class CheckSuiteEvent(__WebhookEvent):
         self.check_suite = CheckSuite(payload.get("check_suite"))
 
 
-class CommitCommentEvent(__WebhookEvent):
+class CommitCommentEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#commitcommentevent
     """
@@ -90,7 +90,7 @@ class CommitCommentEvent(__WebhookEvent):
         self.comment = Comment(payload.get("comment"))
 
 
-class ContentReferenceEvent(__WebhookEvent):
+class ContentReferenceEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#contentreferenceevent
     """
@@ -101,7 +101,7 @@ class ContentReferenceEvent(__WebhookEvent):
         self.installation = Installation(payload.get("installation"))
 
 
-class CreateEvent(__WebhookEvent):
+class CreateEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#createevent
     """
@@ -115,7 +115,7 @@ class CreateEvent(__WebhookEvent):
         self.pusher_type = payload.get("pusher_type")
 
 
-class DeleteEvent(__WebhookEvent):
+class DeleteEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#deleteevent
     """
@@ -127,7 +127,7 @@ class DeleteEvent(__WebhookEvent):
         self.pusher_type = payload.get("pusher_type")
 
 
-class DeployKeyEvent(__WebhookEvent):
+class DeployKeyEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#deploykeyevent
     """
@@ -137,7 +137,7 @@ class DeployKeyEvent(__WebhookEvent):
         self.key = DeployKey(payload.get("key"))
 
 
-class DeploymentEvent(__WebhookEvent):
+class DeploymentEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#deploymentevent
     """
@@ -148,7 +148,7 @@ class DeploymentEvent(__WebhookEvent):
         self.deployment = Deployment(payload.get("deployment"))
 
 
-class DeploymentStatusEvent(__WebhookEvent):
+class DeploymentStatusEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#deploymentstatusevent
     """
@@ -159,7 +159,7 @@ class DeploymentStatusEvent(__WebhookEvent):
         self.deployment = Deployment(payload.get("deployment"))
 
 
-class ForkEvent(__WebhookEvent):
+class ForkEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#forkevent
     """
@@ -169,7 +169,7 @@ class ForkEvent(__WebhookEvent):
         self.forkee = Repository(payload.get("forkee"))
 
 
-class GitHubAppAuthorizationEvent(__WebhookEvent):
+class GitHubAppAuthorizationEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#forkapplyevent
     """
@@ -178,7 +178,7 @@ class GitHubAppAuthorizationEvent(__WebhookEvent):
         super().__init__(payload)
 
 
-class GollumEvent(__WebhookEvent):
+class GollumEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#gollumevent
     """
@@ -189,7 +189,7 @@ class GollumEvent(__WebhookEvent):
         self.pages = [Page(page) for page in payload.get("pages")]
 
 
-class InstallationEvent(__WebhookEvent):
+class InstallationEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#installationevent
     """
@@ -203,7 +203,7 @@ class InstallationEvent(__WebhookEvent):
         ]
 
 
-class InstallationRepositoriesEvent(__WebhookEvent):
+class InstallationRepositoriesEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#installationrepositoriesevent
     """
@@ -221,7 +221,7 @@ class InstallationRepositoriesEvent(__WebhookEvent):
         ]
 
 
-class IssueCommentEvent(__WebhookEvent):
+class IssueCommentEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#issuecommentevent
     """
@@ -233,7 +233,7 @@ class IssueCommentEvent(__WebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
-class IssuesEvent(__WebhookEvent):
+class IssuesEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#issuesevent
     """
@@ -247,7 +247,7 @@ class IssuesEvent(__WebhookEvent):
         self.milestone = _optional(payload, "milestone", Milestone)
 
 
-class LabelEvent(__WebhookEvent):
+class LabelEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#labelevent
     """
@@ -258,7 +258,7 @@ class LabelEvent(__WebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
-class MarketplacePurchaseEvent(__WebhookEvent):
+class MarketplacePurchaseEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#marketplacepurchaseevent
     """
@@ -271,7 +271,7 @@ class MarketplacePurchaseEvent(__WebhookEvent):
         )
 
 
-class MemberEvent(__WebhookEvent):
+class MemberEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#memberevent
     """
@@ -281,7 +281,7 @@ class MemberEvent(__WebhookEvent):
         self.member = User(payload.get("member"))
 
 
-class MembershipEvent(__WebhookEvent):
+class MembershipEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#membershipevent
     """
@@ -293,7 +293,7 @@ class MembershipEvent(__WebhookEvent):
         self.team = Team(payload.get("team"))
 
 
-class MetaEvent(__WebhookEvent):
+class MetaEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#metaevent
     """
@@ -304,7 +304,7 @@ class MetaEvent(__WebhookEvent):
         self.hook = Hook(payload.get("hook"))
 
 
-class MilestoneEvent(__WebhookEvent):
+class MilestoneEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#milestoneevent
     """
@@ -315,7 +315,7 @@ class MilestoneEvent(__WebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
-class OrganizationEvent(__WebhookEvent):
+class OrganizationEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#organizationevent
     """
@@ -326,7 +326,7 @@ class OrganizationEvent(__WebhookEvent):
         self.membership = Membership(payload.get("membership"))
 
 
-class OrgBlockEvent(__WebhookEvent):
+class OrgBlockEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#orgblockevent
     """
@@ -336,7 +336,7 @@ class OrgBlockEvent(__WebhookEvent):
         self.blocked_user = User(payload.get("blocked_user"))
 
 
-class PackageEvent(__WebhookEvent):
+class PackageEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#packageevent
     """
@@ -346,7 +346,7 @@ class PackageEvent(__WebhookEvent):
         self.package = Package(payload.get("package"))
 
 
-class PageBuildEvent(__WebhookEvent):
+class PageBuildEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pagebuildevent
     """
@@ -357,7 +357,7 @@ class PageBuildEvent(__WebhookEvent):
         self.build = PageBuild(payload.get("build"))
 
 
-class ProjectCardEvent(__WebhookEvent):
+class ProjectCardEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#projectcardevent
     """
@@ -368,7 +368,7 @@ class ProjectCardEvent(__WebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
-class ProjectColumnEvent(__WebhookEvent):
+class ProjectColumnEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#projectcolumnevent
     """
@@ -379,7 +379,7 @@ class ProjectColumnEvent(__WebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
-class ProjectEvent(__WebhookEvent):
+class ProjectEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#projectevent
     """
@@ -389,7 +389,7 @@ class ProjectEvent(__WebhookEvent):
         self.project = Project(payload.get("project"))
 
 
-class PublicEvent(__WebhookEvent):
+class PublicEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#publicevent
     """
@@ -400,7 +400,7 @@ class PublicEvent(__WebhookEvent):
         super().__init__(payload)
 
 
-class PullRequestEvent(__WebhookEvent):
+class PullRequestEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pullrequestevent
     """
@@ -417,7 +417,7 @@ class PullRequestEvent(__WebhookEvent):
         self.requested_reviewer = _optional(payload, "requested_reviewer", User)
 
 
-class PullRequestReviewEvent(__WebhookEvent):
+class PullRequestReviewEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewevent
     """
@@ -429,7 +429,7 @@ class PullRequestReviewEvent(__WebhookEvent):
         self.changes = RawDict(payload.get("pull_request"))
 
 
-class PullRequestReviewCommentEvent(__WebhookEvent):
+class PullRequestReviewCommentEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewcommentevent
     """
@@ -441,7 +441,7 @@ class PullRequestReviewCommentEvent(__WebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
-class PushEvent(__WebhookEvent):
+class PushEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pushevent
     """
@@ -461,7 +461,7 @@ class PushEvent(__WebhookEvent):
         self.pusher = CommitUser(payload.get("pusher"))
 
 
-class ReleaseEvent(__WebhookEvent):
+class ReleaseEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#releaseevent
     """
@@ -472,7 +472,7 @@ class ReleaseEvent(__WebhookEvent):
         self.changes = RawDict(payload.get("release"))
 
 
-class RepositoryDispatchEvent(__WebhookEvent):
+class RepositoryDispatchEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#repositorydispatchevent
     """
@@ -484,7 +484,7 @@ class RepositoryDispatchEvent(__WebhookEvent):
         self.installation = Installation(payload.get("installation"))
 
 
-class RepositoryEvent(__WebhookEvent):
+class RepositoryEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#repositoryevent
     """
@@ -493,7 +493,7 @@ class RepositoryEvent(__WebhookEvent):
         super().__init__(payload)
 
 
-class RepositoryImportEvent(__WebhookEvent):
+class RepositoryImportEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#repositoryimportevent
     """
@@ -503,7 +503,7 @@ class RepositoryImportEvent(__WebhookEvent):
         self.status = payload.get("status")
 
 
-class RepositoryVulnerabilityAlertEvent(__WebhookEvent):
+class RepositoryVulnerabilityAlertEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#repositoryvulnerabilityalertevent
     """
@@ -523,7 +523,7 @@ class SecurityAdvisoryEvent:
         self.security_advisory = SecurityAdvisory(payload.get("security_advisory"))
 
 
-class SponsorshipEvent(__WebhookEvent):
+class SponsorshipEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#sponsorshipevent
     """
@@ -538,7 +538,7 @@ class SponsorshipEvent(__WebhookEvent):
             pass
 
 
-class StarEvent(__WebhookEvent):
+class StarEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#starevent
     """
@@ -548,7 +548,7 @@ class StarEvent(__WebhookEvent):
         self.starred_at = payload.get("starred_at")
 
 
-class StatusEvent(__WebhookEvent):
+class StatusEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#statusevent
     """
@@ -569,7 +569,7 @@ class StatusEvent(__WebhookEvent):
         self.updated_at = payload.get("updated_at")
 
 
-class TeamEvent(__WebhookEvent):
+class TeamEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#teamevent
     """
@@ -579,7 +579,7 @@ class TeamEvent(__WebhookEvent):
         self.team = Team(payload.get("team"))
 
 
-class TeamAddEvent(__WebhookEvent):
+class TeamAddEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#teamaddevent
     """
@@ -589,7 +589,7 @@ class TeamAddEvent(__WebhookEvent):
         self.team = Team(payload.get("team"))
 
 
-class WatchEvent(__WebhookEvent):
+class WatchEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#watchevent
     """
@@ -598,7 +598,7 @@ class WatchEvent(__WebhookEvent):
         super().__init__(payload)
 
 
-class PingEvent(__WebhookEvent):
+class PingEvent(BaseWebhookEvent):
     """
     https://developer.github.com/webhooks/#ping-event
     """
