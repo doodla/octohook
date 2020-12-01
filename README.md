@@ -27,7 +27,9 @@ https://api.github.com/repos/doodla/octohook-playground/hello/world"
 
 ## Gotchas
 
-Github doesn't send consistent payloads for each model. Depending on the event type, you can get more information for a particular model, or less.
+Github doesn't send consistent payloads for each model necessitating that the non-optional model type hints conform to the least common denominator. 
+
+Depending on the event type, you can get more information for a particular model, or less.
 For example, Github sends a `changes` key with some payloads with the `edited` action. For other actions, the key is not present. In such cases, our `event.changes` is `None`.
 
 This can happen for arbitrary payloads, so I'd suggest tailoring your code to the expected incoming webhook.
@@ -62,7 +64,11 @@ def webhook():
 ### @hook
 Alternatively, you can also let `octohook` do the heavy lifting of finding and executing the appropriate handlers for any given webhook.
 
-The `@hook` decorator takes in two parameters, the `WebhookEvent` and a list of `WebhookEventAction`s. Any function this decorator is applied to is invoked whenever you receive an event with the specified `WebhookEvent` and a listed `WebhookEventAction`.
+The `@hook` decorator takes in three parameters, the `WebhookEvent`, a list of `WebhookEventAction`s and a `debug` flag (defaults to `False`). 
+
+Any function this decorator is applied to is invoked whenever you receive an event with the specified `WebhookEvent` and a listed `WebhookEventAction`.
+
+If you set `debug=True` on any `@hook`, only those hooks fire for the corresponding webhook event.
 
 ```python
 @hook(WebhookEvent.PULL_REQUEST,[WebhookEventAction.CREATED, WebhookEventAction.EDITED])

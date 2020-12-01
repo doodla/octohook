@@ -12,13 +12,18 @@ class _WebhookDecorator:
     def __init__(self):
         self.handlers = defaultdict(lambda: defaultdict(set))
 
-    def webhook(self, event: WebhookEvent, actions: List[WebhookEventAction] = None):
+    def webhook(
+        self, event: WebhookEvent, actions: List[WebhookEventAction] = None, debug=False
+    ):
         def real_decorator(fn):
             @wraps(fn)
             def wrapper(*, event_name, payload):
                 fn(parse(event_name, payload))
 
-            if actions is None:
+            if debug:
+                self.handlers[event]["debug"].add(wrapper)
+
+            if not actions:
                 self.handlers[event]["*"].add(wrapper)
             else:
                 for action in actions:
@@ -34,6 +39,10 @@ class _WebhookDecorator:
         handlers = action_handlers["*"].copy()
         if payload.get("action") is not None:
             handlers.update(action_handlers[WebhookEventAction(payload["action"])])
+
+        if action_handlers["debug"]:
+            logger.info("Debug handlers found.")
+            handlers = action_handlers["debug"].copy()
 
         for handler in handlers:
             # noinspection PyBroadException
@@ -51,7 +60,7 @@ hook = _decorator.webhook
 handle_webhook = _decorator.handle_webhook
 
 
-def load_hooks(module_path: List[str]):
+def load_hooks(module_paths: List[str]):
     global _loaded
 
     if _loaded:
@@ -61,5 +70,5 @@ def load_hooks(module_path: List[str]):
 
     import pkgutil
 
-    for loader, name, is_pkg in pkgutil.walk_packages(module_path):
+    for loader, name, is_pkg in pkgutil.walk_packages(module_paths):
         loader.find_module(name).load_module(name)
