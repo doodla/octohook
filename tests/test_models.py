@@ -1,5 +1,6 @@
 import json
 import os
+from typing import get_type_hints, get_origin, get_args
 
 import pytest
 
@@ -57,6 +58,10 @@ testcases = [
 ]
 
 
+class TypeHintError(Exception):
+    pass
+
+
 @pytest.mark.parametrize("event_name", testcases)
 def test_model_loads(event_name):
     path_failures = 0
@@ -74,7 +79,7 @@ def test_model_loads(event_name):
         raise FileNotFoundError("The test fixtures were not loaded properly")
 
 
-def validate_model(data, obj):
+def check_model(data, obj):
     """
     Checks if every key in the json is represented either as a RawDict or a nested object.
     :param data: The JSON dictionary
@@ -95,13 +100,13 @@ def validate_model(data, obj):
             if isinstance(obj_value, dict):
                 raise AttributeError(f"Object is a plain dictionary for {key}")
             else:
-                validate_model(json_value, obj_value)
+                check_model(json_value, obj_value)
 
         # When the nested object is a list of objects
         if isinstance(json_value, list):
             for item_json, item_obj in zip(json_value, obj_value):
                 if isinstance(item_json, dict):
-                    validate_model(item_json, item_obj)
+                    check_model(item_json, item_obj)
                 else:
                     assert item_json == item_obj
 
@@ -113,7 +118,7 @@ def validate_model(data, obj):
 
 
 @pytest.mark.parametrize("event_name", testcases)
-def test_validate_models(event_name):
+def test_model_has_all_keys_in_json(event_name):
     path_failures = 0
     for path in paths:
         try:
@@ -121,7 +126,7 @@ def test_validate_models(event_name):
                 examples = json.load(file)
 
                 for example in examples:
-                    validate_model(example, parse(event_name, example))
+                    check_model(example, parse(event_name, example))
         except FileNotFoundError:
             path_failures += 1
 
@@ -130,7 +135,7 @@ def test_validate_models(event_name):
 
 
 @pytest.mark.parametrize("path", paths)
-def test_validate_event_action_enum(path):
+def test_all_event_actions_are_in_enum(path):
     actions = []
     for file in os.listdir(path):
         with open(f"{path}/{file}") as f:
@@ -144,3 +149,55 @@ def test_validate_event_action_enum(path):
 
     for action in actions:
         WebhookEventAction(action)
+
+
+def check_type_hints(obj):
+    primitives = [str, int, type(None), bool, RawDict]
+    hints = get_type_hints(type(obj))
+
+    for attr, type_hint in hints.items():
+        obj_value = getattr(obj, attr)
+
+        try:
+            if isinstance(obj_value, type_hint):
+                if type_hint not in primitives:
+                    check_type_hints(obj_value)
+            else:
+                raise TypeHintError(
+                    f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
+                )
+        except TypeError:
+            origin = get_origin(type_hint)
+            args = get_args(type_hint)
+
+            if type(obj_value) not in args:
+                if type(obj_value) != origin:
+                    raise TypeHintError(
+                        f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
+                    )
+                elif type(obj_value) == list:
+                    try:
+                        first_value = obj_value.pop()
+                        if type(first_value) != args[0]:
+                            raise TypeHintError(
+                                f"{type(obj)} {attr}. Expected {type_hint} Received {origin}[{type(first_value)}]"
+                            )
+                    except IndexError:
+                        pass
+
+
+@pytest.mark.parametrize("event_name", testcases)
+def test_all_type_hints_are_correct(event_name):
+    path_failures = 0
+    for path in paths:
+        try:
+            with open(f"{path}/{event_name}.json") as file:
+                examples = json.load(file)
+
+                for example in examples:
+                    check_type_hints(parse(event_name, example))
+        except FileNotFoundError:
+            path_failures += 1
+
+    if path_failures == 2:
+        raise FileNotFoundError("The test fixtures were not loaded properly")

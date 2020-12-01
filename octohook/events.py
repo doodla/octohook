@@ -1,5 +1,5 @@
-from abc import ABC
 from enum import Enum
+from typing import Optional, List, Any
 
 from octohook.models import (
     Repository,
@@ -39,10 +39,16 @@ from octohook.models import (
     Commit,
     CommitUser,
     _optional,
+    ShortInstallation,
 )
 
 
 class BaseWebhookEvent:
+    action: Optional[str] = None
+    sender: User
+    repository: Optional[Repository] = None
+    organization: Optional[Organization] = None
+
     def __init__(self, payload: dict):
         self.action = payload.get("action")
         self.sender = User(payload.get("sender"))
@@ -65,6 +71,8 @@ class CheckRunEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#checkrunevent
     """
 
+    check_run: CheckRun
+
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.check_run = CheckRun(payload.get("check_run"))
@@ -74,6 +82,8 @@ class CheckSuiteEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#checksuiteevent
     """
+
+    check_suite: CheckSuite
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -85,6 +95,8 @@ class CommitCommentEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#commitcommentevent
     """
 
+    comment: Comment
+
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.comment = Comment(payload.get("comment"))
@@ -95,10 +107,13 @@ class ContentReferenceEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#contentreferenceevent
     """
 
-    def __init__(self, payload):
+    content_reference: ContentReference
+    installation: ShortInstallation
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.content_reference = ContentReference(payload.get("content_reference"))
-        self.installation = Installation(payload.get("installation"))
+        self.installation = ShortInstallation(payload.get("installation"))
 
 
 class CreateEvent(BaseWebhookEvent):
@@ -106,7 +121,13 @@ class CreateEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#createevent
     """
 
-    def __init__(self, payload):
+    ref: str
+    ref_type: str
+    master_branch: str
+    description: str
+    pusher_type: str
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.ref = payload.get("ref")
         self.ref_type = payload.get("ref_type")
@@ -120,7 +141,11 @@ class DeleteEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deleteevent
     """
 
-    def __init__(self, payload):
+    ref: str
+    ref_type: str
+    pusher_type: str
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.ref = payload.get("ref")
         self.ref_type = payload.get("ref_type")
@@ -132,7 +157,9 @@ class DeployKeyEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deploykeyevent
     """
 
-    def __init__(self, payload):
+    key: DeployKey
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.key = DeployKey(payload.get("key"))
 
@@ -142,7 +169,9 @@ class DeploymentEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deploymentevent
     """
 
-    def __init__(self, payload):
+    deployment: Deployment
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
         self.deployment = Deployment(payload.get("deployment"))
@@ -153,7 +182,10 @@ class DeploymentStatusEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#deploymentstatusevent
     """
 
-    def __init__(self, payload):
+    deployment_status: DeploymentStatus
+    deployment: Deployment
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.deployment_status = DeploymentStatus(payload.get("deployment_status"))
         self.deployment = Deployment(payload.get("deployment"))
@@ -164,7 +196,9 @@ class ForkEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#forkevent
     """
 
-    def __init__(self, payload):
+    forkee: Repository
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.forkee = Repository(payload.get("forkee"))
 
@@ -174,7 +208,7 @@ class GitHubAppAuthorizationEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#forkapplyevent
     """
 
-    def __init__(self, payload):
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
 
@@ -183,7 +217,9 @@ class GollumEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#gollumevent
     """
 
-    def __init__(self, payload):
+    pages: List[Page]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
         self.pages = [Page(page) for page in payload.get("pages")]
@@ -194,7 +230,10 @@ class InstallationEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#installationevent
     """
 
-    def __init__(self, payload):
+    installation: Installation
+    repositories: List[ShortRepository]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.installation = Installation(payload.get("installation"))
 
@@ -208,7 +247,12 @@ class InstallationRepositoriesEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#installationrepositoriesevent
     """
 
-    def __init__(self, payload):
+    installation: Installation
+    repository_selection: str
+    repositories_added: List[ShortRepository]
+    repositories_removed: List[ShortRepository]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
         self.installation = Installation(payload.get("installation"))
@@ -226,7 +270,11 @@ class IssueCommentEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#issuecommentevent
     """
 
-    def __init__(self, payload):
+    issue: Issue
+    comment: Comment
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.issue = Issue(payload.get("issue"))
         self.comment = Comment(payload.get("comment"))
@@ -238,7 +286,13 @@ class IssuesEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#issuesevent
     """
 
-    def __init__(self, payload):
+    issue: Issue
+    changes: Optional[RawDict]
+    label: Optional[Label]
+    assignee: Optional[User]
+    milestone: Optional[Milestone]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.issue = Issue(payload.get("issue"))
         self.changes = _optional(payload, "changes", RawDict)
@@ -252,7 +306,10 @@ class LabelEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#labelevent
     """
 
-    def __init__(self, payload):
+    label: Label
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.label = Label(payload.get("label"))
         self.changes = _optional(payload, "changes", RawDict)
@@ -263,7 +320,10 @@ class MarketplacePurchaseEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#marketplacepurchaseevent
     """
 
-    def __init__(self, payload):
+    effective_date: str
+    marketplace_purchase: MarketplacePurchase
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.effective_date = payload.get("effective_date")
         self.marketplace_purchase = MarketplacePurchase(
@@ -276,7 +336,9 @@ class MemberEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#memberevent
     """
 
-    def __init__(self, payload):
+    member: User
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.member = User(payload.get("member"))
 
@@ -286,7 +348,11 @@ class MembershipEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#membershipevent
     """
 
-    def __init__(self, payload):
+    scope: str
+    member: User
+    team: Team
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.scope = payload.get("scope")
         self.member = User(payload.get("member"))
@@ -298,7 +364,10 @@ class MetaEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#metaevent
     """
 
-    def __init__(self, payload):
+    hook_id: int
+    hook: Hook
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.hook_id = payload.get("hook_id")
         self.hook = Hook(payload.get("hook"))
@@ -309,7 +378,10 @@ class MilestoneEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#milestoneevent
     """
 
-    def __init__(self, payload):
+    milestone: Milestone
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.milestone = Milestone(payload.get("milestone"))
         self.changes = _optional(payload, "changes", RawDict)
@@ -320,7 +392,10 @@ class OrganizationEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#organizationevent
     """
 
-    def __init__(self, payload):
+    invitation: Optional[Any]
+    membership: Membership
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.invitation = payload.get("invitation")  # TODO: What does this look like?
         self.membership = Membership(payload.get("membership"))
@@ -331,7 +406,9 @@ class OrgBlockEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#orgblockevent
     """
 
-    def __init__(self, payload):
+    blocked_user: User
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.blocked_user = User(payload.get("blocked_user"))
 
@@ -341,7 +418,9 @@ class PackageEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#packageevent
     """
 
-    def __init__(self, payload):
+    package: Package
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.package = Package(payload.get("package"))
 
@@ -351,7 +430,10 @@ class PageBuildEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pagebuildevent
     """
 
-    def __init__(self, payload):
+    id: int
+    build: PageBuild
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.id = payload.get("id")
         self.build = PageBuild(payload.get("build"))
@@ -362,7 +444,10 @@ class ProjectCardEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#projectcardevent
     """
 
-    def __init__(self, payload):
+    project_card: ProjectCard
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.project_card = ProjectCard(payload.get("project_card"))
         self.changes = _optional(payload, "changes", RawDict)
@@ -373,7 +458,10 @@ class ProjectColumnEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#projectcolumnevent
     """
 
-    def __init__(self, payload):
+    project_column: ProjectColumn
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.project_column = ProjectColumn(payload.get("project_column"))
         self.changes = _optional(payload, "changes", RawDict)
@@ -384,7 +472,9 @@ class ProjectEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#projectevent
     """
 
-    def __init__(self, payload):
+    project: Project
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.project = Project(payload.get("project"))
 
@@ -394,9 +484,7 @@ class PublicEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#publicevent
     """
 
-    event = "public"
-
-    def __init__(self, payload):
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
 
@@ -405,7 +493,16 @@ class PullRequestEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pullrequestevent
     """
 
-    def __init__(self, payload):
+    number: int
+    pull_request: PullRequest
+    assignee: Optional[User]
+    label: Optional[Label]
+    changes: Optional[RawDict]
+    before: Optional[str]
+    after: Optional[str]
+    requested_reviewer: Optional[User]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.number = payload.get("number")
         self.pull_request = PullRequest(payload.get("pull_request"))
@@ -422,7 +519,11 @@ class PullRequestReviewEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewevent
     """
 
-    def __init__(self, payload):
+    review: Review
+    pull_request: PullRequest
+    changes: RawDict
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.review = Review(payload.get("review"))
         self.pull_request = PullRequest(payload.get("pull_request"))
@@ -434,7 +535,11 @@ class PullRequestReviewCommentEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewcommentevent
     """
 
-    def __init__(self, payload):
+    comment: Comment
+    pull_request: PullRequest
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.comment = Comment(payload.get("comment"))
         self.pull_request = PullRequest(payload.get("pull_request"))
@@ -446,7 +551,19 @@ class PushEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pushevent
     """
 
-    def __init__(self, payload):
+    ref: str
+    before: str
+    after: str
+    created: bool
+    deleted: bool
+    forced: bool
+    base_ref: Optional[str]
+    compare: str
+    commits: List[Commit]
+    head_commit: Optional[Commit]
+    pusher: CommitUser
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.ref = payload.get("ref")
         self.before = payload.get("before")
@@ -466,7 +583,10 @@ class ReleaseEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#releaseevent
     """
 
-    def __init__(self, payload):
+    release: Release
+    changes: RawDict
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.release = Release(payload.get("release"))
         self.changes = RawDict(payload.get("release"))
@@ -477,11 +597,15 @@ class RepositoryDispatchEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#repositorydispatchevent
     """
 
-    def __init__(self, payload):
+    branch: str
+    client_payload: RawDict
+    installation: ShortInstallation
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.branch = payload.get("branch")
         self.client_payload = RawDict(payload.get("client_payload"))
-        self.installation = Installation(payload.get("installation"))
+        self.installation = ShortInstallation(payload.get("installation"))
 
 
 class RepositoryEvent(BaseWebhookEvent):
@@ -489,7 +613,7 @@ class RepositoryEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#repositoryevent
     """
 
-    def __init__(self, payload):
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
 
@@ -498,7 +622,9 @@ class RepositoryImportEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#repositoryimportevent
     """
 
-    def __init__(self, payload):
+    status: str
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.status = payload.get("status")
 
@@ -508,7 +634,9 @@ class RepositoryVulnerabilityAlertEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#repositoryvulnerabilityalertevent
     """
 
-    def __init__(self, payload):
+    alert: VulnerabilityAlert
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.alert = VulnerabilityAlert(payload.get("alert"))
 
@@ -518,7 +646,10 @@ class SecurityAdvisoryEvent:
     https://developer.github.com/v3/activity/events/types/#securityadvisoryevent
     """
 
-    def __init__(self, payload):
+    action: str
+    security_advisory: SecurityAdvisory
+
+    def __init__(self, payload: dict):
         self.action = payload.get("action")
         self.security_advisory = SecurityAdvisory(payload.get("security_advisory"))
 
@@ -528,14 +659,15 @@ class SponsorshipEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#sponsorshipevent
     """
 
-    def __init__(self, payload):
+    sponsorship: Sponsorship
+    changes: Optional[RawDict]
+    effective_date: Optional[str]
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.sponsorship = Sponsorship(payload.get("sponsorship"))
-        try:
-            self.changes = _optional(payload, "changes", RawDict)
-            self.effective_date = payload.get("effective_date", None)
-        except KeyError:
-            pass
+        self.changes = _optional(payload, "changes", RawDict)
+        self.effective_date = payload.get("effective_date", None)
 
 
 class StarEvent(BaseWebhookEvent):
@@ -543,7 +675,7 @@ class StarEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#starevent
     """
 
-    def __init__(self, payload):
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.starred_at = payload.get("starred_at")
 
@@ -553,7 +685,20 @@ class StatusEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#statusevent
     """
 
-    def __init__(self, payload):
+    id: int
+    sha: str
+    name: str
+    target_url: Optional[str]
+    avatar_url: Optional[str]
+    context: str
+    description: Optional[str]
+    state: str
+    commit: StatusCommit
+    branches: List[Branch]
+    created_at: str
+    updated_at: str
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.id = payload.get("id")
         self.sha = payload.get("sha")
@@ -574,7 +719,9 @@ class TeamEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#teamevent
     """
 
-    def __init__(self, payload):
+    team: Team
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.team = Team(payload.get("team"))
 
@@ -584,7 +731,9 @@ class TeamAddEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#teamaddevent
     """
 
-    def __init__(self, payload):
+    team: Team
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.team = Team(payload.get("team"))
 
@@ -594,7 +743,7 @@ class WatchEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#watchevent
     """
 
-    def __init__(self, payload):
+    def __init__(self, payload: dict):
         super().__init__(payload)
 
 
@@ -603,7 +752,11 @@ class PingEvent(BaseWebhookEvent):
     https://developer.github.com/webhooks/#ping-event
     """
 
-    def __init__(self, payload):
+    zen: str
+    hook_id: int
+    hook: Hook
+
+    def __init__(self, payload: dict):
         super().__init__(payload)
         self.zen = payload.get("zen")
         self.hook_id = payload.get("hook_id")
@@ -777,5 +930,8 @@ event_map = {
 }
 
 
-def parse(event_name, payload):
+def parse(event_name, payload: dict):
     return event_map[WebhookEvent(event_name)](payload)
+
+
+print(CheckRunEvent.__annotations__)
