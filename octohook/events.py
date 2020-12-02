@@ -199,7 +199,7 @@ class InstallationEvent(__WebhookEvent):
         self.installation = Installation(payload.get("installation"))
 
         self.repositories = [
-            ShortRepository(repo) for repo in payload.get("repositories", list())
+            ShortRepository(repo) for repo in payload.get("repositories", [])
         ]
 
 
