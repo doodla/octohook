@@ -40,6 +40,7 @@ from octohook.models import (
     CommitUser,
     _optional,
     ShortInstallation,
+    Enterprise,
 )
 
 
@@ -48,6 +49,7 @@ class BaseWebhookEvent:
     sender: User
     repository: Optional[Repository] = None
     organization: Optional[Organization] = None
+    enterprise: Optional[Enterprise] = None
 
     def __init__(self, payload: dict):
         self.action = payload.get("action")
@@ -64,6 +66,8 @@ class BaseWebhookEvent:
             self.organization = Organization(payload.get("organization"))
         except AttributeError:
             pass
+
+        self.enterprise = _optional(payload, "enterprise", Enterprise)
 
 
 class CheckRunEvent(BaseWebhookEvent):
@@ -932,6 +936,3 @@ event_map = {
 
 def parse(event_name, payload: dict):
     return event_map[WebhookEvent(event_name)](payload)
-
-
-print(CheckRunEvent.__annotations__)

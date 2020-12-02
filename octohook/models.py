@@ -26,6 +26,31 @@ def _transform(url: str, local_variables: dict) -> str:
     return url
 
 
+class Enterprise:
+    id: int
+    slug: str
+    name: str
+    node_id: str
+    avatar_url: str
+    description: Optional[str]
+    website_url: Optional[str]
+    html_url: str
+    created_at: str
+    updated_at: str
+
+    def __init__(self, payload: dict):
+        self.id = payload.get("id")
+        self.slug = payload.get("slug")
+        self.name = payload.get("name")
+        self.node_id = payload.get("node_id")
+        self.avatar_url = payload.get("avatar_url")
+        self.description = payload.get("description")
+        self.website_url = payload.get("website_url")
+        self.html_url = payload.get("html_url")
+        self.created_at = payload.get("created_at")
+        self.updated_at = payload.get("updated_at")
+
+
 class User:
     name: Optional[str]
     login: str
