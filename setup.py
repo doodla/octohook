@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="octohook",
-    version="0.5.1",
+    version="0.5.2",
     author="Sridhar Vadlamani",
     author_email="v.sridhar.sreenivas@gmail.com",
     description="Typed interactions with Github Webhooks",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/doodla/octohook",
-    packages=["octohook"],
+    packages=["octohook", "octohook.extensions"],
     classifiers=[
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
