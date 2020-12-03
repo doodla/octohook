@@ -9,23 +9,26 @@ def init_pull_request_extensions(github: SimpleGithubClient):
     setattr(PullRequest, "__reviews", None)
     setattr(PullRequest, "__files", None)
 
+    def label_names(self: PullRequest) -> List[str]:
+        return [label.name for label in self.labels]
+
     def apply_label(self: PullRequest, label: str):
-        payload = {"labels": list(set([lbl.name for lbl in self.labels] + [label]))}
+        payload = {"labels": list(set(self.label_names() + [label]))}
         return github.patch(url=self.issue_url, json=payload)
 
     def apply_labels(self: PullRequest, labels: List[str]):
-        payload = {"labels": list(set([lbl.name for lbl in self.labels] + labels))}
+        payload = {"labels": list(set(self.label_names() + labels))}
         return github.patch(url=self.issue_url, json=payload)
 
     def remove_label(self: PullRequest, label: str):
-        labels = [label.name for label in self.labels]
+        labels = self.label_names()
         if label in labels:
             labels.remove(label)
 
             self.apply_labels(labels)
 
     def remove_labels(self: PullRequest, labels: List[str]):
-        original_labels_set = {label.name for label in self.labels}
+        original_labels_set = set(self.label_names())
         incoming_label_set = set(labels)
 
         new_label_set = original_labels_set - incoming_label_set
