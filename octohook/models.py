@@ -27,6 +27,7 @@ def _transform(url: str, local_variables: dict) -> str:
 
 
 class Enterprise:
+    _payload: dict
     id: int
     slug: str
     name: str
@@ -39,6 +40,7 @@ class Enterprise:
     updated_at: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.slug = payload.get("slug")
         self.name = payload.get("name")
@@ -52,6 +54,7 @@ class Enterprise:
 
 
 class User:
+    _payload: dict
     name: Optional[str]
     login: str
     email: Optional[str]
@@ -104,6 +107,7 @@ class User:
 
 
 class ShortRepository:
+    _payload: dict
     id: int
     node_id: str
     name: str
@@ -111,6 +115,7 @@ class ShortRepository:
     private: bool
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.name = payload.get("name")
@@ -124,6 +129,7 @@ class RawDict(dict):
 
 
 class Permissions:
+    _payload: dict
     metadata: str
     contents: str
     issues: str
@@ -148,6 +154,7 @@ class Permissions:
     team_discussions: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.metadata = payload.get("metadata")
         self.contents = payload.get("contents")
         self.issues = payload.get("issues")
@@ -173,6 +180,7 @@ class Permissions:
 
 
 class Repository:
+    _payload: dict
     id: int
     node_id: str
     name: str
@@ -362,6 +370,7 @@ class Repository:
 
 
 class Organization:
+    _payload: dict
     login: str
     id: int
     node_id: str
@@ -396,6 +405,7 @@ class Organization:
 
 
 class Comment:
+    _payload: dict
     url: str
     html_url: str
     issue_url: Optional[str]
@@ -417,6 +427,7 @@ class Comment:
     body: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.html_url = payload.get("html_url")
         self.issue_url = payload.get("issue_url")
@@ -440,6 +451,7 @@ class Comment:
 
 
 class ChecksApp:
+    _payload: dict
     id: int
     node_id: str
     owner: User
@@ -453,6 +465,7 @@ class ChecksApp:
     events: List[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.owner = User(payload.get("owner"))
@@ -467,6 +480,7 @@ class ChecksApp:
 
 
 class ChecksPullRequest:
+    _payload: dict
     url: str
     id: int
     number: int
@@ -474,6 +488,7 @@ class ChecksPullRequest:
     base: RawDict
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.id = payload.get("id")
         self.number = payload.get("number")
@@ -482,17 +497,20 @@ class ChecksPullRequest:
 
 
 class CommitUser:
+    _payload: dict
     name: str
     email: str
     username: Optional[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.name = payload.get("name")
         self.email = payload.get("email")
         self.username = payload.get("username")
 
 
 class Commit:
+    _payload: dict
     id: str
     tree_id: str
     distinct: bool
@@ -506,6 +524,7 @@ class Commit:
     modified: List[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.tree_id = payload.get("tree_id")
         self.distinct = payload.get("distinct")
@@ -520,6 +539,7 @@ class Commit:
 
 
 class CheckSuite:
+    _payload: dict
     id: int
     node_id: str
     head_branch: str
@@ -538,6 +558,7 @@ class CheckSuite:
     head_commit: Optional[Commit]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.head_branch = payload.get("head_branch")
@@ -559,6 +580,7 @@ class CheckSuite:
 
 
 class CheckRunOutput:
+    _payload: dict
     title: Optional[str]
     summary: Optional[str]
     text: Optional[str]
@@ -566,6 +588,7 @@ class CheckRunOutput:
     annotations_url: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.title = payload.get("title")
         self.summary = payload.get("summary")
         self.text = payload.get("text")
@@ -574,6 +597,7 @@ class CheckRunOutput:
 
 
 class CheckRun:
+    _payload: dict
     id: int
     node_id: str
     head_sha: str
@@ -592,6 +616,7 @@ class CheckRun:
     pull_requests: List[ChecksPullRequest]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.head_sha = payload.get("head_sha")
@@ -613,15 +638,18 @@ class CheckRun:
 
 
 class ShortInstallation:
+    _payload: dict
     id: int
     node_id: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
 
 
 class Installation:
+    _payload: dict
     id: int
     node_id: Optional[str]
     account: User
@@ -639,6 +667,7 @@ class Installation:
     target_type: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id", None)
         self.account = _optional(payload, "account", User)
@@ -657,6 +686,7 @@ class Installation:
 
 
 class DeployKey:
+    _payload: dict
     id: int
     key: str
     url: str
@@ -666,6 +696,7 @@ class DeployKey:
     read_only: bool
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.key = payload.get("key")
         self.url = payload.get("url")
@@ -676,6 +707,7 @@ class DeployKey:
 
 
 class Deployment:
+    _payload: dict
     url: str
     id: int
     node_id: str
@@ -693,6 +725,7 @@ class Deployment:
     repository_url: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
@@ -711,6 +744,7 @@ class Deployment:
 
 
 class DeploymentStatus:
+    _payload: dict
     url: str
     id: int
     node_id: str
@@ -725,6 +759,7 @@ class DeploymentStatus:
     repository_url: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
@@ -740,6 +775,7 @@ class DeploymentStatus:
 
 
 class Page:
+    _payload: dict
     page_name: str
     title: str
     summary: str
@@ -748,6 +784,7 @@ class Page:
     html_url: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.page_name = payload.get("page_name")
         self.title = payload.get("title")
         self.summary = payload.get("summary")
@@ -757,6 +794,7 @@ class Page:
 
 
 class Label:
+    _payload: dict
     id: int
     node_id: str
     url: str
@@ -766,6 +804,7 @@ class Label:
     default: bool
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.url = payload.get("url")
@@ -776,6 +815,7 @@ class Label:
 
 
 class Milestone:
+    _payload: dict
     url: str
     html_url: str
     labels_url: str
@@ -794,6 +834,7 @@ class Milestone:
     closed_at: Optional[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.html_url = payload.get("html_url")
         self.labels_url = payload.get("labels_url")
@@ -813,6 +854,7 @@ class Milestone:
 
 
 class Issue:
+    _payload: dict
     url: str
     repository_url: str
     comments_url: str
@@ -866,12 +908,14 @@ class Issue:
 
 
 class PurchaseAccount:
+    _payload: dict
     type: str
     id: int
     login: str
     organization_billing_email: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.type = payload.get("type")
         self.id = payload.get("id")
         self.login = payload.get("login")
@@ -879,6 +923,7 @@ class PurchaseAccount:
 
 
 class Plan:
+    _payload: dict
     id: int
     name: str
     description: str
@@ -891,6 +936,7 @@ class Plan:
     bullets: List[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.name = payload.get("name")
         self.description = payload.get("description")
@@ -904,6 +950,7 @@ class Plan:
 
 
 class MarketplacePurchase:
+    _payload: dict
     account: PurchaseAccount
     billing_cycle: str
     unit_count: int
@@ -913,6 +960,7 @@ class MarketplacePurchase:
     plan: Plan
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.account = PurchaseAccount(payload.get("account"))
         self.billing_cycle = payload.get("billing_cycle")
         self.unit_count = payload.get("unit_count")
@@ -923,6 +971,7 @@ class MarketplacePurchase:
 
 
 class Team:
+    _payload: dict
     name: str
     id: int
     node_id: str
@@ -952,6 +1001,7 @@ class Team:
 
 
 class Hook:
+    _payload: dict
     type: str
     id: int
     name: str
@@ -962,6 +1012,7 @@ class Hook:
     created_at: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.type = payload.get("type")
         self.id = payload.get("id")
         self.name = payload.get("name")
@@ -973,6 +1024,7 @@ class Hook:
 
 
 class Membership:
+    _payload: dict
     url: str
     state: str
     role: str
@@ -980,6 +1032,7 @@ class Membership:
     user: User
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.state = payload.get("state")
         self.role = payload.get("role")
@@ -988,6 +1041,7 @@ class Membership:
 
 
 class Asset:
+    _payload: dict
     url: str
     id: str
     node_id: str
@@ -1003,6 +1057,7 @@ class Asset:
     browser_download_url: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
@@ -1019,6 +1074,7 @@ class Asset:
 
 
 class Release:
+    _payload: dict
     url: str
     assets_url: Optional[str]
     upload_url: Optional[str]
@@ -1039,6 +1095,7 @@ class Release:
     body: Optional[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.assets_url = payload.get("assets_url", None)
         self.upload_url = payload.get("upload_url", None)
@@ -1060,6 +1117,7 @@ class Release:
 
 
 class PackageFile:
+    _payload: dict
     download_url: str
     id: str
     name: str
@@ -1073,6 +1131,7 @@ class PackageFile:
     updated_at: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.download_url = payload.get("download_url")
         self.id = payload.get("id")
         self.name = payload.get("name")
@@ -1087,6 +1146,7 @@ class PackageFile:
 
 
 class PackageVersion:
+    _payload: dict
     id: int
     version: str
     summary: str
@@ -1108,6 +1168,7 @@ class PackageVersion:
     installation_command: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.version = payload.get("version")
         self.summary = payload.get("summary")
@@ -1132,6 +1193,7 @@ class PackageVersion:
 
 
 class Registry:
+    _payload: dict
     about_url: str
     name: str
     type: str
@@ -1139,6 +1201,7 @@ class Registry:
     vendor: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.about_url = payload.get("about_url")
         self.name = payload.get("name")
         self.type = payload.get("type")
@@ -1147,6 +1210,7 @@ class Registry:
 
 
 class Package:
+    _payload: dict
     id: int
     name: str
     package_type: str
@@ -1158,6 +1222,7 @@ class Package:
     registry: Registry
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.name = payload.get("name")
         self.package_type = payload.get("package_type")
@@ -1170,6 +1235,7 @@ class Package:
 
 
 class PageBuild:
+    _payload: dict
     url: str
     status: str
     error: RawDict
@@ -1180,6 +1246,7 @@ class PageBuild:
     updated_at: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.status = payload.get("status")
         self.error = RawDict(payload.get("error"))
@@ -1191,6 +1258,7 @@ class PageBuild:
 
 
 class ProjectCard:
+    _payload: dict
     url: str
     project_url: str
     column_url: str
@@ -1206,6 +1274,7 @@ class ProjectCard:
     content_url: Optional[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.project_url = payload.get("project_url")
         self.column_url = payload.get("column_url")
@@ -1222,6 +1291,7 @@ class ProjectCard:
 
 
 class ProjectColumn:
+    _payload: dict
     url: str
     project_url: str
     cards_url: str
@@ -1233,6 +1303,7 @@ class ProjectColumn:
     after_id: Optional[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
         self.project_url = payload.get("project_url")
         self.cards_url = payload.get("cards_url")
@@ -1245,6 +1316,7 @@ class ProjectColumn:
 
 
 class Project:
+    _payload: dict
     owner_url: str
     url: str
     html_url: str
@@ -1260,6 +1332,7 @@ class Project:
     updated_at: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.owner_url = payload.get("owner_url")
         self.url = payload.get("url")
         self.html_url = payload.get("html_url")
@@ -1276,6 +1349,7 @@ class Project:
 
 
 class Ref:
+    _payload: dict
     label: str
     ref: str
     sha: str
@@ -1283,6 +1357,7 @@ class Ref:
     repo: Repository
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.label = payload.get("label")
         self.ref = payload.get("ref")
         self.sha = payload.get("sha")
@@ -1291,6 +1366,7 @@ class Ref:
 
 
 class PullRequest:
+    _payload: dict
     url: str
     id: int
     node_id: str
@@ -1392,6 +1468,7 @@ class PullRequest:
 
 
 class Review:
+    _payload: dict
     id: int
     node_id: str
     user: User
@@ -1405,6 +1482,7 @@ class Review:
     _links: RawDict
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.user = User(payload.get("user"))
@@ -1419,6 +1497,7 @@ class Review:
 
 
 class VulnerabilityAlert:
+    _payload: dict
     id: int
     affected_range: str
     affected_package_name: str
@@ -1427,6 +1506,7 @@ class VulnerabilityAlert:
     fixed_in: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.affected_range = payload.get("affected_range")
         self.affected_package_name = payload.get("affected_package_name")
@@ -1436,28 +1516,34 @@ class VulnerabilityAlert:
 
 
 class VulnerablePackage:
+    _payload: dict
     ecosystem: str
     name: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.ecosystem = payload.get("ecosystem")
         self.name = payload.get("name")
 
 
 class PackageVersionInfo:
+    _payload: dict
     identifier: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.identifier = payload.get("identifier")
 
 
 class Vulnerability:
+    _payload: dict
     package: VulnerablePackage
     severity: str
     vulnerable_version_range: str
     first_patched_version: PackageVersionInfo
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.package = VulnerablePackage(payload.get("package"))
         self.severity = payload.get("severity")
         self.vulnerable_version_range = payload.get("vulnerable_version_range")
@@ -1467,22 +1553,27 @@ class Vulnerability:
 
 
 class SecurityVulnerabilityIdentifier:
+    _payload: dict
     value: str
     type: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.value: str = payload.get("value")
         self.type: str = payload.get("type")
 
 
 class SecurityAdvisoryReference:
+    _payload: dict
     url: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.url = payload.get("url")
 
 
 class SecurityAdvisory:
+    _payload: dict
     ghsa_id: str
     summary: str
     description: str
@@ -1495,6 +1586,7 @@ class SecurityAdvisory:
     vulnerabilities: List[Vulnerability]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.ghsa_id = payload.get("ghsa_id")
         self.summary = payload.get("summary")
         self.description = payload.get("description")
@@ -1516,6 +1608,7 @@ class SecurityAdvisory:
 
 
 class SponsorshipTier:
+    _payload: dict
     node_id: str
     created_at: str
     description: str
@@ -1524,6 +1617,7 @@ class SponsorshipTier:
     name: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.node_id = payload.get("node_id")
         self.created_at = payload.get("created_at")
         self.description = payload.get("description")
@@ -1533,6 +1627,7 @@ class SponsorshipTier:
 
 
 class Sponsorship:
+    _payload: dict
     node_id: str
     created_at: str
     maintainer: User
@@ -1541,6 +1636,7 @@ class Sponsorship:
     tier: SponsorshipTier
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.node_id = payload.get("node_id")
         self.created_at = payload.get("created_at")
         self.maintainer = User(payload.get("maintainer"))
@@ -1550,34 +1646,40 @@ class Sponsorship:
 
 
 class StatusBranchCommit:
+    _payload: dict
     sha: str
     url: str
     html_url: Optional[str]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.sha = payload.get("sha")
         self.url = payload.get("url")
         self.html_url = payload.get("html_url", None)
 
 
 class Branch:
+    _payload: dict
     name: str
     commit: StatusBranchCommit
     protected: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.name = payload.get("name")
         self.commit = StatusBranchCommit(payload.get("commit"))
         self.protected = payload.get("protected")
 
 
 class StatusCommitVerification:
+    _payload: dict
     verified: bool
     reason: str
     signature: str
     payload: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.verified = payload.get("verified")
         self.reason = payload.get("reason")
         self.signature = payload.get("signature")
@@ -1585,17 +1687,20 @@ class StatusCommitVerification:
 
 
 class StatusNestedCommitUser:
+    _payload: dict
     name: str
     email: str
     date: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.name = payload.get("name")
         self.email = payload.get("email")
         self.date = payload.get("date")
 
 
 class StatusNestedCommit:
+    _payload: dict
     author: StatusNestedCommitUser
     committer: StatusNestedCommitUser
     message: str
@@ -1605,6 +1710,7 @@ class StatusNestedCommit:
     verification: StatusCommitVerification
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.author = StatusNestedCommitUser(payload.get("author"))
         self.committer = StatusNestedCommitUser(payload.get("committer"))
         self.message = payload.get("message")
@@ -1615,6 +1721,7 @@ class StatusNestedCommit:
 
 
 class StatusCommit:
+    _payload: dict
     sha: str
     node_id: str
     commit: StatusNestedCommit
@@ -1626,6 +1733,7 @@ class StatusCommit:
     parents: List[StatusBranchCommit]
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.sha = payload.get("sha")
         self.node_id = payload.get("node_id")
         self.commit = StatusNestedCommit(payload.get("commit"))
@@ -1638,11 +1746,13 @@ class StatusCommit:
 
 
 class ContentReference:
+    _payload: dict
     id: int
     node_id: str
     reference: str
 
     def __init__(self, payload: dict):
+        self._payload = payload
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.reference = payload.get("reference")

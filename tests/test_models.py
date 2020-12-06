@@ -155,7 +155,10 @@ def check_type_hints(obj):
     primitives = [str, int, type(None), bool, RawDict]
     hints = get_type_hints(type(obj))
 
+    assert "_payload" in hints.keys()
     for attr, type_hint in hints.items():
+        if attr == "_payload":
+            continue
         obj_value = getattr(obj, attr)
 
         try:
