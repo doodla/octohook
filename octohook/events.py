@@ -45,7 +45,7 @@ from octohook.models import (
 
 
 class BaseWebhookEvent:
-    _payload: dict
+    payload: dict
     action: Optional[str] = None
     sender: User
     repository: Optional[Repository] = None
@@ -53,7 +53,7 @@ class BaseWebhookEvent:
     enterprise: Optional[Enterprise] = None
 
     def __init__(self, payload: dict):
-        self._payload = payload
+        self.payload = payload
         self.action = payload.get("action")
         self.sender = User(payload.get("sender"))
 
@@ -652,12 +652,12 @@ class SecurityAdvisoryEvent:
     https://developer.github.com/v3/activity/events/types/#securityadvisoryevent
     """
 
-    _payload: dict
+    payload: dict
     action: str
     security_advisory: SecurityAdvisory
 
     def __init__(self, payload: dict):
-        self._payload = payload
+        self.payload = payload
         self.action = payload.get("action")
         self.security_advisory = SecurityAdvisory(payload.get("security_advisory"))
 
