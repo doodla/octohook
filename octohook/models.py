@@ -813,6 +813,15 @@ class Label:
         self.description = payload.get("description")
         self.default = payload.get("default")
 
+    def __eq__(self, other):
+        return self.name == other
+
+    def __repr__(self):
+        return f"{self.name}(#{self.color})"
+
+    def __str__(self):
+        return self.name
+
 
 class Milestone:
     payload: dict
