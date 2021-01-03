@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import TypeVar, Optional, Type, List, Any
 
 T = TypeVar("T")
@@ -26,7 +27,15 @@ def _transform(url: str, local_variables: dict) -> str:
     return url
 
 
-class Enterprise:
+class BaseGithubModel(ABC):
+    def __new__(cls, *args, **kwargs):
+        from octohook import model_overrides
+
+        cls = model_overrides.get(cls) or cls
+        return object.__new__(cls)
+
+
+class Enterprise(BaseGithubModel):
     payload: dict
     id: int
     slug: str
@@ -56,7 +65,7 @@ class Enterprise:
         return self.name
 
 
-class User:
+class User(BaseGithubModel):
     payload: dict
     name: Optional[str]
     login: str
@@ -112,7 +121,7 @@ class User:
         return self.login
 
 
-class ShortRepository:
+class ShortRepository(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -137,7 +146,7 @@ class RawDict(dict):
         super().__init__(payload)
 
 
-class Permissions:
+class Permissions(BaseGithubModel):
     payload: dict
     metadata: str
     contents: str
@@ -188,7 +197,7 @@ class Permissions:
         self.team_discussions = payload.get("team_discussions")
 
 
-class Repository:
+class Repository(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -381,7 +390,7 @@ class Repository:
         return self.full_name
 
 
-class Organization:
+class Organization(BaseGithubModel):
     payload: dict
     login: str
     id: int
@@ -419,7 +428,7 @@ class Organization:
         return self.login
 
 
-class Comment:
+class Comment(BaseGithubModel):
     payload: dict
     url: str
     html_url: str
@@ -468,7 +477,7 @@ class Comment:
         return self.body
 
 
-class ChecksApp:
+class ChecksApp(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -497,7 +506,7 @@ class ChecksApp:
         self.events = payload.get("events")
 
 
-class ChecksPullRequest:
+class ChecksPullRequest(BaseGithubModel):
     payload: dict
     url: str
     id: int
@@ -514,7 +523,7 @@ class ChecksPullRequest:
         self.base = RawDict(payload.get("base"))
 
 
-class CommitUser:
+class CommitUser(BaseGithubModel):
     payload: dict
     name: str
     email: str
@@ -527,7 +536,7 @@ class CommitUser:
         self.username = payload.get("username")
 
 
-class Commit:
+class Commit(BaseGithubModel):
     payload: dict
     id: str
     tree_id: str
@@ -556,7 +565,7 @@ class Commit:
         self.modified = payload.get("modified")
 
 
-class CheckSuite:
+class CheckSuite(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -597,7 +606,7 @@ class CheckSuite:
         self.head_commit = _optional(payload, "head_commit", Commit)
 
 
-class CheckRunOutput:
+class CheckRunOutput(BaseGithubModel):
     payload: dict
     title: Optional[str]
     summary: Optional[str]
@@ -614,7 +623,7 @@ class CheckRunOutput:
         self.annotations_url = payload.get("annotations_url")
 
 
-class CheckRun:
+class CheckRun(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -655,7 +664,7 @@ class CheckRun:
         ]
 
 
-class ShortInstallation:
+class ShortInstallation(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -666,7 +675,7 @@ class ShortInstallation:
         self.node_id = payload.get("node_id")
 
 
-class Installation:
+class Installation(BaseGithubModel):
     payload: dict
     id: int
     node_id: Optional[str]
@@ -703,7 +712,7 @@ class Installation:
         self.target_type = payload.get("target_type")
 
 
-class DeployKey:
+class DeployKey(BaseGithubModel):
     payload: dict
     id: int
     key: str
@@ -724,7 +733,7 @@ class DeployKey:
         self.read_only = payload.get("read_only")
 
 
-class Deployment:
+class Deployment(BaseGithubModel):
     payload: dict
     url: str
     id: int
@@ -761,7 +770,7 @@ class Deployment:
         self.repository_url = payload.get("repository_url")
 
 
-class DeploymentStatus:
+class DeploymentStatus(BaseGithubModel):
     payload: dict
     url: str
     id: int
@@ -792,7 +801,7 @@ class DeploymentStatus:
         self.repository_url = payload.get("repository_url")
 
 
-class Page:
+class Page(BaseGithubModel):
     payload: dict
     page_name: str
     title: str
@@ -811,7 +820,7 @@ class Page:
         self.html_url = payload.get("html_url")
 
 
-class Label:
+class Label(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -841,7 +850,7 @@ class Label:
         return self.name
 
 
-class Milestone:
+class Milestone(BaseGithubModel):
     payload: dict
     url: str
     html_url: str
@@ -880,7 +889,7 @@ class Milestone:
         self.closed_at = payload.get("closed_at")
 
 
-class Issue:
+class Issue(BaseGithubModel):
     payload: dict
     url: str
     repository_url: str
@@ -934,7 +943,7 @@ class Issue:
         return _transform(self.payload["labels_url"], locals())
 
 
-class PurchaseAccount:
+class PurchaseAccount(BaseGithubModel):
     payload: dict
     type: str
     id: int
@@ -949,7 +958,7 @@ class PurchaseAccount:
         self.organization_billing_email = payload.get("organization_billing_email")
 
 
-class Plan:
+class Plan(BaseGithubModel):
     payload: dict
     id: int
     name: str
@@ -976,7 +985,7 @@ class Plan:
         self.bullets = payload.get("bullets")
 
 
-class MarketplacePurchase:
+class MarketplacePurchase(BaseGithubModel):
     payload: dict
     account: PurchaseAccount
     billing_cycle: str
@@ -997,7 +1006,7 @@ class MarketplacePurchase:
         self.plan = Plan(payload.get("plan"))
 
 
-class Team:
+class Team(BaseGithubModel):
     payload: dict
     name: str
     id: int
@@ -1027,7 +1036,7 @@ class Team:
         return _transform(self.payload["members_url"], locals())
 
 
-class Hook:
+class Hook(BaseGithubModel):
     payload: dict
     type: str
     id: int
@@ -1050,7 +1059,7 @@ class Hook:
         self.created_at = payload.get("created_at")
 
 
-class Membership:
+class Membership(BaseGithubModel):
     payload: dict
     url: str
     state: str
@@ -1067,7 +1076,7 @@ class Membership:
         self.user = User(payload.get("user"))
 
 
-class Asset:
+class Asset(BaseGithubModel):
     payload: dict
     url: str
     id: str
@@ -1100,7 +1109,7 @@ class Asset:
         self.browser_download_url = payload.get("browser_download_url")
 
 
-class Release:
+class Release(BaseGithubModel):
     payload: dict
     url: str
     assets_url: Optional[str]
@@ -1143,7 +1152,7 @@ class Release:
         self.body = payload.get("body", None)
 
 
-class PackageFile:
+class PackageFile(BaseGithubModel):
     payload: dict
     download_url: str
     id: str
@@ -1172,7 +1181,7 @@ class PackageFile:
         self.updated_at = payload.get("updated_at")
 
 
-class PackageVersion:
+class PackageVersion(BaseGithubModel):
     payload: dict
     id: int
     version: str
@@ -1219,7 +1228,7 @@ class PackageVersion:
         self.installation_command = payload.get("installation_command")
 
 
-class Registry:
+class Registry(BaseGithubModel):
     payload: dict
     about_url: str
     name: str
@@ -1236,7 +1245,7 @@ class Registry:
         self.vendor = payload.get("vendor")
 
 
-class Package:
+class Package(BaseGithubModel):
     payload: dict
     id: int
     name: str
@@ -1261,7 +1270,7 @@ class Package:
         self.registry = Registry(payload.get("registry"))
 
 
-class PageBuild:
+class PageBuild(BaseGithubModel):
     payload: dict
     url: str
     status: str
@@ -1284,7 +1293,7 @@ class PageBuild:
         self.updated_at = payload.get("updated_at")
 
 
-class ProjectCard:
+class ProjectCard(BaseGithubModel):
     payload: dict
     url: str
     project_url: str
@@ -1317,7 +1326,7 @@ class ProjectCard:
         self.content_url = payload.get("content_url")
 
 
-class ProjectColumn:
+class ProjectColumn(BaseGithubModel):
     payload: dict
     url: str
     project_url: str
@@ -1342,7 +1351,7 @@ class ProjectColumn:
         self.after_id = payload.get("after_id")
 
 
-class Project:
+class Project(BaseGithubModel):
     payload: dict
     owner_url: str
     url: str
@@ -1375,7 +1384,7 @@ class Project:
         self.updated_at = payload.get("updated_at")
 
 
-class Ref:
+class Ref(BaseGithubModel):
     payload: dict
     label: str
     ref: str
@@ -1392,7 +1401,7 @@ class Ref:
         self.repo = Repository(payload.get("repo"))
 
 
-class PullRequest:
+class PullRequest(BaseGithubModel):
     payload: dict
     url: str
     id: int
@@ -1497,7 +1506,7 @@ class PullRequest:
         return f"#{self.number} {self.title}"
 
 
-class Review:
+class Review(BaseGithubModel):
     payload: dict
     id: int
     node_id: str
@@ -1526,7 +1535,7 @@ class Review:
         self._links = RawDict(payload.get("_links"))
 
 
-class VulnerabilityAlert:
+class VulnerabilityAlert(BaseGithubModel):
     payload: dict
     id: int
     affected_range: str
@@ -1545,7 +1554,7 @@ class VulnerabilityAlert:
         self.fixed_in = payload.get("fixed_in")
 
 
-class VulnerablePackage:
+class VulnerablePackage(BaseGithubModel):
     payload: dict
     ecosystem: str
     name: str
@@ -1556,7 +1565,7 @@ class VulnerablePackage:
         self.name = payload.get("name")
 
 
-class PackageVersionInfo:
+class PackageVersionInfo(BaseGithubModel):
     payload: dict
     identifier: str
 
@@ -1565,7 +1574,7 @@ class PackageVersionInfo:
         self.identifier = payload.get("identifier")
 
 
-class Vulnerability:
+class Vulnerability(BaseGithubModel):
     payload: dict
     package: VulnerablePackage
     severity: str
@@ -1582,7 +1591,7 @@ class Vulnerability:
         )
 
 
-class SecurityVulnerabilityIdentifier:
+class SecurityVulnerabilityIdentifier(BaseGithubModel):
     payload: dict
     value: str
     type: str
@@ -1593,7 +1602,7 @@ class SecurityVulnerabilityIdentifier:
         self.type: str = payload.get("type")
 
 
-class SecurityAdvisoryReference:
+class SecurityAdvisoryReference(BaseGithubModel):
     payload: dict
     url: str
 
@@ -1602,7 +1611,7 @@ class SecurityAdvisoryReference:
         self.url = payload.get("url")
 
 
-class SecurityAdvisory:
+class SecurityAdvisory(BaseGithubModel):
     payload: dict
     ghsa_id: str
     summary: str
@@ -1637,7 +1646,7 @@ class SecurityAdvisory:
         ]
 
 
-class SponsorshipTier:
+class SponsorshipTier(BaseGithubModel):
     payload: dict
     node_id: str
     created_at: str
@@ -1656,7 +1665,7 @@ class SponsorshipTier:
         self.name = payload.get("name")
 
 
-class Sponsorship:
+class Sponsorship(BaseGithubModel):
     payload: dict
     node_id: str
     created_at: str
@@ -1675,7 +1684,7 @@ class Sponsorship:
         self.tier = SponsorshipTier(payload.get("tier"))
 
 
-class StatusBranchCommit:
+class StatusBranchCommit(BaseGithubModel):
     payload: dict
     sha: str
     url: str
@@ -1688,7 +1697,7 @@ class StatusBranchCommit:
         self.html_url = payload.get("html_url", None)
 
 
-class Branch:
+class Branch(BaseGithubModel):
     payload: dict
     name: str
     commit: StatusBranchCommit
@@ -1701,7 +1710,7 @@ class Branch:
         self.protected = payload.get("protected")
 
 
-class StatusCommitVerification:
+class StatusCommitVerification(BaseGithubModel):
     payload: dict
     verified: bool
     reason: str
@@ -1716,7 +1725,7 @@ class StatusCommitVerification:
         self.payload = payload.get("payload")
 
 
-class StatusNestedCommitUser:
+class StatusNestedCommitUser(BaseGithubModel):
     payload: dict
     name: str
     email: str
@@ -1729,7 +1738,7 @@ class StatusNestedCommitUser:
         self.date = payload.get("date")
 
 
-class StatusNestedCommit:
+class StatusNestedCommit(BaseGithubModel):
     payload: dict
     author: StatusNestedCommitUser
     committer: StatusNestedCommitUser
@@ -1750,7 +1759,7 @@ class StatusNestedCommit:
         self.verification = StatusCommitVerification(payload.get("verification"))
 
 
-class StatusCommit:
+class StatusCommit(BaseGithubModel):
     payload: dict
     sha: str
     node_id: str
@@ -1775,7 +1784,7 @@ class StatusCommit:
         self.parents = [StatusBranchCommit(parent) for parent in payload.get("parents")]
 
 
-class ContentReference:
+class ContentReference(BaseGithubModel):
     payload: dict
     id: int
     node_id: str

@@ -5,7 +5,8 @@ from contextlib import redirect_stdout
 import pytest
 
 import octohook.decorators
-from octohook.decorators import load_hooks, _WebhookDecorator
+from octohook import load_hooks
+from octohook.decorators import _WebhookDecorator
 from octohook.events import WebhookEvent, WebhookEventAction
 
 ANY_REPO = "*"
@@ -13,7 +14,7 @@ ANY_ACTION = "*"
 
 
 def setup_function():
-    octohook.decorators._loaded = False
+    octohook._loaded = False
 
 
 def test_load_hooks_calls_hook(mocker):
