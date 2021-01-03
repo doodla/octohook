@@ -52,6 +52,9 @@ class Enterprise:
         self.created_at = payload.get("created_at")
         self.updated_at = payload.get("updated_at")
 
+    def __str__(self):
+        return self.name
+
 
 class User:
     payload: dict
@@ -105,6 +108,9 @@ class User:
     def events_url(self, privacy: str = None) -> str:
         return _transform(self.payload["events_url"], locals())
 
+    def __str__(self):
+        return self.login
+
 
 class ShortRepository:
     payload: dict
@@ -121,6 +127,9 @@ class ShortRepository:
         self.name = payload.get("name")
         self.full_name = payload.get("full_name")
         self.private = payload.get("private")
+
+    def __str__(self):
+        return self.full_name
 
 
 class RawDict(dict):
@@ -368,6 +377,9 @@ class Repository:
     def releases_url(self, id: str = None) -> str:
         return _transform(self.payload["releases_url"], locals())
 
+    def __str__(self):
+        return self.full_name
+
 
 class Organization:
     payload: dict
@@ -402,6 +414,9 @@ class Organization:
 
     def public_members_url(self, member: str = None) -> str:
         return _transform(self.payload["public_members_url"], locals())
+
+    def __str__(self):
+        return self.login
 
 
 class Comment:
@@ -448,6 +463,9 @@ class Comment:
         self.author_association = payload.get("author_association")
         self.body = payload.get("body")
         self._links = _optional(payload, "_links", RawDict)
+
+    def __str__(self):
+        return self.body
 
 
 class ChecksApp:
@@ -1474,6 +1492,9 @@ class PullRequest:
 
     def review_comment_url(self, number: int = None) -> str:
         return _transform(self.payload["review_comment_url"], locals())
+
+    def __str__(self):
+        return f"#{self.number} {self.title}"
 
 
 class Review:
