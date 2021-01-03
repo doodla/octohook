@@ -8,6 +8,9 @@ import octohook.decorators
 from octohook.decorators import load_hooks, _WebhookDecorator
 from octohook.events import WebhookEvent, WebhookEventAction
 
+ANY_REPO = "*"
+ANY_ACTION = "*"
+
 
 def setup_function():
     octohook.decorators._loaded = False
@@ -18,7 +21,7 @@ def test_load_hooks_calls_hook(mocker):
 
     load_hooks(["tests/hooks"])
 
-    assert mock.call_count == 20
+    assert mock.call_count == 22
 
 
 def test_load_hooks_parses_properly(mocker):
@@ -36,17 +39,19 @@ def test_load_hooks_parses_properly(mocker):
 
     # LabelEvent
     assert len(label) == 5  # (*, created, edited, deleted and debug)
-    assert len(label["*"]) == 6
-    assert len(label[WebhookEventAction.CREATED]) == 4
-    assert len(label[WebhookEventAction.EDITED]) == 6
-    assert len(label[WebhookEventAction.DELETED]) == 4
+    assert len(label[ANY_ACTION][ANY_REPO]) == 6
+    assert len(label[WebhookEventAction.CREATED][ANY_REPO]) == 4
+    assert len(label[WebhookEventAction.EDITED][ANY_REPO]) == 6
+    assert len(label[WebhookEventAction.DELETED][ANY_REPO]) == 4
 
     # PullRequestReviewEvent
     assert len(review) == 4
-    assert len(review["*"]) == 2
-    assert len(review[WebhookEventAction.SUBMITTED]) == 4
-    assert len(review[WebhookEventAction.EDITED]) == 3
-    assert len(review[WebhookEventAction.DISMISSED]) == 3
+    assert len(review[ANY_ACTION][ANY_REPO]) == 2
+    assert len(review[WebhookEventAction.SUBMITTED][ANY_REPO]) == 4
+    assert len(review[WebhookEventAction.EDITED][ANY_REPO]) == 3
+    assert len(review[WebhookEventAction.DISMISSED][ANY_REPO]) == 3
+    assert len(review[WebhookEventAction.DISMISSED]["doodla/octohook-playground"]) == 1
+    assert len(review[WebhookEventAction.SUBMITTED]["doodla/octohook-playground2"]) == 1
 
 
 def test_calling_load_hooks_multiple_times_raises_error(mocker):
@@ -191,6 +196,7 @@ def test_debug_hooks_are_handled(mocker):
             "inner review d",
             "review a",
             "review d",
+            "repo a",
         },
     }
     with open("tests/fixtures/complete/pull_request_review.json") as f:

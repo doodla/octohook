@@ -64,10 +64,14 @@ def webhook():
 ### @hook
 Alternatively, you can also let `octohook` do the heavy lifting of finding and executing the appropriate handlers for any given webhook.
 
-The `@hook` decorator takes in three parameters, the `WebhookEvent`, a list of `WebhookEventAction`s and a `debug` flag (defaults to `False`). 
+The `@hook` decorator takes in four parameters, the `WebhookEvent`, a list of `WebhookEventAction`s, an optional list of repositories and a `debug` flag (defaults to `False`). 
 
 Any function this decorator is applied to is invoked whenever you receive an event with the specified `WebhookEvent` and a listed `WebhookEventAction`.
 
+If present, the hook can be filtered for one or more repositories in a multi-repository set up.
+```
+Note: The "full_name" of the repositories are used. Ex: "doodla/octohook"
+```
 If you set `debug=True` on any `@hook`, only those hooks fire for the corresponding webhook event.
 
 ```python
