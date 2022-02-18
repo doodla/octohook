@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="octohook",
-    version="0.7.0",
+    version="0.8.0",
     author="Sridhar Vadlamani",
     author_email="v.sridhar.sreenivas@gmail.com",
     description="Typed interactions with Github Webhooks",
