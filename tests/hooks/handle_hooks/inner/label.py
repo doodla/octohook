@@ -23,7 +23,9 @@ def c(event: LabelEvent):
     assert isinstance(event, LabelEvent)
 
 
-@hook(WebhookEvent.LABEL,)
+@hook(
+    WebhookEvent.LABEL,
+)
 def d(event: LabelEvent):
     print("inner label d")
     assert isinstance(event, LabelEvent)

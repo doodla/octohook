@@ -1,8 +1,7 @@
 import io
 import json
+import sys
 from contextlib import redirect_stdout
-
-import pytest
 
 import octohook.decorators
 from octohook import load_hooks
@@ -14,13 +13,25 @@ ANY_ACTION = "*"
 
 
 def setup_function():
+    octohook._imported_modules = []
+
+
+def teardown_function():
     octohook._loaded = False
+
+    for module in octohook._imported_modules:
+        try:
+            sys.modules.pop(module)
+        except KeyError:
+            pass
+
+    octohook._imported_modules = list()
 
 
 def test_load_hooks_calls_hook(mocker):
     mock = mocker.patch("octohook.decorators.hook")
 
-    load_hooks(["tests/hooks"])
+    load_hooks(["tests.hooks"])
 
     assert mock.call_count == 22
 
@@ -29,7 +40,7 @@ def test_load_hooks_parses_properly(mocker):
     decorator = _WebhookDecorator()
     mocker.patch("octohook.decorators.hook", side_effect=decorator.webhook)
 
-    load_hooks(["tests/hooks"])
+    load_hooks(["tests.hooks"])
 
     handlers = decorator.handlers
 
@@ -55,22 +66,21 @@ def test_load_hooks_parses_properly(mocker):
     assert len(review[WebhookEventAction.SUBMITTED]["doodla/octohook-playground2"]) == 1
 
 
-def test_calling_load_hooks_multiple_times_raises_error(mocker):
-    mocker.patch("octohook.decorators.hook")
+def test_calling_load_hooks_multiple_times_does_not_have_side_effects(mocker):
+    mock = mocker.patch("octohook.decorators.hook")
 
-    load_hooks(["tests/hooks"])
+    load_hooks(["tests.hooks"])
+    load_hooks(["tests.hooks"])
+    load_hooks(["tests.hooks"])
 
-    with pytest.raises(RuntimeError) as excinfo:
-        load_hooks(["tests/hooks"])
-
-    assert "load_hooks should only be called once" in str(excinfo.value)
+    assert mock.call_count == 22
 
 
 def test_handle_hooks(mocker):
     decorator = _WebhookDecorator()
     mocker.patch("octohook.decorators.hook", side_effect=decorator.webhook)
 
-    load_hooks(["tests/hooks/handle_hooks"])
+    load_hooks(["tests.hooks.handle_hooks"])
 
     assertions = {
         WebhookEvent.LABEL: {
@@ -159,7 +169,7 @@ def test_debug_hooks_are_handled(mocker):
     decorator = _WebhookDecorator()
     mocker.patch("octohook.decorators.hook", side_effect=decorator.webhook)
 
-    load_hooks(["tests/hooks/"])
+    load_hooks(["tests.hooks"])
 
     # LabelEvent has `debug=True`. Only debug hooks should be fired.
     with open("tests/fixtures/complete/label.json") as f:

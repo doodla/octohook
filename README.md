@@ -116,14 +116,6 @@ def webhook():
     return Response("OK", status=200)
 ```
 
-**Note**
-
-`load_hooks` can only be called once and raises a `RuntimeError` if called multiple times. This is because every time it parses a given module structure, it creates new instances of the functions. So if you parse them multiple times, your handlers will get invoked multiple times.
-```python
-load_hooks(['module_a','module_b','path_a'])
-load_hooks(['path_a']) # RuntimeError
-``` 
-
 `handle_hooks` goes through all the handlers sequentially and blocks till everything is done. Any exceptions are logged to `logging.getLogger('octohook')`. You can configure the output stream of this logger to capture the logs.
 
 ### Model Overrides

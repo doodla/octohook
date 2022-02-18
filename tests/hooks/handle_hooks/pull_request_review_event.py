@@ -30,3 +30,10 @@ def c(event: PullRequestReviewEvent):
 def d(event: PullRequestReviewEvent):
     print("review d")
     assert isinstance(event, PullRequestReviewEvent)
+
+
+def some_function():
+    pass
+
+
+some_function()

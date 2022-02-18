@@ -1,5 +1,6 @@
 from octohook.decorators import hook
 from octohook.events import WebhookEvent, WebhookEventAction, LabelEvent
+from tests.hooks.handle_hooks.pull_request_review_event import some_function
 
 
 @hook(WebhookEvent.LABEL, [WebhookEventAction.CREATED, WebhookEventAction.EDITED])
@@ -23,7 +24,12 @@ def c(event: LabelEvent):
     assert isinstance(event, LabelEvent)
 
 
-@hook(WebhookEvent.LABEL,)
+@hook(
+    WebhookEvent.LABEL,
+)
 def d(event: LabelEvent):
     print("label d")
     assert isinstance(event, LabelEvent)
+
+
+some_function()
