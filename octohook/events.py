@@ -552,6 +552,22 @@ class PullRequestReviewCommentEvent(BaseWebhookEvent):
         self.changes = _optional(payload, "changes", RawDict)
 
 
+class PullRequestReviewThreadEvent(BaseWebhookEvent):
+    """
+    https://developer.github.com/v3/activity/events/types/#pullrequestreviewthreadevent
+    """
+
+    comment: Comment
+    pull_request: PullRequest
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
+        super().__init__(payload)
+        self.comment = Comment(payload.get("comment"))
+        self.pull_request = PullRequest(payload.get("pull_request"))
+        self.changes = _optional(payload, "changes", RawDict)
+
+
 class PushEvent(BaseWebhookEvent):
     """
     https://developer.github.com/v3/activity/events/types/#pushevent
@@ -804,6 +820,7 @@ class WebhookEvent(Enum):
     PULL_REQUEST = "pull_request"
     PULL_REQUEST_REVIEW = "pull_request_review"
     PULL_REQUEST_REVIEW_COMMENT = "pull_request_review_comment"
+    PULL_REQUEST_REVIEW_THREAD = "pull_request_review_thread"
     PUSH = "push"
     PROJECT_CARD = "project_card"
     PROJECT_COLUMN = "project_column"
@@ -867,6 +884,7 @@ class WebhookEventAction(Enum):
     REOPENED = "reopened"
     REREQUESTED = "rerequested"
     RESOLVE = "resolve"
+    RESOLVED = "resolved"
     REQUESTED = "requested"
     REQUESTED_ACTION = "requested_action"
     REVIEW_REQUESTED = "review_requested"
@@ -884,6 +902,7 @@ class WebhookEventAction(Enum):
     UNLOCKED = "unlocked"
     UNPINNED = "unpinned"
     UNPUBLISHED = "unpublished"
+    UNRESOLVED = "unresolved"
     UPDATED = "updated"
 
 
@@ -920,6 +939,7 @@ event_map = {
     WebhookEvent.PULL_REQUEST: PullRequestEvent,
     WebhookEvent.PULL_REQUEST_REVIEW: PullRequestReviewEvent,
     WebhookEvent.PULL_REQUEST_REVIEW_COMMENT: PullRequestReviewCommentEvent,
+    WebhookEvent.PULL_REQUEST_REVIEW_THREAD: PullRequestReviewThreadEvent,
     WebhookEvent.PUSH: PushEvent,
     WebhookEvent.PROJECT_CARD: ProjectCardEvent,
     WebhookEvent.PROJECT_COLUMN: ProjectColumnEvent,

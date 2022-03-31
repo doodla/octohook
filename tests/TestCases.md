@@ -205,6 +205,11 @@ Covered
 - [x] edited
 - [x] deleted
 
+## PullRequestReviewThreadEvent
+
+- [x] resolved
+- [x] unresolved
+
 ## PushEvent
 Covered
 
