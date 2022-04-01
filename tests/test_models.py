@@ -163,8 +163,12 @@ def check_type_hints(obj):
 
         try:
             if isinstance(obj_value, type_hint):
-                if type_hint not in primitives:
-                    check_type_hints(obj_value)
+                try:
+                    if set(type_hint.__args__).isdisjoint(primitives) and obj_value is not None:
+                        check_type_hints(obj_value)
+                except AttributeError:
+                    if type_hint not in primitives:
+                        check_type_hints(obj_value)
             else:
                 raise TypeHintError(
                     f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
