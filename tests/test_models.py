@@ -55,6 +55,7 @@ testcases = [
     "check_suite",
     "marketplace_purchase",
     "security_advisory",
+    "pull_request_review_thread",
 ]
 
 
