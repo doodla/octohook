@@ -431,18 +431,6 @@
               "href": "https://api.github.com/repos/doodla/octohook-playground/pulls/12886"
             }
           },
-          "reactions": {
-            "url": "https://api.github.com/repos/doodla/octohook-playground/pulls/comments/839046410/reactions",
-            "total_count": 0,
-            "+1": 0,
-            "-1": 0,
-            "laugh": 0,
-            "hooray": 0,
-            "confused": 0,
-            "heart": 0,
-            "rocket": 0,
-            "eyes": 0
-          },
           "start_line": null,
           "original_start_line": null,
           "start_side": null,
@@ -1008,18 +996,6 @@
             "pull_request": {
               "href": "https://api.github.com/repos/doodla/octohook-playground/pulls/12886"
             }
-          },
-          "reactions": {
-            "url": "https://api.github.com/repos/doodla/octohook-playground/pulls/comments/839046410/reactions",
-            "total_count": 0,
-            "+1": 0,
-            "-1": 0,
-            "laugh": 0,
-            "hooray": 0,
-            "confused": 0,
-            "heart": 0,
-            "rocket": 0,
-            "eyes": 0
           },
           "start_line": null,
           "original_start_line": null,

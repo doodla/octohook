@@ -41,13 +41,14 @@ from octohook.models import (
     _optional,
     ShortInstallation,
     Enterprise,
+    Thread,
 )
 
 
 class BaseWebhookEvent:
     payload: dict
     action: Optional[str] = None
-    sender: User
+    sender: Optional[User]
     repository: Optional[Repository] = None
     organization: Optional[Organization] = None
     enterprise: Optional[Enterprise] = None
@@ -55,7 +56,7 @@ class BaseWebhookEvent:
     def __init__(self, payload: dict):
         self.payload = payload
         self.action = payload.get("action")
-        self.sender = User(payload.get("sender"))
+        self.sender = _optional(payload, "sender", User)
 
         # Not present in GitHubAppAuthorizationEvent, InstallationEvent, SponsorshipEvent
         try:
@@ -557,15 +558,13 @@ class PullRequestReviewThreadEvent(BaseWebhookEvent):
     https://developer.github.com/v3/activity/events/types/#pullrequestreviewthreadevent
     """
 
-    comment: Comment
     pull_request: PullRequest
-    changes: Optional[RawDict]
+    thread: Thread
 
     def __init__(self, payload: dict):
         super().__init__(payload)
-        self.comment = Comment(payload.get("comment"))
         self.pull_request = PullRequest(payload.get("pull_request"))
-        self.changes = _optional(payload, "changes", RawDict)
+        self.thread = Thread(payload.get("thread"))
 
 
 class PushEvent(BaseWebhookEvent):

@@ -253,6 +253,10 @@ class Repository(BaseGithubModel):
     public: Optional[bool]
     master_branch: Optional[str]
     permissions: Optional[Permissions]
+    allow_forking: Optional[bool]
+    is_template: Optional[bool]
+    topics: List[str]
+    visibility: Optional[str]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -310,6 +314,10 @@ class Repository(BaseGithubModel):
         self.public = payload.get("public")
         self.master_branch = payload.get("master_branch")
         self.permissions = _optional(payload, "permissions", Permissions)
+        self.allow_forking = payload.get("allow_forking")
+        self.is_template = payload.get("is_template")
+        self.topics = _optional(payload, "topics", List[str]) or []
+        self.visibility = payload.get("visibility")
 
     def keys_url(self, key_id: str = None) -> str:
         return _transform(self.payload["keys_url"], locals())
@@ -449,6 +457,11 @@ class Comment(BaseGithubModel):
     updated_at: str
     author_association: str
     body: str
+    start_line: Optional[int]
+    original_start_line: Optional[int]
+    start_side: Optional[str]
+    original_line: Optional[int]
+    side: Optional[str]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -472,9 +485,25 @@ class Comment(BaseGithubModel):
         self.author_association = payload.get("author_association")
         self.body = payload.get("body")
         self._links = _optional(payload, "_links", RawDict)
+        self.start_line = payload.get("start_line")
+        self.original_start_line = payload.get("original_start_line")
+        self.start_side = payload.get("start_side")
+        self.original_line = payload.get("original_line")
+        self.side = payload.get("side")
 
     def __str__(self):
         return self.body
+
+
+class Thread(BaseGithubModel):
+    payload: dict
+    node_id: str
+    comments: List[Comment]
+
+    def __init__(self, payload: dict):
+        self.payload = payload
+        self.node_id = payload.get("node_id")
+        self.comments = [Comment(comment) for comment in payload.get("comments")]
 
 
 class ChecksApp(BaseGithubModel):
@@ -1448,6 +1477,8 @@ class PullRequest(BaseGithubModel):
     additions: Optional[int]
     deletions: Optional[int]
     changed_files: Optional[int]
+    auto_merge: Optional[bool]
+    active_lock_reason: Optional[str]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -1498,6 +1529,8 @@ class PullRequest(BaseGithubModel):
         self.additions = payload.get("additions")
         self.deletions = payload.get("deletions")
         self.changed_files = payload.get("changed_files")
+        self.auto_merge = payload.get("auto_merge")
+        self.active_lock_reason = payload.get("active_lock_reason")
 
     def review_comment_url(self, number: int = None) -> str:
         return _transform(self.payload["review_comment_url"], locals())
