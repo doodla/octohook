@@ -11,11 +11,6 @@ DEBUG = "debug"
 ANY_REPO = "*"
 ANY_ACTION = "*"
 
-d = {
-    "pr": {"fn 1", "fn 2"},
-    "push": {"*": {"fn1", "fn2"}, "mob_android": {"fn1", "fn2"}},
-}
-
 
 class _WebhookDecorator:
     def __init__(self):
