@@ -316,7 +316,7 @@ class Repository(BaseGithubModel):
         self.permissions = _optional(payload, "permissions", Permissions)
         self.allow_forking = payload.get("allow_forking")
         self.is_template = payload.get("is_template")
-        self.topics = _optional(payload, "topics", List[str]) or []
+        self.topics = payload.get("topics") or []
         self.visibility = payload.get("visibility")
 
     def keys_url(self, key_id: str = None) -> str:
@@ -462,6 +462,7 @@ class Comment(BaseGithubModel):
     start_side: Optional[str]
     original_line: Optional[int]
     side: Optional[str]
+    reactions: Optional[RawDict]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -490,6 +491,7 @@ class Comment(BaseGithubModel):
         self.start_side = payload.get("start_side")
         self.original_line = payload.get("original_line")
         self.side = payload.get("side")
+        self.reactions = _optional(payload, "reactions", RawDict)
 
     def __str__(self):
         return self.body
