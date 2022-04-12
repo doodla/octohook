@@ -2,6 +2,6 @@ default_language_version:
   python: python3.9
 repos:
   - repo: https://github.com/ambv/black
-    rev: 22.1.0
+    rev: 22.3.0
     hooks:
       - id: black
