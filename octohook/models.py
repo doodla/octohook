@@ -257,6 +257,7 @@ class Repository(BaseGithubModel):
     is_template: Optional[bool]
     topics: List[str]
     visibility: Optional[str]
+    web_commit_signoff_required: Optional[bool]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -318,6 +319,9 @@ class Repository(BaseGithubModel):
         self.is_template = payload.get("is_template")
         self.topics = payload.get("topics") or []
         self.visibility = payload.get("visibility")
+        self.web_commit_signoff_required = _optional(
+            payload, "web_commit_signoff_required", bool
+        )
 
     def keys_url(self, key_id: str = None) -> str:
         return _transform(self.payload["keys_url"], locals())
@@ -1830,3 +1834,90 @@ class ContentReference(BaseGithubModel):
         self.id = payload.get("id")
         self.node_id = payload.get("node_id")
         self.reference = payload.get("reference")
+
+
+class Rule(BaseGithubModel):
+    payload: dict
+    id: int
+    repository_id: int
+    name: str
+    created_at: str
+    updated_at: str
+    pull_request_reviews_enforcement_level: str
+    required_approving_review_count: int
+    dismiss_stale_reviews_on_push: bool
+    require_code_owner_review: bool
+    authorized_dismissal_actors_only: bool
+    ignore_approvals_from_contributors: bool
+    required_status_checks: List[str]
+    required_status_checks_enforcement_level: str
+    strict_required_status_checks_policy: bool
+    signature_requirement_enforcement_level: str
+    linear_history_requirement_enforcement_level: str
+    admin_enforced: bool
+    create_protected: bool
+    allow_force_pushes_enforcement_level: str
+    allow_deletions_enforcement_level: str
+    merge_queue_enforcement_level: str
+    required_deployments_enforcement_level: str
+    required_conversation_resolution_level: str
+    authorized_actors_only: bool
+    authorized_actor_names: List[str]
+    require_last_push_approval: bool
+
+    def __init__(self, payload: dict):
+        self.payload = payload
+        self.id = payload.get("id")
+        self.repository_id = payload.get("repository_id")
+        self.name = payload.get("name")
+        self.created_at = payload.get("created_at")
+        self.updated_at = payload.get("updated_at")
+        self.pull_request_reviews_enforcement_level = payload.get(
+            "pull_request_reviews_enforcement_level"
+        )
+        self.required_approving_review_count = payload.get(
+            "required_approving_review_count"
+        )
+        self.dismiss_stale_reviews_on_push = payload.get(
+            "dismiss_stale_reviews_on_push"
+        )
+        self.require_code_owner_review = payload.get("require_code_owner_review")
+        self.authorized_dismissal_actors_only = payload.get(
+            "authorized_dismissal_actors_only"
+        )
+        self.ignore_approvals_from_contributors = payload.get(
+            "ignore_approvals_from_contributors"
+        )
+        self.required_status_checks = payload.get("required_status_checks")
+        self.required_status_checks_enforcement_level = payload.get(
+            "required_status_checks_enforcement_level"
+        )
+        self.strict_required_status_checks_policy = payload.get(
+            "strict_required_status_checks_policy"
+        )
+        self.signature_requirement_enforcement_level = payload.get(
+            "signature_requirement_enforcement_level"
+        )
+        self.linear_history_requirement_enforcement_level = payload.get(
+            "linear_history_requirement_enforcement_level"
+        )
+        self.admin_enforced = payload.get("admin_enforced")
+        self.create_protected = payload.get("create_protected")
+        self.allow_force_pushes_enforcement_level = payload.get(
+            "allow_force_pushes_enforcement_level"
+        )
+        self.allow_deletions_enforcement_level = payload.get(
+            "allow_deletions_enforcement_level"
+        )
+        self.merge_queue_enforcement_level = payload.get(
+            "merge_queue_enforcement_level"
+        )
+        self.required_deployments_enforcement_level = payload.get(
+            "required_deployments_enforcement_level"
+        )
+        self.required_conversation_resolution_level = payload.get(
+            "required_conversation_resolution_level"
+        )
+        self.authorized_actors_only = payload.get("authorized_actors_only")
+        self.authorized_actor_names = payload.get("authorized_actor_names")
+        self.require_last_push_approval = payload.get("require_last_push_approval")

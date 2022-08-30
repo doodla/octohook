@@ -42,6 +42,7 @@ from octohook.models import (
     ShortInstallation,
     Enterprise,
     Thread,
+    Rule,
 )
 
 
@@ -71,6 +72,17 @@ class BaseWebhookEvent:
             pass
 
         self.enterprise = _optional(payload, "enterprise", Enterprise)
+
+
+class BranchProtectionRuleEvent(BaseWebhookEvent):
+    payload: dict
+    rule: Rule
+    changes: Optional[RawDict]
+
+    def __init__(self, payload: dict):
+        super().__init__(payload)
+        self.rule = Rule(payload.get("rule"))
+        self.changes = _optional(payload, "changes", RawDict)
 
 
 class CheckRunEvent(BaseWebhookEvent):
@@ -787,6 +799,7 @@ class PingEvent(BaseWebhookEvent):
 
 
 class WebhookEvent(Enum):
+    BRANCH_PROTECTION_RULE = "branch_protection_rule"
     CHECK_RUN = "check_run"
     CHECK_SUITE = "check_suite"
     COMMIT_COMMENT = "commit_comment"
@@ -906,6 +919,7 @@ class WebhookEventAction(Enum):
 
 
 event_map = {
+    WebhookEvent.BRANCH_PROTECTION_RULE: BranchProtectionRuleEvent,
     WebhookEvent.CHECK_RUN: CheckRunEvent,
     WebhookEvent.CHECK_SUITE: CheckSuiteEvent,
     WebhookEvent.COMMIT_COMMENT: CommitCommentEvent,
