@@ -890,6 +890,7 @@ class WebhookEventAction(Enum):
     PUBLISHED = "published"
     PURCHASED = "purchased"
     READY_FOR_REVIEW = "ready_for_review"
+    RELEASED = "released"
     REMOVED = "removed"
     REMOVED_FROM_REPOSITORY = "removed_from_repository"
     RENAMED = "renamed"
