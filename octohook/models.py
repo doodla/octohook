@@ -254,6 +254,17 @@ class Repository(BaseGithubModel):
     master_branch: Optional[str]
     permissions: Optional[Permissions]
     allow_forking: Optional[bool]
+    allow_squash_merge: Optional[bool]
+    allow_merge_commit: Optional[bool]
+    allow_rebase_merge: Optional[bool]
+    allow_update_branch: Optional[bool]
+    allow_auto_merge: Optional[bool]
+    delete_branch_on_merge: Optional[bool]
+    use_squash_pr_title_as_default: Optional[bool]
+    squash_merge_commit_message: Optional[str]
+    squash_merge_commit_title: Optional[str]
+    merge_commit_message: Optional[str]
+    merge_commit_title: Optional[str]
     is_template: Optional[bool]
     topics: List[str]
     visibility: Optional[str]
@@ -316,6 +327,19 @@ class Repository(BaseGithubModel):
         self.master_branch = payload.get("master_branch")
         self.permissions = _optional(payload, "permissions", Permissions)
         self.allow_forking = payload.get("allow_forking")
+        self.allow_squash_merge = payload.get("allow_squash_merge")
+        self.allow_merge_commit = payload.get("allow_merge_commit")
+        self.allow_rebase_merge = payload.get("allow_rebase_merge")
+        self.allow_auto_merge = payload.get("allow_auto_merge")
+        self.allow_update_branch = payload.get("allow_auto_merge")
+        self.use_squash_pr_title_as_default = payload.get(
+            "use_squash_pr_title_as_default"
+        )
+        self.squash_merge_commit_message = payload.get("squash_merge_commit_message")
+        self.squash_merge_commit_title = payload.get("squash_merge_commit_title")
+        self.merge_commit_message = payload.get("merge_commit_message")
+        self.merge_commit_title = payload.get("merge_commit_title")
+        self.delete_branch_on_merge = payload.get("delete_branch_on_merge")
         self.is_template = payload.get("is_template")
         self.topics = payload.get("topics") or []
         self.visibility = payload.get("visibility")

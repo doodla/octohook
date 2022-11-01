@@ -861,6 +861,7 @@ class WebhookEventAction(Enum):
     CLOSED = "closed"
     COMPLETED = "completed"
     CONVERTED = "converted"
+    CONVERTED_TO_DRAFT = "converted_to_draft"
     CREATE = "create"
     CREATED = "created"
     DELETED = "deleted"
