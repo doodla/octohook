@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "octohook"
+version = "0.13.0.dev1"
+description = "Typed interactions with Github Webhooks"
+authors = ["Sridhar Vadlamani <v.sridhar.sreenivas@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/doodla/octohook"
+license = "MIT"
+keywords = ["github", "webhooks", "typed"]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.0.1"
+pytest = "^8.3.3"
+pytest-mock = "^3.14.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
