@@ -165,7 +165,7 @@ def check_type_hints(obj):
 
         try:
             if isinstance(obj_value, type_hint):
-                if type_hint not in primitives:
+                if type_hint not in primitives and type(None) not in get_args(type_hint):
                     check_type_hints(obj_value)
             else:
                 raise TypeHintError(
