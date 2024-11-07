@@ -3,7 +3,6 @@ from pathlib import Path
 from pkgutil import walk_packages
 from typing import List
 
-import octohook.models
 from .decorators import hook, handle_webhook
 from .events import parse, WebhookEvent, WebhookEventAction
 

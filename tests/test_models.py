@@ -176,14 +176,14 @@ def check_type_hints(obj):
             args = get_args(type_hint)
 
             if type(obj_value) not in args:
-                if type(obj_value) != origin:
+                if type(obj_value) is not origin:
                     raise TypeHintError(
                         f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
                     )
-                elif type(obj_value) == list:
+                elif type(obj_value) is list:
                     try:
                         first_value = obj_value.pop()
-                        if type(first_value) != args[0]:
+                        if type(first_value) is not args[0]:
                             raise TypeHintError(
                                 f"{type(obj)} {attr}. Expected {type_hint} Received {origin}[{type(first_value)}]"
                             )
