@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 from typing import Optional, List, Any
 
@@ -35,7 +36,6 @@ from octohook.models import (
     Branch,
     StatusCommit,
     RawDict,
-    ContentReference,
     Commit,
     CommitUser,
     _optional,
@@ -45,6 +45,7 @@ from octohook.models import (
     Rule,
 )
 
+logger = logging.getLogger("octohook")
 
 class BaseWebhookEvent:
     payload: dict
@@ -119,20 +120,6 @@ class CommitCommentEvent(BaseWebhookEvent):
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.comment = Comment(payload.get("comment"))
-
-
-class ContentReferenceEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#contentreferenceevent
-    """
-
-    content_reference: ContentReference
-    installation: ShortInstallation
-
-    def __init__(self, payload: dict):
-        super().__init__(payload)
-        self.content_reference = ContentReference(payload.get("content_reference"))
-        self.installation = ShortInstallation(payload.get("installation"))
 
 
 class CreateEvent(BaseWebhookEvent):
@@ -799,55 +786,80 @@ class PingEvent(BaseWebhookEvent):
 
 
 class WebhookEvent(Enum):
+    BRANCH_PROTECTION_CONFIGURATION = "branch_protection_configuration"
     BRANCH_PROTECTION_RULE = "branch_protection_rule"
     CHECK_RUN = "check_run"
     CHECK_SUITE = "check_suite"
+    CODE_SCANNING_ALERT = "code_scanning_alert"
     COMMIT_COMMENT = "commit_comment"
-    CONTENT_REFERENCE = "content_reference"
     CREATE = "create"
+    CUSTOM_PROPERTY = "custom_property"
+    CUSTOM_PROPERTY_VALUES = "custom_property_values"
     DELETE = "delete"
+    DEPENDABOT_ALERT = "dependabot_alert"
     DEPLOY_KEY = "deploy_key"
     DEPLOYMENT = "deployment"
+    DEPLOYMENT_PROTECTION_RULE = "deployment_protection_rule"
+    DEPLOYMENT_REVIEW = "deployment_review"
     DEPLOYMENT_STATUS = "deployment_status"
+    DISCUSSION = "discussion"
+    DISCUSSION_COMMENT = "discussion_comment"
     FORK = "fork"
     GITHUB_APP_AUTHORIZATION = "github_app_authorization"
     GOLLUM = "gollum"
     INSTALLATION = "installation"
     INSTALLATION_REPOSITORIES = "installation_repositories"
+    INSTALLATION_TARGET = "installation_target"
     ISSUE_COMMENT = "issue_comment"
     ISSUES = "issues"
     LABEL = "label"
     MARKETPLACE_PURCHASE = "marketplace_purchase"
     MEMBER = "member"
     MEMBERSHIP = "membership"
+    MERGE_GROUP = "merge_group"
     META = "meta"
     MILESTONE = "milestone"
     ORG_BLOCK = "org_block"
     ORGANIZATION = "organization"
     PACKAGE = "package"
     PAGE_BUILD = "page_build"
+    PERSONAL_ACCESS_TOKEN_REQUEST = "personal_access_token_request"
     PING = "ping"
+    PROJECT_CARD = "project_card"
     PROJECT = "project"
+    PROJECT_COLUMN = "project_column"
+    PROJECTS_V2 = "projects_v2"
+    PROJECTS_V2_ITEM = "projects_v2_item"
+    PROJECTS_V2_STATUS_UPDATE = "projects_v2_status_update"
     PUBLIC = "public"
     PULL_REQUEST = "pull_request"
-    PULL_REQUEST_REVIEW = "pull_request_review"
     PULL_REQUEST_REVIEW_COMMENT = "pull_request_review_comment"
+    PULL_REQUEST_REVIEW = "pull_request_review"
     PULL_REQUEST_REVIEW_THREAD = "pull_request_review_thread"
     PUSH = "push"
-    PROJECT_CARD = "project_card"
-    PROJECT_COLUMN = "project_column"
+    REGISTRY_PACKAGE = "registry_package"
     RELEASE = "release"
+    REPOSITORY_ADVISORY = "repository_advisory"
     REPOSITORY = "repository"
     REPOSITORY_DISPATCH = "repository_dispatch"
     REPOSITORY_IMPORT = "repository_import"
+    REPOSITORY_RULESET = "repository_ruleset"
     REPOSITORY_VULNERABILITY_ALERT = "repository_vulnerability_alert"
+    SECRET_SCANNING_ALERT = "secret_scanning_alert"
+    SECRET_SCANNING_ALERT_LOCATION = "secret_scanning_alert_location"
+    SECRET_SCANNING_SCAN = "secret_scanning_scan"
     SECURITY_ADVISORY = "security_advisory"
+    SECURITY_AND_ANALYSIS = "security_and_analysis"
     SPONSORSHIP = "sponsorship"
     STAR = "star"
     STATUS = "status"
-    TEAM = "team"
+    SUB_ISSUES = "sub_issues"
     TEAM_ADD = "team_add"
+    TEAM = "team"
     WATCH = "watch"
+    WORKFLOW_DISPATCH = "workflow_dispatch"
+    WORKFLOW_JOB = "workflow_job"
+    WORKFLOW_RUN = "workflow_run"
 
 
 class WebhookEventAction(Enum):
@@ -925,7 +937,6 @@ event_map = {
     WebhookEvent.CHECK_RUN: CheckRunEvent,
     WebhookEvent.CHECK_SUITE: CheckSuiteEvent,
     WebhookEvent.COMMIT_COMMENT: CommitCommentEvent,
-    WebhookEvent.CONTENT_REFERENCE: ContentReferenceEvent,
     WebhookEvent.CREATE: CreateEvent,
     WebhookEvent.DELETE: DeleteEvent,
     WebhookEvent.DEPLOY_KEY: DeployKeyEvent,
@@ -974,4 +985,8 @@ event_map = {
 
 
 def parse(event_name, payload: dict):
-    return event_map[WebhookEvent(event_name)](payload)
+    try:
+        return event_map[WebhookEvent(event_name)](payload)
+    except Exception:
+        logger.exception(f"Could not parse event {event_name}")
+        return BaseWebhookEvent(payload)

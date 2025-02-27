@@ -4,7 +4,7 @@ from typing import get_type_hints, get_origin, get_args
 
 import pytest
 
-from octohook.events import parse, WebhookEventAction
+from octohook.events import parse, WebhookEventAction, BaseWebhookEvent
 from octohook.models import RawDict
 
 paths = ["tests/fixtures/complete", "tests/fixtures/incomplete"]
@@ -18,7 +18,6 @@ testcases = [
     "issue_comment",
     "pull_request_review_comment",
     "deploy_key",
-    "content_reference",
     "project_column",
     "repository_dispatch",
     "push",
@@ -206,3 +205,10 @@ def test_all_type_hints_are_correct(event_name):
 
     if path_failures == 2:
         raise FileNotFoundError("The test fixtures were not loaded properly")
+
+
+def test_missing_models_return_basewebhookevent():
+    with open("tests/fixtures/incomplete/code_scanning_alert.json") as file:
+        payload = json.load(file)[0]
+
+        assert isinstance(parse("code_scanning_alert", payload), BaseWebhookEvent)

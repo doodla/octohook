@@ -1846,20 +1846,6 @@ class StatusCommit(BaseGithubModel):
         self.committer = _optional(payload, "committer", User)
         self.parents = [StatusBranchCommit(parent) for parent in payload.get("parents")]
 
-
-class ContentReference(BaseGithubModel):
-    payload: dict
-    id: int
-    node_id: str
-    reference: str
-
-    def __init__(self, payload: dict):
-        self.payload = payload
-        self.id = payload.get("id")
-        self.node_id = payload.get("node_id")
-        self.reference = payload.get("reference")
-
-
 class Rule(BaseGithubModel):
     payload: dict
     id: int
