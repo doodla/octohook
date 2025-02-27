@@ -1,11 +1,9 @@
-[tool.poetry]
+[project]
 name = "octohook"
 version = "0.13.0.dev1"
 description = "Typed interactions with Github Webhooks"
-authors = ["Sridhar Vadlamani <v.sridhar.sreenivas@gmail.com>"]
+authors = [{name="Sridhar Vadlamani", email= "v.sridhar.sreenivas@gmail.com"}]
 readme = "README.md"
-homepage = "https://github.com/doodla/octohook"
-license = "MIT"
 keywords = ["github", "webhooks", "typed"]
 classifiers = [
     "Programming Language :: Python :: 3.10",
@@ -18,15 +16,21 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
+requires-python = ">=3.10"
+dependencies = []
 
-[tool.poetry.dependencies]
-python = "^3.10"
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = "^4.0.1"
-pytest = "^8.3.3"
-pytest-mock = "^3.14.0"
+[dependency-groups]
+dev = [
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-mock>=3.14.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "octohook",
+]
