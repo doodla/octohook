@@ -35,6 +35,19 @@ def test_load_hooks_calls_hook(mocker):
 
     assert mock.call_count == 22
 
+def test_load_hooks_only_parses_specified_modules(mocker):
+    mock = mocker.patch("octohook.decorators.hook")
+
+    load_hooks(["tests.hooks.debug_hooks"])
+
+    assert mock.call_count == 4
+
+def test_load_hooks_parses_python_module(mocker):
+    mock = mocker.patch("octohook.decorators.hook")
+
+    load_hooks(["tests.hooks.debug_hooks.label"])
+
+    assert mock.call_count == 4
 
 def test_load_hooks_parses_properly(mocker):
     decorator = _WebhookDecorator()

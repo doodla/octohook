@@ -1,3 +1,4 @@
+import logging
 from importlib import import_module
 from pathlib import Path
 from pkgutil import walk_packages
@@ -18,14 +19,24 @@ __all__ = [
     "WebhookEventAction",
 ]
 
+logger = logging.getLogger("octohook")
+
 _imported_modules = []
 model_overrides = {}
 
-
 def _import_module(module: str) -> List[str]:
-    module_path = import_module(module).__file__
+    try:
+        imported = import_module(module)
+    except Exception as e:
+        logger.error("Failed to import module %s", module, exc_info=e)
+        return []
 
-    package_dir = Path(module_path).resolve().parent
+    module_path = imported.__file__
+
+    if module_path.endswith("__init__.py"):
+        package_dir = Path(module_path).resolve().parent
+    else:
+        return [imported.__name__]
 
     imported_modules = []
     for _, module_name, is_package in walk_packages([str(package_dir)]):
@@ -35,7 +46,6 @@ def _import_module(module: str) -> List[str]:
         else:
             imported_modules.append(import_module(module_to_be_imported).__name__)
     return imported_modules
-
 
 def load_hooks(modules: List[str]):
     """
