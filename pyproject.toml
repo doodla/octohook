@@ -1,6 +1,6 @@
 [project]
 name = "octohook"
-version = "0.13.0.dev1"
+version = "0.13"
 description = "Typed interactions with Github Webhooks"
 authors = [{name="Sridhar Vadlamani", email= "v.sridhar.sreenivas@gmail.com"}]
 readme = "README.md"

@@ -75,7 +75,7 @@ wheels = [
 
 [[package]]
 name = "octohook"
-version = "0.13.0.dev1"
+version = "0.13"
 source = { editable = "." }
 
 [package.dev-dependencies]
