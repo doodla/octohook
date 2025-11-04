@@ -1,75 +1,17 @@
 import json
 import os
-from pathlib import Path
 from typing import get_type_hints, get_origin, get_args
 
 import pytest
 
 from octohook.events import parse, WebhookEventAction, BaseWebhookEvent
 from octohook.models import RawDict
+from tests.conftest import discover_fixtures
 
 paths = ["tests/fixtures/complete", "tests/fixtures/incomplete"]
 
-
-def _discover_test_fixtures():
-    """
-    Auto-discover test fixture files from complete and incomplete directories.
-    Returns sorted list of fixture names (without .json extension).
-
-    This eliminates the need to manually update the testcases list when
-    GitHub adds new webhook events.
-
-    Note: Some fixtures are excluded because they lack proper model implementations
-    and would fail tests that expect complete event classes. These fixtures exist
-    but return BaseWebhookEvent which doesn't have all the specific event fields.
-    """
-    # Fixtures that exist but don't have proper model implementations
-    EXCLUDED_FIXTURES = {
-        "code_scanning_alert",  # No CodeScanningAlertEvent class implemented
-        "ping_event",  # No PingEvent class implemented
-    }
-
-    fixtures = set()
-    for directory in ["complete", "incomplete"]:
-        fixture_path = Path(__file__).parent / "fixtures" / directory
-        if fixture_path.exists():
-            for json_file in fixture_path.glob("*.json"):
-                fixture_name = json_file.stem
-                if fixture_name not in EXCLUDED_FIXTURES:
-                    fixtures.add(fixture_name)
-
-    return sorted(fixtures)
-
-
-# Auto-discovered from fixture files
-testcases = _discover_test_fixtures()
-
-
-def _load_event_fixture(event_name: str):
-    """
-    Load event fixtures for given event name.
-
-    Tries to load from 'complete' directory first, then 'incomplete'.
-    Raises FileNotFoundError if fixture doesn't exist in either location.
-
-    Args:
-        event_name: Name of the webhook event (e.g., 'label', 'pull_request')
-
-    Returns:
-        List of example payloads from the JSON fixture file
-
-    Raises:
-        FileNotFoundError: If fixture file not found in either directory
-    """
-    for directory in ["complete", "incomplete"]:
-        fixture_path = Path(__file__).parent / "fixtures" / directory / f"{event_name}.json"
-        if fixture_path.exists():
-            with fixture_path.open() as f:
-                return json.load(f)
-
-    raise FileNotFoundError(
-        f"No fixture found for '{event_name}' in complete or incomplete directories"
-    )
+# Auto-discovered from fixture files using shared utility
+testcases = discover_fixtures()
 
 
 class TypeHintError(Exception):
@@ -77,14 +19,14 @@ class TypeHintError(Exception):
 
 
 @pytest.mark.parametrize("event_name", testcases)
-def test_model_loads(event_name):
+def test_model_loads(event_name, fixture_loader):
     """
     Verify that parse() correctly instantiates event models from fixtures.
 
     Tests that all webhook event fixtures can be successfully parsed into
     their corresponding event model classes without errors.
     """
-    examples = _load_event_fixture(event_name)
+    examples = fixture_loader.load(event_name)
     for example in examples:
         parse(event_name, example)
 
@@ -128,7 +70,7 @@ def check_model(data, obj):
 
 
 @pytest.mark.parametrize("event_name", testcases)
-def test_model_has_all_keys_in_json(event_name):
+def test_model_has_all_keys_in_json(event_name, fixture_loader):
     """
     Verify that every JSON key from GitHub is accessible in the parsed object.
 
@@ -136,7 +78,7 @@ def test_model_has_all_keys_in_json(event_name):
     payload must be present either as a direct attribute, nested object, or RawDict.
     This ensures users can access all webhook data without information loss.
     """
-    examples = _load_event_fixture(event_name)
+    examples = fixture_loader.load(event_name)
     for example in examples:
         check_model(example, parse(event_name, example))
 
@@ -204,7 +146,7 @@ def check_type_hints(obj):
 
 
 @pytest.mark.parametrize("event_name", testcases)
-def test_all_type_hints_are_correct(event_name):
+def test_all_type_hints_are_correct(event_name, fixture_loader):
     """
     Verify that type hints match actual runtime types.
 
@@ -212,7 +154,7 @@ def test_all_type_hints_are_correct(event_name):
     actual types of the attributes at runtime. This ensures IDE autocomplete,
     type checkers like mypy, and other tooling work correctly.
     """
-    examples = _load_event_fixture(event_name)
+    examples = fixture_loader.load(event_name)
     for example in examples:
         check_type_hints(parse(event_name, example))
 
