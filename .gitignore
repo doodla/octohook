@@ -10,3 +10,5 @@ build/
 
 .qodo
 .DS_Store
+
+.coverage
