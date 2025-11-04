@@ -107,42 +107,133 @@ def test_all_event_actions_are_in_enum(path):
         WebhookEventAction(action)
 
 
-def check_type_hints(obj):
+def _is_primitive_type(type_hint):
+    """
+    Check if a type hint represents a primitive type.
+
+    Args:
+        type_hint: Type hint to check
+
+    Returns:
+        bool: True if the type is primitive (str, int, None, bool, RawDict)
+    """
     primitives = [str, int, type(None), bool, RawDict]
+    return type_hint in primitives
+
+
+def _validate_simple_type(obj, attr, type_hint, obj_value):
+    """
+    Validate that an attribute's value matches its simple type hint.
+
+    Args:
+        obj: The object being validated
+        attr: The attribute name
+        type_hint: Expected type hint
+        obj_value: Actual value of the attribute
+
+    Raises:
+        TypeHintError: If the type doesn't match
+    """
+    if isinstance(obj_value, type_hint):
+        # Recursively validate nested objects (non-primitives without None in Union)
+        # Example: For PullRequest type, recursively validate its nested User objects
+        # Skip primitives (str, int, etc.) and Optional types (which include None)
+        if not _is_primitive_type(type_hint) and type(None) not in get_args(type_hint):
+            check_type_hints(obj_value)
+    else:
+        raise TypeHintError(
+            f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
+        )
+
+
+def _validate_list_items(obj, attr, type_hint, obj_value, origin, args):
+    """
+    Validate items in a list match the expected type.
+
+    Args:
+        obj: The object being validated
+        attr: The attribute name
+        type_hint: Expected type hint
+        obj_value: The list to validate
+        origin: Origin type (e.g., list)
+        args: Type arguments (e.g., [str] for List[str])
+
+    Raises:
+        TypeHintError: If list items don't match expected type
+    """
+    if not obj_value:  # Empty list is valid
+        return
+
+    # Check first item (non-destructive - use indexing)
+    # No need for try/except since we already checked for empty list
+    first_value = obj_value[0]
+    if type(first_value) is not args[0]:
+        raise TypeHintError(
+            f"{type(obj)} {attr}. Expected {type_hint} Received {origin}[{type(first_value)}]"
+        )
+
+
+def _validate_complex_type(obj, attr, type_hint, obj_value):
+    """
+    Validate that an attribute's value matches its complex type hint.
+
+    Handles Union types, List types, and other generic types.
+
+    Args:
+        obj: The object being validated
+        attr: The attribute name
+        type_hint: Expected type hint (e.g., Optional[str], List[int])
+        obj_value: Actual value of the attribute
+
+    Raises:
+        TypeHintError: If the type doesn't match
+    """
+    origin = get_origin(type_hint)
+    args = get_args(type_hint)
+
+    # Check if the actual type is one of the Union args (e.g., Optional[X] = Union[X, None])
+    if type(obj_value) not in args:
+        # Check if the origin type matches (e.g., list)
+        if type(obj_value) is not origin:
+            raise TypeHintError(
+                f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
+            )
+        # For lists, validate the items
+        elif type(obj_value) is list:
+            _validate_list_items(obj, attr, type_hint, obj_value, origin, args)
+
+
+def check_type_hints(obj):
+    """
+    Recursively validate that all type hints on an object match actual runtime types.
+
+    This ensures that type annotations accurately reflect the actual types at runtime,
+    which is critical for IDE autocomplete, type checkers, and documentation.
+
+    Args:
+        obj: The object to validate (typically a parsed webhook event)
+
+    Raises:
+        TypeHintError: If any type hint doesn't match the actual runtime type
+        AssertionError: If the object doesn't have a 'payload' attribute
+    """
     hints = get_type_hints(type(obj))
 
+    # All webhook objects should have a payload attribute
     assert "payload" in hints.keys()
+
     for attr, type_hint in hints.items():
         if attr == "payload":
             continue
+
         obj_value = getattr(obj, attr)
 
         try:
-            if isinstance(obj_value, type_hint):
-                if type_hint not in primitives and type(None) not in get_args(type_hint):
-                    check_type_hints(obj_value)
-            else:
-                raise TypeHintError(
-                    f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
-                )
+            # Try simple type validation first
+            _validate_simple_type(obj, attr, type_hint, obj_value)
         except TypeError:
-            origin = get_origin(type_hint)
-            args = get_args(type_hint)
-
-            if type(obj_value) not in args:
-                if type(obj_value) is not origin:
-                    raise TypeHintError(
-                        f"{type(obj)} {attr}. Expected {type_hint} Received {type(obj_value)}"
-                    )
-                elif type(obj_value) is list:
-                    try:
-                        first_value = obj_value.pop()
-                        if type(first_value) is not args[0]:
-                            raise TypeHintError(
-                                f"{type(obj)} {attr}. Expected {type_hint} Received {origin}[{type(first_value)}]"
-                            )
-                    except IndexError:
-                        pass
+            # TypeError means we have a complex type (Union, List, etc.)
+            _validate_complex_type(obj, attr, type_hint, obj_value)
 
 
 @pytest.mark.parametrize("event_name", testcases)

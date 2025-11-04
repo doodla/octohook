@@ -24,6 +24,7 @@ dev = [
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
     "pytest-mock>=3.14.0",
+    "pytest-cov>=6.0.0",
 ]
 
 [build-system]
@@ -34,3 +35,28 @@ build-backend = "hatchling.build"
 include = [
   "octohook",
 ]
+
+[tool.coverage.run]
+source = ["octohook"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers --tb=short"
