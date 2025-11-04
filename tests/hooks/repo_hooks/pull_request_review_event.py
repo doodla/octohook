@@ -1,5 +1,6 @@
 from octohook.decorators import hook
 from octohook.events import WebhookEvent, WebhookEventAction, PullRequestReviewEvent
+from tests.hooks._tracker import track_call
 
 
 @hook(
@@ -8,7 +9,7 @@ from octohook.events import WebhookEvent, WebhookEventAction, PullRequestReviewE
     repositories=["doodla/octohook-playground"],
 )
 def a(event: PullRequestReviewEvent):
-    print("repo a")
+    track_call("repo a")
     assert isinstance(event, PullRequestReviewEvent)
 
 
@@ -18,5 +19,5 @@ def a(event: PullRequestReviewEvent):
     repositories=["doodla/octohook-playground2"],
 )
 def b(event: PullRequestReviewEvent):
-    print("repo b")
+    track_call("repo b")
     assert isinstance(event, PullRequestReviewEvent)

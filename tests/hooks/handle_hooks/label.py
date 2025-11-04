@@ -1,17 +1,18 @@
 from octohook.decorators import hook
 from octohook.events import WebhookEvent, WebhookEventAction, LabelEvent
+from tests.hooks._tracker import track_call
 from tests.hooks.handle_hooks.pull_request_review_event import some_function
 
 
 @hook(WebhookEvent.LABEL, [WebhookEventAction.CREATED, WebhookEventAction.EDITED])
 def a(event: LabelEvent):
-    print("label a")
+    track_call("label a")
     assert isinstance(event, LabelEvent)
 
 
 @hook(WebhookEvent.LABEL, [WebhookEventAction.EDITED, WebhookEventAction.DELETED])
 def b(event: LabelEvent):
-    print("label b")
+    track_call("label b")
     assert isinstance(event, LabelEvent)
 
 
@@ -20,7 +21,7 @@ def b(event: LabelEvent):
     [WebhookEventAction.CREATED, WebhookEventAction.EDITED, WebhookEventAction.DELETED],
 )
 def c(event: LabelEvent):
-    print("label c")
+    track_call("label c")
     assert isinstance(event, LabelEvent)
 
 
@@ -28,7 +29,7 @@ def c(event: LabelEvent):
     WebhookEvent.LABEL,
 )
 def d(event: LabelEvent):
-    print("label d")
+    track_call("label d")
     assert isinstance(event, LabelEvent)
 
 

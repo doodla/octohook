@@ -1,10 +1,11 @@
 from octohook.decorators import hook
 from octohook.events import WebhookEvent, WebhookEventAction, PullRequestReviewEvent
+from tests.hooks._tracker import track_call
 
 
 @hook(WebhookEvent.PULL_REQUEST_REVIEW, [WebhookEventAction.DISMISSED])
 def a(event: PullRequestReviewEvent):
-    print("review a")
+    track_call("review a")
     assert isinstance(event, PullRequestReviewEvent)
 
 
@@ -13,7 +14,7 @@ def a(event: PullRequestReviewEvent):
     [WebhookEventAction.EDITED, WebhookEventAction.SUBMITTED],
 )
 def b(event: PullRequestReviewEvent):
-    print("review b")
+    track_call("review b")
     assert isinstance(event, PullRequestReviewEvent)
 
 
@@ -22,13 +23,13 @@ def b(event: PullRequestReviewEvent):
     [WebhookEventAction.SUBMITTED, WebhookEventAction.EDITED],
 )
 def c(event: PullRequestReviewEvent):
-    print("review c")
+    track_call("review c")
     assert isinstance(event, PullRequestReviewEvent)
 
 
 @hook(WebhookEvent.PULL_REQUEST_REVIEW)
 def d(event: PullRequestReviewEvent):
-    print("review d")
+    track_call("review d")
     assert isinstance(event, PullRequestReviewEvent)
 
 

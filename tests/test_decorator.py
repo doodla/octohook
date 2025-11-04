@@ -1,7 +1,4 @@
-import io
-import json
 import sys
-from contextlib import redirect_stdout
 
 import pytest
 
@@ -10,6 +7,7 @@ import octohook.decorators
 from octohook import load_hooks
 from octohook.decorators import _WebhookDecorator
 from octohook.events import WebhookEvent, WebhookEventAction
+from tests.hooks import _tracker
 
 ANY_REPO = "*"
 ANY_ACTION = "*"
@@ -18,13 +16,12 @@ ANY_ACTION = "*"
 # tests/hooks contains:
 #   - debug_hooks/label.py: 4 hooks (2 debug, 2 normal)
 #   - handle_hooks/label.py: 4 hooks
-#   - handle_hooks/inner/label.py: 4 hooks
 #   - handle_hooks/pull_request_review_event.py: 4 hooks
-#   - handle_hooks/inner/pull_request_review_event.py: 4 hooks
 #   - repo_hooks/pull_request_review_event.py: 2 hooks (repository-specific)
-EXPECTED_TOTAL_HOOKS = 22
+# Note: Removed duplicate inner/ directory to eliminate code duplication
+EXPECTED_TOTAL_HOOKS = 14
 EXPECTED_DEBUG_HOOKS_ONLY = 4
-EXPECTED_HANDLE_HOOKS_ONLY = 18  # Total hooks excluding debug_hooks module
+EXPECTED_HANDLE_HOOKS_ONLY = 10  # Total hooks excluding debug_hooks module
 
 
 @pytest.fixture(autouse=True)
@@ -115,19 +112,19 @@ def test_load_hooks_parses_properly(mocker):
 
     assert len(handlers) == 2
 
-    # LabelEvent
+    # LabelEvent (counts updated after removing inner/ directory)
     assert len(label) == 5  # (*, created, edited, deleted and debug)
-    assert len(label[ANY_ACTION][ANY_REPO]) == 6
-    assert len(label[WebhookEventAction.CREATED][ANY_REPO]) == 4
-    assert len(label[WebhookEventAction.EDITED][ANY_REPO]) == 6
-    assert len(label[WebhookEventAction.DELETED][ANY_REPO]) == 4
+    assert len(label[ANY_ACTION][ANY_REPO]) == 5  # Was 6, removed inner/label d
+    assert len(label[WebhookEventAction.CREATED][ANY_REPO]) == 2  # Was 4, removed inner/label a, c
+    assert len(label[WebhookEventAction.EDITED][ANY_REPO]) == 3  # Was 6, removed inner/label a, b, c
+    assert len(label[WebhookEventAction.DELETED][ANY_REPO]) == 2  # Was 4, removed inner/label b, c
 
-    # PullRequestReviewEvent
+    # PullRequestReviewEvent (counts updated after removing inner/ directory)
     assert len(review) == 4
-    assert len(review[ANY_ACTION][ANY_REPO]) == 2
-    assert len(review[WebhookEventAction.SUBMITTED][ANY_REPO]) == 4
-    assert len(review[WebhookEventAction.EDITED][ANY_REPO]) == 3
-    assert len(review[WebhookEventAction.DISMISSED][ANY_REPO]) == 3
+    assert len(review[ANY_ACTION][ANY_REPO]) == 1  # Was 2, removed inner/pr_review d
+    assert len(review[WebhookEventAction.SUBMITTED][ANY_REPO]) == 2  # Was 4, removed inner/pr_review a, c
+    assert len(review[WebhookEventAction.EDITED][ANY_REPO]) == 2  # Was 3, removed inner/pr_review b
+    assert len(review[WebhookEventAction.DISMISSED][ANY_REPO]) == 1  # Was 3, removed inner/pr_review b, c
     assert len(review[WebhookEventAction.DISMISSED]["doodla/octohook-playground"]) == 1
     assert len(review[WebhookEventAction.SUBMITTED]["doodla/octohook-playground2"]) == 1
 
@@ -148,7 +145,7 @@ def test_calling_load_hooks_multiple_times_does_not_have_side_effects(mocker):
     assert mock.call_count == EXPECTED_TOTAL_HOOKS
 
 
-def test_handle_hooks(mocker):
+def test_handle_hooks(mocker, fixture_loader):
     """
     Verify that the correct handlers fire for webhook events based on action filtering.
 
@@ -164,6 +161,7 @@ def test_handle_hooks(mocker):
 
     load_hooks(["tests.hooks.handle_hooks"])
 
+    # Expected hooks for each action (after removing inner/ directory)
     assertions = {
         WebhookEvent.LABEL: {
             WebhookEventAction.EDITED: {
@@ -171,15 +169,8 @@ def test_handle_hooks(mocker):
                 "label b",
                 "label c",
                 "label d",
-                "inner label a",
-                "inner label b",
-                "inner label c",
-                "inner label d",
             },
             WebhookEventAction.CREATED: {
-                "inner label a",
-                "inner label c",
-                "inner label d",
                 "label a",
                 "label c",
                 "label d",
@@ -188,16 +179,10 @@ def test_handle_hooks(mocker):
                 "label b",
                 "label c",
                 "label d",
-                "inner label b",
-                "inner label c",
-                "inner label d",
             },
         },
         WebhookEvent.PULL_REQUEST_REVIEW: {
             WebhookEventAction.SUBMITTED: {
-                "inner review a",
-                "inner review c",
-                "inner review d",
                 "review b",
                 "review c",
                 "review d",
@@ -206,13 +191,8 @@ def test_handle_hooks(mocker):
                 "review b",
                 "review c",
                 "review d",
-                "inner review b",
-                "inner review d",
             },
             WebhookEventAction.DISMISSED: {
-                "inner review b",
-                "inner review c",
-                "inner review d",
                 "review a",
                 "review d",
             },
@@ -220,34 +200,33 @@ def test_handle_hooks(mocker):
     }
 
     test_cases = [
-        (WebhookEvent.LABEL, "tests/fixtures/complete/label.json"),
-        (
-            WebhookEvent.PULL_REQUEST_REVIEW,
-            "tests/fixtures/complete/pull_request_review.json",
-        ),
+        (WebhookEvent.LABEL, "label"),
+        (WebhookEvent.PULL_REQUEST_REVIEW, "pull_request_review"),
     ]
 
-    for event_name, path in test_cases:
-        with open(path) as f:
-            events = json.load(f)
+    for event_name, fixture_name in test_cases:
+        events = fixture_loader.load(fixture_name)
 
         for event in events:
-            out = io.StringIO()
-            with redirect_stdout(out):
-                decorator.handle_webhook(event_name.value, event)
+            # Reset tracker before each test
+            _tracker.reset()
 
-            output = out.getvalue().strip().split("\n")
-            output_set = set(output)
+            # Handle the webhook
+            decorator.handle_webhook(event_name.value, event)
 
-            assert len(output) == len(output_set)
+            # Get tracked calls
+            calls = _tracker.get_calls()
+            calls_set = set(calls)
 
-            assert (
-                output_set
-                == assertions[event_name][WebhookEventAction(event["action"])]
-            )
+            # Verify no duplicates
+            assert len(calls) == len(calls_set), "Hooks were called multiple times"
+
+            # Verify correct hooks fired
+            expected = assertions[event_name][WebhookEventAction(event["action"])]
+            assert calls_set == expected, f"Expected {expected}, got {calls_set}"
 
 
-def test_debug_hooks_are_handled(mocker):
+def test_debug_hooks_are_handled(mocker, fixture_loader):
     """
     Verify that debug hooks completely override normal hooks for their event type.
 
@@ -263,24 +242,18 @@ def test_debug_hooks_are_handled(mocker):
     load_hooks(["tests.hooks"])
 
     # LabelEvent has `debug=True`. Only debug hooks should be fired.
-    with open("tests/fixtures/complete/label.json") as f:
-        events = json.load(f)
+    label_events = fixture_loader.load("label")
 
-    for event in events:
-        out = io.StringIO()
-        with redirect_stdout(out):
-            decorator.handle_webhook(WebhookEvent.LABEL.value, event)
-
-        output = set(out.getvalue().strip().split("\n"))
-
-        assert output == {"label a debug", "label d debug"}
+    for event in label_events:
+        _tracker.reset()
+        decorator.handle_webhook(WebhookEvent.LABEL.value, event)
+        calls = set(_tracker.get_calls())
+        assert calls == {"label a debug", "label d debug"}
 
     # PullRequestReview has no debug. All relevant hooks should be fired.
+    # (after removing inner/ directory)
     expected = {
         WebhookEventAction.SUBMITTED: {
-            "inner review a",
-            "inner review c",
-            "inner review d",
             "review b",
             "review c",
             "review d",
@@ -289,26 +262,18 @@ def test_debug_hooks_are_handled(mocker):
             "review b",
             "review c",
             "review d",
-            "inner review b",
-            "inner review d",
         },
         WebhookEventAction.DISMISSED: {
-            "inner review b",
-            "inner review c",
-            "inner review d",
             "review a",
             "review d",
             "repo a",
         },
     }
-    with open("tests/fixtures/complete/pull_request_review.json") as f:
-        events = json.load(f)
 
-        for event in events:
-            out = io.StringIO()
-            with redirect_stdout(out):
-                decorator.handle_webhook(WebhookEvent.PULL_REQUEST_REVIEW.value, event)
+    pr_review_events = fixture_loader.load("pull_request_review")
 
-            output = set(out.getvalue().strip().split("\n"))
-
-            assert output == expected[WebhookEventAction(event["action"])]
+    for event in pr_review_events:
+        _tracker.reset()
+        decorator.handle_webhook(WebhookEvent.PULL_REQUEST_REVIEW.value, event)
+        calls = set(_tracker.get_calls())
+        assert calls == expected[WebhookEventAction(event["action"])]
