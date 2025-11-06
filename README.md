@@ -119,13 +119,9 @@ def webhook():
 
 `handle_webhook` goes through all the handlers sequentially and blocks till everything is done. Any exceptions are logged to `logging.getLogger('octohook')`. You can configure the output stream of this logger to capture the logs.
 
-**Note:** `octohook.load_hooks()` is still supported for backwards compatibility, but `octohook.setup()` is recommended as it provides better error handling and validation.
-
 ### Model Overrides
 
 `octohook` provides a way to extend/modify the models being provided in the event object.
-
-#### Using setup() (Recommended)
 
 ```python
 import octohook
@@ -144,23 +140,6 @@ octohook.setup(
 )
 ```
 
-#### Manual override (Legacy)
-
-```python
-import octohook
-from octohook.models import PullRequest
-
-class MyPullRequest(PullRequest):
-
-    def custom_work(self):
-        pass
-
-octohook.load_hooks(["module_a"])
-octohook.model_overrides = {
-    PullRequest: MyPullRequest
-}
-```
-
 Now, everytime `octohook` attempts to initialize a `PullRequest` object, it will initialize `MyPullRequest` instead.
 
 Check the [test](tests/test_model_override.py) for example usage.
@@ -168,5 +147,5 @@ Check the [test](tests/test_model_override.py) for example usage.
 **Note**
 
 - The class is initialized with the relevant `payload: dict` data from the incoming event payload.
-- It is recommended you subclass the original model class. When using `setup()`, this is validated automatically.
+- You must subclass the original model class - `setup()` validates this automatically.
 - Type hints are no longer reliable for the overridden classes.

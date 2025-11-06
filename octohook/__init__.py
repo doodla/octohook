@@ -11,9 +11,9 @@ __all__ = [
     "events",
     "handle_webhook",
     "hook",
-    "load_hooks",
     "models",
     "model_overrides",
+    "OctohookConfigError",
     "parse",
     "reset",
     "setup",
@@ -48,18 +48,6 @@ def _import_module(module: str) -> List[str]:
         else:
             imported_modules.append(import_module(module_to_be_imported).__name__)
     return imported_modules
-
-def load_hooks(modules: List[str]):
-    """
-    Iterates through the given modules recursively and imports all the modules to load hook information.
-
-    @param modules List of modules to be imported. The modules cannot be relative. For example, you may use
-                   "module_a.module_b" or "module_a", but not ".module_a" or "module_a/module_b"
-    """
-    global _imported_modules
-
-    for module in modules:
-        _imported_modules.extend(_import_module(module))
 
 
 def setup(
