@@ -38,7 +38,7 @@ def test_setup_with_model_overrides():
         model_overrides={PullRequest: CustomPullRequest}
     )
 
-    assert octohook.model_overrides[PullRequest] == CustomPullRequest
+    assert octohook._model_overrides[PullRequest] == CustomPullRequest
 
 
 def test_setup_validates_model_override_is_subclass():
@@ -63,16 +63,6 @@ def test_setup_raises_on_invalid_module():
     """Verify that setup() raises ImportError for invalid modules."""
     with pytest.raises(ModuleNotFoundError):
         setup(modules=["nonexistent.module"])
-
-
-def test_setup_warns_on_multiple_calls(caplog):
-    """Verify that calling setup() multiple times logs a warning."""
-    setup(modules=["tests.hooks.handle_hooks.label"])
-
-    # Second call should warn and reconfigure
-    setup(modules=["tests.hooks.debug_hooks"])
-
-    assert "called multiple times" in caplog.text
 
 
 def test_setup_multiple_calls_replaces_hooks():
@@ -110,11 +100,11 @@ def test_reset_clears_model_overrides():
         model_overrides={PullRequest: CustomPullRequest}
     )
 
-    assert len(octohook.model_overrides) > 0
+    assert len(octohook._model_overrides) > 0
 
     reset()
 
-    assert len(octohook.model_overrides) == 0
+    assert len(octohook._model_overrides) == 0
 
 
 def test_reset_clears_imported_modules():

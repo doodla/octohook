@@ -24,9 +24,9 @@ uv build
 ### Core Components
 
 **octohook/__init__.py** - Entry point providing:
-- `setup(modules, model_overrides)` - Configures octohook by loading webhook handlers and registering model overrides. Validates that model overrides inherit from base classes. Raises on import errors.
+- `setup(modules, model_overrides)` - Configures octohook by loading webhook handlers and registering model overrides. Validates that model overrides inherit from base classes. Raises on import errors. Always calls reset() first to clear existing state.
 - `reset()` - Clears all registered hooks, imported modules, and model overrides. Returns octohook to unconfigured state.
-- `model_overrides` - Global dict for extending/replacing model classes
+- `_model_overrides` - Internal dict for extending/replacing model classes (private, set via setup())
 - `OctohookConfigError` - Exception raised for configuration errors
 - Exports: `hook`, `handle_webhook`, `parse`, `setup`, `reset`, `WebhookEvent`, `WebhookEventAction`, `OctohookConfigError`
 
@@ -65,7 +65,7 @@ Handler resolution order:
 
 ### Model Override System
 
-Users can extend/replace models via `model_overrides`:
+Users can extend/replace models via `setup()`:
 
 ```python
 from octohook.models import PullRequest
@@ -74,10 +74,13 @@ class MyPullRequest(PullRequest):
     def custom_method(self):
         pass
 
-octohook.model_overrides = {PullRequest: MyPullRequest}
+octohook.setup(
+    modules=["hooks"],
+    model_overrides={PullRequest: MyPullRequest}
+)
 ```
 
-When any model is instantiated, `BaseGithubModel.__new__` checks `model_overrides` and substitutes the custom class. This allows adding custom methods/properties to GitHub objects without modifying octohook source.
+When any model is instantiated, `BaseGithubModel.__new__` checks `_model_overrides` and substitutes the custom class. This allows adding custom methods/properties to GitHub objects without modifying octohook source.
 
 ### Payload Inconsistencies
 

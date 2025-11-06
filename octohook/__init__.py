@@ -12,7 +12,6 @@ __all__ = [
     "handle_webhook",
     "hook",
     "models",
-    "model_overrides",
     "OctohookConfigError",
     "parse",
     "reset",
@@ -24,7 +23,7 @@ __all__ = [
 logger = logging.getLogger("octohook")
 
 _imported_modules = []
-model_overrides = {}
+_model_overrides = {}
 
 
 class OctohookConfigError(Exception):
@@ -58,9 +57,9 @@ def setup(
     """
     Configure octohook by loading webhook handlers and registering model overrides.
 
-    This function recursively imports the specified modules to discover and register
-    all decorated webhook handlers. If setup() has already been called, it will reset
-    the existing configuration and reconfigure with the new parameters.
+    This function clears any existing configuration via reset(), then recursively
+    imports the specified modules to discover and register all decorated webhook
+    handlers.
 
     Args:
         modules: List of fully-qualified module paths containing webhook handlers.
@@ -86,11 +85,8 @@ def setup(
         ... )
     """
     global _imported_modules
-    from octohook.decorators import _decorator
 
-    if _decorator.handlers:
-        logger.warning("octohook.setup() called multiple times - reconfiguring")
-        reset()
+    reset()
 
     if model_overrides:
         for base_class, override_class in model_overrides.items():
@@ -105,7 +101,7 @@ def setup(
                     f"{base_class.__name__}"
                 )
 
-        globals()["model_overrides"].update(model_overrides)
+        globals()["_model_overrides"] = model_overrides.copy()
 
     for module in modules:
         _imported_modules.extend(_import_module(module))
@@ -115,20 +111,21 @@ def reset() -> None:
     """
     Clear all octohook configuration and return to unconfigured state.
 
-    This function removes all registered webhook handlers, clears the list of imported
-    modules, and removes all model overrides. After calling reset(), setup() must be
-    called again before handling webhooks.
+    Removes all registered webhook handlers, clears the list of imported modules,
+    and removes all model overrides. After calling reset(), setup() must be called
+    again before handling webhooks.
 
-    Primarily intended for use in test suites to ensure isolation between test cases.
+    This function is automatically called by setup() to ensure a clean configuration.
+    It can also be called directly to clear octohook state.
 
     Example:
         >>> import octohook
         >>> octohook.reset()
-        >>> octohook.setup(modules=["tests.hooks"])
+        >>> octohook.setup(modules=["hooks"])
     """
-    global _imported_modules, model_overrides
+    global _imported_modules, _model_overrides
     from octohook.decorators import _decorator
 
     _decorator.handlers.clear()
     _imported_modules.clear()
-    model_overrides.clear()
+    _model_overrides.clear()

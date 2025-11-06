@@ -159,7 +159,7 @@ def test_nested_model_overrides_apply_recursively(monkeypatch, fixture_loader):
         def custom_field(self):
             return "custom"
 
-    monkeypatch.setattr(octohook, "model_overrides", {User: MyUser})
+    monkeypatch.setattr(octohook, "_model_overrides", {User: MyUser})
 
     # Load fixture
     payload = fixture_loader.load("pull_request")[0]
