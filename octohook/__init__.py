@@ -59,7 +59,7 @@ def setup(
     Configure octohook (one-time initialization).
 
     Args:
-        modules: List of module paths to load hooks from (required).
+        modules: List of module paths to load hooks from.
         model_overrides: Dict mapping base models to custom implementations.
                         Validates that overrides are subclasses.
 
