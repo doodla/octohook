@@ -1,7 +1,7 @@
 """
 Tests for octohook.setup() and octohook.reset() functions.
 
-These tests verify the new simplified initialization API.
+Verifies webhook handler loading, model override validation, and state management.
 """
 import pytest
 

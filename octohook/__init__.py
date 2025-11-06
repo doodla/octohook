@@ -56,22 +56,32 @@ def setup(
     model_overrides: Optional[Dict[Type, Type]] = None,
 ) -> None:
     """
-    Configure octohook (one-time initialization).
+    Configure octohook by loading webhook handlers and registering model overrides.
+
+    This function recursively imports the specified modules to discover and register
+    all decorated webhook handlers. If setup() has already been called, it will reset
+    the existing configuration and reconfigure with the new parameters.
 
     Args:
-        modules: List of module paths to load hooks from.
-        model_overrides: Dict mapping base models to custom implementations.
-                        Validates that overrides are subclasses.
+        modules: List of fully-qualified module paths containing webhook handlers.
+                 Modules are imported recursively. Cannot use relative imports.
+        model_overrides: Optional mapping of base model classes to custom subclasses.
+                        All custom classes are validated to ensure they inherit from
+                        the base class they override.
 
     Raises:
-        OctohookConfigError: If configuration is invalid.
-        ImportError: If any module fails to import.
-        TypeError: If model_overrides contains invalid mappings.
+        ImportError: If any specified module cannot be imported.
+        TypeError: If a model override is not a class or not a subclass of the base model.
 
     Example:
-        >>> octohook.setup(modules=["hooks.github", "hooks.slack"])
+        >>> import octohook
+        >>> from octohook.models import PullRequest
+        >>>
+        >>> class CustomPullRequest(PullRequest):
+        ...     pass
+        >>>
         >>> octohook.setup(
-        ...     modules=["hooks"],
+        ...     modules=["hooks.github", "hooks.slack"],
         ...     model_overrides={PullRequest: CustomPullRequest}
         ... )
     """
@@ -103,12 +113,16 @@ def setup(
 
 def reset() -> None:
     """
-    Reset octohook to initial state.
+    Clear all octohook configuration and return to unconfigured state.
 
-    Clears all registered hooks, imported modules, and model overrides.
-    Useful for testing isolation.
+    This function removes all registered webhook handlers, clears the list of imported
+    modules, and removes all model overrides. After calling reset(), setup() must be
+    called again before handling webhooks.
+
+    Primarily intended for use in test suites to ensure isolation between test cases.
 
     Example:
+        >>> import octohook
         >>> octohook.reset()
         >>> octohook.setup(modules=["tests.hooks"])
     """

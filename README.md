@@ -105,7 +105,7 @@ import octohook
 
 app = Flask(__name__)
 
-# Initialize octohook (one-time setup)
+# Load webhook handlers from the hooks module
 octohook.setup(modules=["hooks"])
 
 @app.route('/webhook', methods=['POST'])

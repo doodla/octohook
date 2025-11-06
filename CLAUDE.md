@@ -24,8 +24,8 @@ uv build
 ### Core Components
 
 **octohook/__init__.py** - Entry point providing:
-- `setup(modules, model_overrides)` - One-time initialization. Validates model overrides and raises on import errors
-- `reset()` - Clears all hooks, imported modules, and model overrides (primarily for testing)
+- `setup(modules, model_overrides)` - Configures octohook by loading webhook handlers and registering model overrides. Validates that model overrides inherit from base classes. Raises on import errors.
+- `reset()` - Clears all registered hooks, imported modules, and model overrides. Returns octohook to unconfigured state.
 - `model_overrides` - Global dict for extending/replacing model classes
 - `OctohookConfigError` - Exception raised for configuration errors
 - Exports: `hook`, `handle_webhook`, `parse`, `setup`, `reset`, `WebhookEvent`, `WebhookEventAction`, `OctohookConfigError`
