@@ -24,9 +24,12 @@ uv build
 ### Core Components
 
 **octohook/__init__.py** - Entry point providing:
-- `load_hooks(modules)` - Recursively imports modules to register webhook handlers
+- `setup(modules, model_overrides)` - One-time initialization (recommended). Validates model overrides and raises on import errors
+- `load_hooks(modules)` - Recursively imports modules to register webhook handlers (legacy, logs errors but continues)
+- `reset()` - Clears all hooks, imported modules, and model overrides (primarily for testing)
 - `model_overrides` - Global dict for extending/replacing model classes
-- Exports: `hook`, `handle_webhook`, `parse`, `WebhookEvent`, `WebhookEventAction`
+- `OctohookConfigError` - Exception raised for configuration errors
+- Exports: `hook`, `handle_webhook`, `parse`, `setup`, `reset`, `WebhookEvent`, `WebhookEventAction`, `OctohookConfigError`
 
 **octohook/decorators.py** - Decorator system (`_WebhookDecorator` class):
 - `@hook(event, actions, repositories, debug)` - Registers functions as webhook handlers
@@ -91,3 +94,5 @@ Octohook uses `Optional` types extensively and the `_optional()` helper to handl
 - Test fixtures in `tests/fixtures/complete/` contain real GitHub webhook payloads
 - Hook tests verify that the decorator system correctly routes events to handlers
 - Model tests verify parsing and URL interpolation
+- `tests/conftest.py` provides an autouse fixture that calls `reset()` before/after each test for isolation
+- The autouse fixture also clears test module imports from `sys.modules` to ensure decorators re-register on each test

@@ -61,10 +61,10 @@ def webhook():
     return Response(event.pull_request.head.user.name, status=200)
 ```
 
-### @hook
+### @hook (Recommended)
 Alternatively, you can also let `octohook` do the heavy lifting of finding and executing the appropriate handlers for any given webhook.
 
-The `@hook` decorator takes in four parameters, the `WebhookEvent`, a list of `WebhookEventAction`s, an optional list of repositories and a `debug` flag (defaults to `False`). 
+The `@hook` decorator takes in four parameters, the `WebhookEvent`, a list of `WebhookEventAction`s, an optional list of repositories and a `debug` flag (defaults to `False`).
 
 Any function this decorator is applied to is invoked whenever you receive an event with the specified `WebhookEvent` and a listed `WebhookEventAction`.
 
@@ -82,7 +82,7 @@ def work(event: PullRequestEvent):
 
 `work()` is automatically called with the parsed `PullRequestEvent` anytime you receive a webhook event with `X-Github-Event: pull_request` and it has any of the `created` or `edited` actions.
 
-If you don't specify a list of actions, then the function is invoked for _any_ action. For some events like `Push`, which do not have an `action`, take care not to specify any actions in the decorator. 
+If you don't specify a list of actions, then the function is invoked for _any_ action. For some events like `Push`, which do not have an `action`, take care not to specify any actions in the decorator.
 
 #### hooks/do_something.py
 ```python
@@ -105,30 +105,53 @@ import octohook
 
 app = Flask(__name__)
 
-octohook.load_hooks(["hooks"]) 
+# Initialize octohook (one-time setup)
+octohook.setup(modules=["hooks"])
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     github_event = request.headers.get('X-GitHub-Event')
-    
+
     octohook.handle_webhook(event_name=github_event, payload=request.json)
 
     return Response("OK", status=200)
 ```
 
-`handle_hooks` goes through all the handlers sequentially and blocks till everything is done. Any exceptions are logged to `logging.getLogger('octohook')`. You can configure the output stream of this logger to capture the logs.
+`handle_webhook` goes through all the handlers sequentially and blocks till everything is done. Any exceptions are logged to `logging.getLogger('octohook')`. You can configure the output stream of this logger to capture the logs.
+
+**Note:** `octohook.load_hooks()` is still supported for backwards compatibility, but `octohook.setup()` is recommended as it provides better error handling and validation.
 
 ### Model Overrides
 
-`octohook` provides a way to extend/modify the models being provided in the event object. `model_overrides` is a dictionary where you can map `octohook` models to your own.
+`octohook` provides a way to extend/modify the models being provided in the event object.
 
+#### Using setup() (Recommended)
 
 ```python
 import octohook
 from octohook.models import PullRequest
 
 class MyPullRequest(PullRequest):
-    
+
+    def custom_work(self):
+        pass
+
+octohook.setup(
+    modules=["module_a"],
+    model_overrides={
+        PullRequest: MyPullRequest
+    }
+)
+```
+
+#### Manual override (Legacy)
+
+```python
+import octohook
+from octohook.models import PullRequest
+
+class MyPullRequest(PullRequest):
+
     def custom_work(self):
         pass
 
@@ -145,5 +168,5 @@ Check the [test](tests/test_model_override.py) for example usage.
 **Note**
 
 - The class is initialized with the relevant `payload: dict` data from the incoming event payload.
-- It is recommended you subclass the original model class, but it is not required.
+- It is recommended you subclass the original model class. When using `setup()`, this is validated automatically.
 - Type hints are no longer reliable for the overridden classes.

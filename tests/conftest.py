@@ -9,7 +9,36 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 import pytest
+import octohook
 from octohook.decorators import _WebhookDecorator
+
+
+@pytest.fixture(autouse=True)
+def reset_octohook():
+    """
+    Reset octohook state before each test to ensure isolation.
+
+    This fixture automatically runs before every test, clearing all hooks,
+    imported modules, and model overrides. It also clears test module imports
+    from sys.modules to ensure decorators re-register on each test.
+    """
+    import sys
+
+    # Clear octohook state
+    octohook.reset()
+
+    # Save current sys.modules state
+    original_modules = set(sys.modules.keys())
+
+    yield
+
+    # Cleanup after test
+    octohook.reset()
+
+    # Remove test modules from sys.modules to allow fresh imports next test
+    for module_name in list(sys.modules.keys()):
+        if module_name not in original_modules and module_name.startswith("tests.hooks"):
+            sys.modules.pop(module_name, None)
 
 
 @pytest.fixture

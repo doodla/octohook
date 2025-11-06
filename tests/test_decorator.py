@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 import octohook
@@ -22,35 +20,6 @@ ANY_ACTION = "*"
 EXPECTED_TOTAL_HOOKS = 14
 EXPECTED_DEBUG_HOOKS_ONLY = 4
 EXPECTED_HANDLE_HOOKS_ONLY = 10  # Total hooks excluding debug_hooks module
-
-
-@pytest.fixture(autouse=True)
-def clean_imported_modules(monkeypatch):
-    """
-    Clean up module imports after each test to prevent test pollution.
-
-    This fixture:
-    1. Saves current state of imported modules
-    2. Resets octohook._imported_modules before test
-    3. Cleans up sys.modules after test
-
-    Using autouse=True applies this to all tests in this file automatically.
-    """
-    # Save current imported modules
-    original_modules = set(sys.modules.keys())
-
-    # Reset octohook's module tracking
-    monkeypatch.setattr(octohook, "_imported_modules", [])
-
-    yield  # Run the test
-
-    # Clean up any modules imported during test
-    for module_name in list(sys.modules.keys()):
-        if module_name not in original_modules and module_name.startswith("tests.hooks"):
-            sys.modules.pop(module_name, None)
-
-    # Reset module tracking again
-    octohook._imported_modules = []
 
 
 def test_load_hooks_calls_hook(mocker):
