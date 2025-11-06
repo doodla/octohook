@@ -61,7 +61,7 @@ def webhook():
     return Response(event.pull_request.head.user.name, status=200)
 ```
 
-### @hook (Recommended)
+### @hook
 Alternatively, you can also let `octohook` do the heavy lifting of finding and executing the appropriate handlers for any given webhook.
 
 The `@hook` decorator takes in four parameters, the `WebhookEvent`, a list of `WebhookEventAction`s, an optional list of repositories and a `debug` flag (defaults to `False`).
