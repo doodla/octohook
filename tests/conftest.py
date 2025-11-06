@@ -9,7 +9,28 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 import pytest
+import octohook
 from octohook.decorators import _WebhookDecorator
+
+
+@pytest.fixture(autouse=True)
+def cleanup_test_modules():
+    """
+    Clean up test module imports after each test.
+
+    Removes test hook modules from sys.modules to ensure decorators re-register
+    on each test. This is necessary because @hook decorators execute at import time,
+    and without cleanup, Python won't re-execute them when modules are imported again.
+    """
+    import sys
+
+    original_modules = set(sys.modules.keys())
+
+    yield
+
+    for module_name in list(sys.modules.keys()):
+        if module_name not in original_modules and module_name.startswith("tests.hooks"):
+            sys.modules.pop(module_name, None)
 
 
 @pytest.fixture

@@ -20,7 +20,7 @@ def model_override(monkeypatch):
     the standard PullRequest class, allowing us to test the model
     override system.
     """
-    monkeypatch.setattr(octohook, "model_overrides", {
+    monkeypatch.setattr(octohook, "_model_overrides", {
         PullRequest: MyPullRequest,
     })
     return MyPullRequest

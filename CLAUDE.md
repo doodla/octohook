@@ -24,9 +24,11 @@ uv build
 ### Core Components
 
 **octohook/__init__.py** - Entry point providing:
-- `load_hooks(modules)` - Recursively imports modules to register webhook handlers
-- `model_overrides` - Global dict for extending/replacing model classes
-- Exports: `hook`, `handle_webhook`, `parse`, `WebhookEvent`, `WebhookEventAction`
+- `setup(modules, model_overrides)` - Configures octohook by loading webhook handlers and registering model overrides. Validates that model overrides inherit from base classes. Raises on import errors. Always calls reset() first to clear existing state.
+- `reset()` - Clears all registered hooks, imported modules, and model overrides. Returns octohook to unconfigured state.
+- `_model_overrides` - Internal dict for extending/replacing model classes (private, set via setup())
+- `OctohookConfigError` - Exception raised for configuration errors
+- Exports: `hook`, `handle_webhook`, `parse`, `setup`, `reset`, `WebhookEvent`, `WebhookEventAction`, `OctohookConfigError`
 
 **octohook/decorators.py** - Decorator system (`_WebhookDecorator` class):
 - `@hook(event, actions, repositories, debug)` - Registers functions as webhook handlers
@@ -63,7 +65,7 @@ Handler resolution order:
 
 ### Model Override System
 
-Users can extend/replace models via `model_overrides`:
+Users can extend/replace models via `setup()`:
 
 ```python
 from octohook.models import PullRequest
@@ -72,10 +74,13 @@ class MyPullRequest(PullRequest):
     def custom_method(self):
         pass
 
-octohook.model_overrides = {PullRequest: MyPullRequest}
+octohook.setup(
+    modules=["hooks"],
+    model_overrides={PullRequest: MyPullRequest}
+)
 ```
 
-When any model is instantiated, `BaseGithubModel.__new__` checks `model_overrides` and substitutes the custom class. This allows adding custom methods/properties to GitHub objects without modifying octohook source.
+When any model is instantiated, `BaseGithubModel.__new__` checks `_model_overrides` and substitutes the custom class. This allows adding custom methods/properties to GitHub objects without modifying octohook source.
 
 ### Payload Inconsistencies
 
@@ -91,3 +96,5 @@ Octohook uses `Optional` types extensively and the `_optional()` helper to handl
 - Test fixtures in `tests/fixtures/complete/` contain real GitHub webhook payloads
 - Hook tests verify that the decorator system correctly routes events to handlers
 - Model tests verify parsing and URL interpolation
+- `tests/conftest.py` provides an autouse fixture that calls `reset()` before/after each test for isolation
+- The autouse fixture also clears test module imports from `sys.modules` to ensure decorators re-register on each test
