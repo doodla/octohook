@@ -25,7 +25,7 @@ uv build
 
 **octohook/__init__.py** - Entry point providing:
 - `setup(modules, model_overrides)` - One-time initialization (recommended). Validates model overrides and raises on import errors
-- `load_hooks(modules)` - Recursively imports modules to register webhook handlers (legacy, logs errors but continues)
+- `load_hooks(modules)` - Recursively imports modules to register webhook handlers (legacy). Also raises on import errors
 - `reset()` - Clears all hooks, imported modules, and model overrides (primarily for testing)
 - `model_overrides` - Global dict for extending/replacing model classes
 - `OctohookConfigError` - Exception raised for configuration errors

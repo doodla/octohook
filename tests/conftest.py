@@ -24,18 +24,13 @@ def reset_octohook():
     """
     import sys
 
-    # Clear octohook state
     octohook.reset()
-
-    # Save current sys.modules state
     original_modules = set(sys.modules.keys())
 
     yield
 
-    # Cleanup after test
     octohook.reset()
 
-    # Remove test modules from sys.modules to allow fresh imports next test
     for module_name in list(sys.modules.keys()):
         if module_name not in original_modules and module_name.startswith("tests.hooks"):
             sys.modules.pop(module_name, None)

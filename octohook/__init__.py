@@ -31,15 +31,8 @@ class OctohookConfigError(Exception):
     """Raised when octohook configuration is invalid."""
     pass
 
-def _import_module(module: str, strict: bool = True) -> List[str]:
-    try:
-        imported = import_module(module)
-    except Exception as e:
-        logger.error("Failed to import module %s", module, exc_info=e)
-        if strict:
-            raise
-        return []
-
+def _import_module(module: str) -> List[str]:
+    imported = import_module(module)
     module_path = imported.__file__
 
     if module_path.endswith("__init__.py"):
@@ -51,7 +44,7 @@ def _import_module(module: str, strict: bool = True) -> List[str]:
     for _, module_name, is_package in walk_packages([str(package_dir)]):
         module_to_be_imported = f"{module}.{module_name}"
         if is_package:
-            imported_modules.extend(_import_module(module_to_be_imported, strict=strict))
+            imported_modules.extend(_import_module(module_to_be_imported))
         else:
             imported_modules.append(import_module(module_to_be_imported).__name__)
     return imported_modules
@@ -66,7 +59,7 @@ def load_hooks(modules: List[str]):
     global _imported_modules
 
     for module in modules:
-        _imported_modules.extend(_import_module(module, strict=False))
+        _imported_modules.extend(_import_module(module))
 
 
 def setup(
@@ -95,17 +88,14 @@ def setup(
         ... )
     """
     global _imported_modules
-
-    # Warn if setup() called multiple times (check if handlers already exist)
     from octohook.decorators import _decorator
+
     if _decorator.handlers:
         logger.warning("octohook.setup() called multiple times - reconfiguring")
         reset()
 
-    # Validate and set model overrides
     if model_overrides:
         for base_class, override_class in model_overrides.items():
-            # Validate that override is a subclass of base
             if not isinstance(override_class, type):
                 raise TypeError(
                     f"Model override for {base_class.__name__} must be a class, "
@@ -117,12 +107,10 @@ def setup(
                     f"{base_class.__name__}"
                 )
 
-        # Access the module-level global via globals()
         globals()["model_overrides"].update(model_overrides)
 
-    # Load hook modules (strict=True, will raise on import errors)
     for module in modules:
-        _imported_modules.extend(_import_module(module, strict=True))
+        _imported_modules.extend(_import_module(module))
 
 
 def reset() -> None:
@@ -137,13 +125,8 @@ def reset() -> None:
         >>> octohook.setup(modules=["tests.hooks"])
     """
     global _imported_modules, model_overrides
-
-    # Clear hook registry
     from octohook.decorators import _decorator
+
     _decorator.handlers.clear()
-
-    # Clear imported modules tracking
     _imported_modules.clear()
-
-    # Clear model overrides
     model_overrides.clear()

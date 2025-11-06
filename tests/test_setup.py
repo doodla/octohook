@@ -27,7 +27,6 @@ def test_setup_loads_modules():
     """Verify that setup() loads hooks from specified modules."""
     setup(modules=["tests.hooks.handle_hooks"])
 
-    # Verify hooks were loaded
     from octohook.decorators import _decorator
     assert len(_decorator.handlers) > 0
 
@@ -39,7 +38,6 @@ def test_setup_with_model_overrides():
         model_overrides={PullRequest: CustomPullRequest}
     )
 
-    # Verify override was set
     assert octohook.model_overrides[PullRequest] == CustomPullRequest
 
 
@@ -149,13 +147,11 @@ def test_setup_and_handle_webhook(fixture_loader):
 
     setup(modules=["tests.hooks.handle_hooks"])
 
-    # Load a test payload
     payloads = fixture_loader.load("label")
     created_payload = [p for p in payloads if p["action"] == "created"][0]
 
     _tracker.reset()
     octohook.handle_webhook("label", created_payload)
 
-    # Verify handlers were called
     calls = _tracker.get_calls()
     assert len(calls) > 0
