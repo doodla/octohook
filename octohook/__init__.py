@@ -84,7 +84,7 @@ def setup(
         ...     model_overrides={PullRequest: CustomPullRequest}
         ... )
     """
-    global _imported_modules
+    global _imported_modules, _model_overrides
 
     reset()
 
@@ -101,7 +101,7 @@ def setup(
                     f"{base_class.__name__}"
                 )
 
-        globals()["_model_overrides"] = model_overrides.copy()
+        _model_overrides = model_overrides.copy()
 
     for module in modules:
         _imported_modules.extend(_import_module(module))
