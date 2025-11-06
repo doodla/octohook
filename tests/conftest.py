@@ -14,22 +14,18 @@ from octohook.decorators import _WebhookDecorator
 
 
 @pytest.fixture(autouse=True)
-def reset_octohook():
+def cleanup_test_modules():
     """
-    Reset octohook state before each test to ensure isolation.
+    Clean up test module imports after each test.
 
-    This fixture automatically runs before every test, clearing all hooks,
-    imported modules, and model overrides. It also clears test module imports
-    from sys.modules to ensure decorators re-register on each test.
+    Removes test hook modules from sys.modules to ensure decorators re-register
+    on each test. This is necessary because @hook decorators execute at import time.
     """
     import sys
 
-    octohook.reset()
     original_modules = set(sys.modules.keys())
 
     yield
-
-    octohook.reset()
 
     for module_name in list(sys.modules.keys()):
         if module_name not in original_modules and module_name.startswith("tests.hooks"):
