@@ -19,7 +19,8 @@ def cleanup_test_modules():
     Clean up test module imports after each test.
 
     Removes test hook modules from sys.modules to ensure decorators re-register
-    on each test. This is necessary because @hook decorators execute at import time.
+    on each test. This is necessary because @hook decorators execute at import time,
+    and without cleanup, Python won't re-execute them when modules are imported again.
     """
     import sys
 
