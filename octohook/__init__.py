@@ -25,7 +25,6 @@ logger = logging.getLogger("octohook")
 
 _imported_modules = []
 model_overrides = {}
-_setup_called = False
 
 
 class OctohookConfigError(Exception):
@@ -95,14 +94,13 @@ def setup(
         ...     model_overrides={PullRequest: CustomPullRequest}
         ... )
     """
-    global _setup_called, _imported_modules
+    global _imported_modules
 
-    # Warn if setup() called multiple times
-    if _setup_called:
+    # Warn if setup() called multiple times (check if handlers already exist)
+    from octohook.decorators import _decorator
+    if _decorator.handlers:
         logger.warning("octohook.setup() called multiple times - reconfiguring")
         reset()
-
-    _setup_called = True
 
     # Validate and set model overrides
     if model_overrides:
@@ -138,7 +136,7 @@ def reset() -> None:
         >>> octohook.reset()
         >>> octohook.setup(modules=["tests.hooks"])
     """
-    global _imported_modules, model_overrides, _setup_called
+    global _imported_modules, model_overrides
 
     # Clear hook registry
     from octohook.decorators import _decorator
@@ -149,6 +147,3 @@ def reset() -> None:
 
     # Clear model overrides
     model_overrides.clear()
-
-    # Reset setup flag
-    _setup_called = False
