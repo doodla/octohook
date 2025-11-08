@@ -1,26 +1,13 @@
 """
 Tests for octohook.setup() and octohook.reset() functions.
 
-Verifies webhook handler loading, model override validation, and state management.
+Verifies webhook handler loading and state management.
 """
 import pytest
 
 import octohook
 from octohook import setup, reset, OctohookConfigError
-from octohook.models import PullRequest
 from octohook.events import WebhookEvent, WebhookEventAction
-
-
-class CustomPullRequest(PullRequest):
-    """Test custom model class."""
-    @property
-    def custom_property(self):
-        return "custom"
-
-
-class InvalidClass:
-    """Not a subclass of any model."""
-    pass
 
 
 def test_setup_loads_modules():
@@ -29,34 +16,6 @@ def test_setup_loads_modules():
 
     from octohook.decorators import _decorator
     assert len(_decorator.handlers) > 0
-
-
-def test_setup_with_model_overrides():
-    """Verify that setup() applies model overrides correctly."""
-    setup(
-        modules=["tests.hooks.handle_hooks"],
-        model_overrides={PullRequest: CustomPullRequest}
-    )
-
-    assert octohook._model_overrides[PullRequest] == CustomPullRequest
-
-
-def test_setup_validates_model_override_is_subclass():
-    """Verify that setup() validates model overrides are subclasses."""
-    with pytest.raises(TypeError, match="must be a subclass"):
-        setup(
-            modules=["tests.hooks.handle_hooks"],
-            model_overrides={PullRequest: InvalidClass}
-        )
-
-
-def test_setup_validates_model_override_is_class():
-    """Verify that setup() validates model overrides are classes."""
-    with pytest.raises(TypeError, match="must be a class"):
-        setup(
-            modules=["tests.hooks.handle_hooks"],
-            model_overrides={PullRequest: "not a class"}
-        )
 
 
 def test_setup_raises_on_invalid_module():
@@ -91,20 +50,6 @@ def test_reset_clears_hooks():
     reset()
 
     assert len(_decorator.handlers) == 0
-
-
-def test_reset_clears_model_overrides():
-    """Verify that reset() clears model overrides."""
-    setup(
-        modules=["tests.hooks.handle_hooks"],
-        model_overrides={PullRequest: CustomPullRequest}
-    )
-
-    assert len(octohook._model_overrides) > 0
-
-    reset()
-
-    assert len(octohook._model_overrides) == 0
 
 
 def test_reset_clears_imported_modules():

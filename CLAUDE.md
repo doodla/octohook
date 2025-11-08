@@ -24,9 +24,8 @@ uv build
 ### Core Components
 
 **octohook/__init__.py** - Entry point providing:
-- `setup(modules, model_overrides)` - Configures octohook by loading webhook handlers and registering model overrides. Validates that model overrides inherit from base classes. Raises on import errors. Always calls reset() first to clear existing state.
-- `reset()` - Clears all registered hooks, imported modules, and model overrides. Returns octohook to unconfigured state.
-- `_model_overrides` - Internal dict for extending/replacing model classes (private, set via setup())
+- `setup(modules)` - Configures octohook by loading webhook handlers. Raises on import errors. Always calls reset() first to clear existing state.
+- `reset()` - Clears all registered hooks and imported modules. Returns octohook to unconfigured state.
 - `OctohookConfigError` - Exception raised for configuration errors
 - Exports: `hook`, `handle_webhook`, `parse`, `setup`, `reset`, `WebhookEvent`, `WebhookEventAction`, `OctohookConfigError`
 
@@ -45,7 +44,7 @@ uv build
 - `parse(event_name, payload)` - Factory function that returns appropriate event object
 
 **octohook/models.py** - Model classes:
-- `BaseGithubModel` - Uses `__new__` to check `model_overrides` dict and instantiate override classes
+- `BaseGithubModel` - Base class for all GitHub models
 - Core models: `User`, `Repository`, `PullRequest`, `Issue`, `Comment`, etc.
 - URL interpolation: Many models have methods like `archive_url(format, ref)` that fill in URL templates
 - `_transform(url, local_variables)` - Helper that replaces `{param}` and `{/param}` patterns in URLs
@@ -62,25 +61,6 @@ The hook system uses a three-level filtering mechanism:
 Handler resolution order:
 1. If any debug hooks exist for the event, ONLY debug hooks run
 2. Otherwise: handlers for (event, specific_action, ANY_REPO) + (event, specific_action, specific_repo) + (event, ANY_ACTION, ANY_REPO)
-
-### Model Override System
-
-Users can extend/replace models via `setup()`:
-
-```python
-from octohook.models import PullRequest
-
-class MyPullRequest(PullRequest):
-    def custom_method(self):
-        pass
-
-octohook.setup(
-    modules=["hooks"],
-    model_overrides={PullRequest: MyPullRequest}
-)
-```
-
-When any model is instantiated, `BaseGithubModel.__new__` checks `_model_overrides` and substitutes the custom class. This allows adding custom methods/properties to GitHub objects without modifying octohook source.
 
 ### Payload Inconsistencies
 

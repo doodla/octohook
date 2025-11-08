@@ -9,7 +9,6 @@ from unittest.mock import Mock
 
 
 from octohook.events import WebhookEvent, WebhookEventAction, parse, BaseWebhookEvent
-from octohook.models import User
 import octohook
 
 
@@ -144,46 +143,6 @@ def test_all_fixture_examples_parse_correctly(fixture_loader):
             # Verify changes field exists when present (e.g., edited actions)
             if "changes" in fixture:
                 assert hasattr(result, "changes"), f"{event_name} missing 'changes' attribute"
-
-
-def test_nested_model_overrides_apply_recursively(monkeypatch, fixture_loader):
-    """
-    Verify that model overrides apply to nested objects.
-
-    E.g., if we override User, does PR.user use the override?
-    Tests that overrides apply to all User instances throughout the object tree.
-    """
-
-    class MyUser(User):
-        @property
-        def custom_field(self):
-            return "custom"
-
-    monkeypatch.setattr(octohook, "_model_overrides", {User: MyUser})
-
-    # Load fixture
-    payload = fixture_loader.load("pull_request")[0]
-
-    from octohook.events import PullRequestEvent
-
-    event = PullRequestEvent(payload)
-
-    # Test 1: Primary nested User object (pull_request.user)
-    assert isinstance(event.pull_request.user, MyUser)
-    assert event.pull_request.user.custom_field == "custom"
-
-    # Test 2: Top-level sender User object
-    assert isinstance(event.sender, MyUser)
-    assert event.sender.custom_field == "custom"
-
-    # Test 3: Repository owner User object (if present)
-    if hasattr(event.repository, "owner") and event.repository.owner:
-        assert isinstance(event.repository.owner, MyUser)
-        assert event.repository.owner.custom_field == "custom"
-
-    # Note: The fixture has assignee=None, so we can't test that path
-    # This is acceptable as we've verified the override applies to multiple
-    # User instances across different nesting levels
 
 
 def test_malformed_payload_missing_required_fields():
