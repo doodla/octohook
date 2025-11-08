@@ -28,11 +28,7 @@ def _transform(url: str, local_variables: dict) -> str:
 
 
 class BaseGithubModel(ABC):
-    def __new__(cls, *args, **kwargs):
-        from octohook import _model_overrides
-
-        cls = _model_overrides.get(cls) or cls
-        return object.__new__(cls)
+    pass
 
 
 class Enterprise(BaseGithubModel):
