@@ -1,3 +1,23 @@
+"""
+GitHub webhook model classes.
+
+This module uses Annotated[dict, "unstructured"] to mark intentionally unstructured
+dictionary data in webhook payloads. This annotation serves two purposes:
+
+1. Documentation: Clearly indicates fields containing variable or user-defined data
+2. Type safety: Tests enforce that all dicts are either annotated or proper model classes
+
+When to use Annotated[dict, "unstructured"]:
+- GitHub's variable payload structures (e.g., 'changes' field format varies by event)
+- User-defined data (e.g., deployment payloads, client_payload)
+- Hypermedia links (_links fields)
+- Configuration dictionaries (webhook config)
+- Error details with varying structures
+
+When to create a model class instead:
+- Structured GitHub data with consistent fields across events
+- Data that benefits from type hints and IDE autocomplete
+"""
 from abc import ABC
 from typing import TypeVar, Optional, Type, List, Any, Annotated
 

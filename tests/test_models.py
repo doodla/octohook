@@ -123,6 +123,40 @@ def test_all_event_actions_are_in_enum(path):
         WebhookEventAction(action)
 
 
+def _unwrap_annotated(type_hint):
+    """
+    Extract the actual type from Annotated and Optional wrappers.
+
+    Handles:
+    - Annotated[T, ...] -> T
+    - Optional[Annotated[T, ...]] -> T
+    - Optional[T] -> T
+    - T -> T
+
+    Args:
+        type_hint: Type hint to unwrap
+
+    Returns:
+        The unwrapped type, or the original if not wrapped
+    """
+    origin = get_origin(type_hint)
+
+    # Handle Optional/Union - extract non-None type
+    if origin is Union:
+        args = get_args(type_hint)
+        for arg in args:
+            if arg is not type(None):
+                # Recursively unwrap in case it's Optional[Annotated[...]]
+                return _unwrap_annotated(arg)
+
+    # Handle Annotated - extract the actual type
+    if origin is Annotated:
+        args = get_args(type_hint)
+        return args[0]
+
+    return type_hint
+
+
 def _is_unstructured_dict(type_hint) -> bool:
     """
     Check if a type hint is Annotated[dict, "unstructured"].
@@ -188,24 +222,8 @@ def _validate_simple_type(obj, attr, type_hint, obj_value):
     if obj_value is None and type(None) in get_args(type_hint):
         return  # None is valid for Optional types
 
-    # Extract actual type from Annotated if needed
-    # Handle both Annotated[dict, "unstructured"] and Optional[Annotated[dict, "unstructured"]]
-    check_type = type_hint
-    origin = get_origin(type_hint)
-
-    if origin is Annotated:
-        check_type = get_args(type_hint)[0]
-    elif origin is Union:
-        # For Optional/Union, extract the non-None type
-        args = get_args(type_hint)
-        for arg in args:
-            if arg is not type(None):
-                # Check if this arg is Annotated
-                if get_origin(arg) is Annotated:
-                    check_type = get_args(arg)[0]
-                else:
-                    check_type = arg
-                break
+    # Extract actual type from Annotated/Optional wrappers
+    check_type = _unwrap_annotated(type_hint)
 
     if isinstance(obj_value, check_type):
         # Recursively validate nested objects (non-primitives without None in Union)
@@ -335,3 +353,32 @@ def test_missing_models_return_basewebhookevent():
         payload = json.load(file)[0]
 
         assert isinstance(parse("code_scanning_alert", payload), BaseWebhookEvent)
+
+
+def test_unannotated_dict_enforcement():
+    """
+    Verify that check_model enforces Annotated[dict, "unstructured"] requirement.
+
+    Tests that using a plain dict without the annotation raises an AttributeError,
+    preventing accidental use of unstructured data where model classes should exist.
+    """
+    from octohook.models import BaseGithubModel
+
+    # Create a test model with a plain dict field (missing annotation)
+    class BadModel(BaseGithubModel):
+        payload: dict
+        bad_field: dict  # This should be Annotated[dict, "unstructured"]
+
+        def __init__(self, payload: dict):
+            self.payload = payload
+            self.bad_field = payload.get("bad_field")
+
+    test_payload = {"bad_field": {"key": "value"}}
+    obj = BadModel(test_payload)
+
+    # This should raise an error because bad_field is a plain dict without annotation
+    with pytest.raises(
+        AttributeError,
+        match="Plain dict for 'bad_field' in BadModel - should be a model class or Annotated",
+    ):
+        check_model(test_payload, obj)

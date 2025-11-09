@@ -526,13 +526,13 @@ class PullRequestReviewEvent(BaseWebhookEvent):
 
     review: Review
     pull_request: PullRequest
-    changes: Annotated[dict, "unstructured"]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.review = Review(payload.get("review"))
         self.pull_request = PullRequest(payload.get("pull_request"))
-        self.changes = payload.get("pull_request")
+        self.changes = payload.get("changes")
 
 
 class PullRequestReviewCommentEvent(BaseWebhookEvent):
@@ -603,12 +603,12 @@ class ReleaseEvent(BaseWebhookEvent):
     """
 
     release: Release
-    changes: Annotated[dict, "unstructured"]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
         self.release = Release(payload.get("release"))
-        self.changes = payload.get("release")
+        self.changes = payload.get("changes")
 
 
 class RepositoryDispatchEvent(BaseWebhookEvent):
