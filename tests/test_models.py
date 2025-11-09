@@ -5,7 +5,6 @@ from typing import get_type_hints, get_origin, get_args
 import pytest
 
 from octohook.events import parse, WebhookEventAction, BaseWebhookEvent
-from octohook.models import RawDict
 from tests.conftest import discover_fixtures
 
 paths = ["tests/fixtures/complete", "tests/fixtures/incomplete"]
@@ -33,7 +32,7 @@ def test_model_loads(event_name, fixture_loader):
 
 def check_model(data, obj):
     """
-    Checks if every key in the json is represented either as a RawDict or a nested object.
+    Checks if every key in the json is represented either as a dict or a nested object.
     :param data: The JSON dictionary
     :param obj: The Class Object for the dictionary
     """
@@ -48,10 +47,10 @@ def check_model(data, obj):
                 raise AttributeError(f"Couldn't find function or attribute for {key}")
 
         # When the nested object is another dictionary
-        if not isinstance(obj_value, RawDict) and isinstance(json_value, dict):
-            if isinstance(obj_value, dict):
-                raise AttributeError(f"Object is a plain dictionary for {key}")
-            else:
+        if isinstance(json_value, dict):
+            # If it's a plain dict, that's fine - it's intentionally unstructured data
+            # If it's a model object, recursively check it
+            if not isinstance(obj_value, dict):
                 check_model(json_value, obj_value)
 
         # When the nested object is a list of objects
@@ -115,9 +114,9 @@ def _is_primitive_type(type_hint):
         type_hint: Type hint to check
 
     Returns:
-        bool: True if the type is primitive (str, int, None, bool, RawDict)
+        bool: True if the type is primitive (str, int, None, bool, dict)
     """
-    primitives = [str, int, type(None), bool, RawDict]
+    primitives = [str, int, type(None), bool, dict]
     return type_hint in primitives
 
 
