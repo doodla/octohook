@@ -1,5 +1,25 @@
+"""
+GitHub webhook model classes.
+
+This module uses Annotated[dict, "unstructured"] to mark intentionally unstructured
+dictionary data in webhook payloads. This annotation serves two purposes:
+
+1. Documentation: Clearly indicates fields containing variable or user-defined data
+2. Type safety: Tests enforce that all dicts are either annotated or proper model classes
+
+When to use Annotated[dict, "unstructured"]:
+- GitHub's variable payload structures (e.g., 'changes' field format varies by event)
+- User-defined data (e.g., deployment payloads, client_payload)
+- Hypermedia links (_links fields)
+- Configuration dictionaries (webhook config)
+- Error details with varying structures
+
+When to create a model class instead:
+- Structured GitHub data with consistent fields across events
+- Data that benefits from type hints and IDE autocomplete
+"""
 from abc import ABC
-from typing import TypeVar, Optional, Type, List, Any
+from typing import TypeVar, Optional, Type, List, Any, Annotated
 
 T = TypeVar("T")
 
@@ -135,11 +155,6 @@ class ShortRepository(BaseGithubModel):
 
     def __str__(self):
         return self.full_name
-
-
-class RawDict(dict):
-    def __init__(self, payload: dict):
-        super().__init__(payload)
 
 
 class Permissions(BaseGithubModel):
@@ -486,7 +501,8 @@ class Comment(BaseGithubModel):
     start_side: Optional[str]
     original_line: Optional[int]
     side: Optional[str]
-    reactions: Optional[RawDict]
+    reactions: Optional[Annotated[dict, "unstructured"]]
+    _links: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -509,13 +525,13 @@ class Comment(BaseGithubModel):
         self.updated_at = payload.get("updated_at")
         self.author_association = payload.get("author_association")
         self.body = payload.get("body")
-        self._links = _optional(payload, "_links", RawDict)
+        self._links = payload.get("_links")
         self.start_line = payload.get("start_line")
         self.original_start_line = payload.get("original_start_line")
         self.start_side = payload.get("start_side")
         self.original_line = payload.get("original_line")
         self.side = payload.get("side")
-        self.reactions = _optional(payload, "reactions", RawDict)
+        self.reactions = payload.get("reactions")
 
     def __str__(self):
         return self.body
@@ -566,16 +582,16 @@ class ChecksPullRequest(BaseGithubModel):
     url: str
     id: int
     number: int
-    head: RawDict
-    base: RawDict
+    head: Annotated[dict, "unstructured"]
+    base: Annotated[dict, "unstructured"]
 
     def __init__(self, payload: dict):
         self.payload = payload
         self.url = payload.get("url")
         self.id = payload.get("id")
         self.number = payload.get("number")
-        self.head = RawDict(payload.get("head"))
-        self.base = RawDict(payload.get("base"))
+        self.head = payload.get("head")
+        self.base = payload.get("base")
 
 
 class CommitUser(BaseGithubModel):
@@ -796,7 +812,7 @@ class Deployment(BaseGithubModel):
     sha: str
     ref: str
     task: str
-    payload: RawDict
+    payload: Annotated[dict, "unstructured"]
     original_environment: str
     environment: str
     description: Optional[str]
@@ -814,7 +830,7 @@ class Deployment(BaseGithubModel):
         self.sha = payload.get("sha")
         self.ref = payload.get("ref")
         self.task = payload.get("task")
-        self.payload = RawDict(payload.get("payload"))
+        self.payload = payload.get("payload")
         self.original_environment = payload.get("original_environment")
         self.environment = payload.get("environment")
         self.description = payload.get("description")
@@ -1098,7 +1114,7 @@ class Hook(BaseGithubModel):
     name: str
     active: bool
     events: List[str]
-    config: RawDict
+    config: Annotated[dict, "unstructured"]
     updated_at: str
     created_at: str
 
@@ -1109,7 +1125,7 @@ class Hook(BaseGithubModel):
         self.name = payload.get("name")
         self.active = payload.get("active")
         self.events = payload.get("events")
-        self.config = RawDict(payload.get("config"))
+        self.config = payload.get("config")
         self.updated_at = payload.get("updated_at")
         self.created_at = payload.get("created_at")
 
@@ -1329,7 +1345,7 @@ class PageBuild(BaseGithubModel):
     payload: dict
     url: str
     status: str
-    error: RawDict
+    error: Annotated[dict, "unstructured"]
     pusher: User
     commit: str
     duration: int
@@ -1340,7 +1356,7 @@ class PageBuild(BaseGithubModel):
         self.payload = payload
         self.url = payload.get("url")
         self.status = payload.get("status")
-        self.error = RawDict(payload.get("error"))
+        self.error = payload.get("error")
         self.pusher = User(payload.get("pusher"))
         self.commit = payload.get("commit")
         self.duration = payload.get("duration")
@@ -1488,7 +1504,7 @@ class PullRequest(BaseGithubModel):
     statuses_url: str
     head: Ref
     base: Ref
-    _links: RawDict
+    _links: Annotated[dict, "unstructured"]
     author_association: str
     draft: bool
     merged: Optional[bool]
@@ -1540,7 +1556,7 @@ class PullRequest(BaseGithubModel):
         self.statuses_url = payload.get("statuses_url")
         self.head = Ref(payload.get("head"))
         self.base = Ref(payload.get("base"))
-        self._links = RawDict(payload.get("_links"))
+        self._links = payload.get("_links")
         self.author_association = payload.get("author_association")
         self.draft = payload.get("draft")
         self.merged = payload.get("merged")
@@ -1577,7 +1593,7 @@ class Review(BaseGithubModel):
     html_url: str
     pull_request_url: str
     author_association: str
-    _links: RawDict
+    _links: Annotated[dict, "unstructured"]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -1591,7 +1607,7 @@ class Review(BaseGithubModel):
         self.html_url = payload.get("html_url")
         self.pull_request_url = payload.get("pull_request_url")
         self.author_association = payload.get("author_association")
-        self._links = RawDict(payload.get("_links"))
+        self._links = payload.get("_links")
 
 
 class VulnerabilityAlert(BaseGithubModel):
