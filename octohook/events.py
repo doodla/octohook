@@ -1,6 +1,6 @@
 import logging
 from enum import Enum
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Annotated
 
 from octohook.models import (
     Repository,
@@ -77,7 +77,7 @@ class BaseWebhookEvent:
 class BranchProtectionRuleEvent(BaseWebhookEvent):
     payload: dict
     rule: Rule
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -277,7 +277,7 @@ class IssueCommentEvent(BaseWebhookEvent):
 
     issue: Issue
     comment: Comment
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -292,7 +292,7 @@ class IssuesEvent(BaseWebhookEvent):
     """
 
     issue: Issue
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
     label: Optional[Label]
     assignee: Optional[User]
     milestone: Optional[Milestone]
@@ -312,7 +312,7 @@ class LabelEvent(BaseWebhookEvent):
     """
 
     label: Label
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -384,7 +384,7 @@ class MilestoneEvent(BaseWebhookEvent):
     """
 
     milestone: Milestone
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -450,7 +450,7 @@ class ProjectCardEvent(BaseWebhookEvent):
     """
 
     project_card: ProjectCard
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -464,7 +464,7 @@ class ProjectColumnEvent(BaseWebhookEvent):
     """
 
     project_column: ProjectColumn
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -502,7 +502,7 @@ class PullRequestEvent(BaseWebhookEvent):
     pull_request: PullRequest
     assignee: Optional[User]
     label: Optional[Label]
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
     before: Optional[str]
     after: Optional[str]
     requested_reviewer: Optional[User]
@@ -526,7 +526,7 @@ class PullRequestReviewEvent(BaseWebhookEvent):
 
     review: Review
     pull_request: PullRequest
-    changes: dict
+    changes: Annotated[dict, "unstructured"]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -542,7 +542,7 @@ class PullRequestReviewCommentEvent(BaseWebhookEvent):
 
     comment: Comment
     pull_request: PullRequest
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -603,7 +603,7 @@ class ReleaseEvent(BaseWebhookEvent):
     """
 
     release: Release
-    changes: dict
+    changes: Annotated[dict, "unstructured"]
 
     def __init__(self, payload: dict):
         super().__init__(payload)
@@ -617,7 +617,7 @@ class RepositoryDispatchEvent(BaseWebhookEvent):
     """
 
     branch: str
-    client_payload: dict
+    client_payload: Annotated[dict, "unstructured"]
     installation: ShortInstallation
 
     def __init__(self, payload: dict):
@@ -681,7 +681,7 @@ class SponsorshipEvent(BaseWebhookEvent):
     """
 
     sponsorship: Sponsorship
-    changes: Optional[dict]
+    changes: Optional[Annotated[dict, "unstructured"]]
     effective_date: Optional[str]
 
     def __init__(self, payload: dict):

@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import TypeVar, Optional, Type, List, Any
+from typing import TypeVar, Optional, Type, List, Any, Annotated
 
 T = TypeVar("T")
 
@@ -481,7 +481,8 @@ class Comment(BaseGithubModel):
     start_side: Optional[str]
     original_line: Optional[int]
     side: Optional[str]
-    reactions: Optional[dict]
+    reactions: Optional[Annotated[dict, "unstructured"]]
+    _links: Optional[Annotated[dict, "unstructured"]]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -561,8 +562,8 @@ class ChecksPullRequest(BaseGithubModel):
     url: str
     id: int
     number: int
-    head: dict
-    base: dict
+    head: Annotated[dict, "unstructured"]
+    base: Annotated[dict, "unstructured"]
 
     def __init__(self, payload: dict):
         self.payload = payload
@@ -791,7 +792,7 @@ class Deployment(BaseGithubModel):
     sha: str
     ref: str
     task: str
-    payload: dict
+    payload: Annotated[dict, "unstructured"]
     original_environment: str
     environment: str
     description: Optional[str]
@@ -1093,7 +1094,7 @@ class Hook(BaseGithubModel):
     name: str
     active: bool
     events: List[str]
-    config: dict
+    config: Annotated[dict, "unstructured"]
     updated_at: str
     created_at: str
 
@@ -1324,7 +1325,7 @@ class PageBuild(BaseGithubModel):
     payload: dict
     url: str
     status: str
-    error: dict
+    error: Annotated[dict, "unstructured"]
     pusher: User
     commit: str
     duration: int
@@ -1483,7 +1484,7 @@ class PullRequest(BaseGithubModel):
     statuses_url: str
     head: Ref
     base: Ref
-    _links: dict
+    _links: Annotated[dict, "unstructured"]
     author_association: str
     draft: bool
     merged: Optional[bool]
@@ -1572,7 +1573,7 @@ class Review(BaseGithubModel):
     html_url: str
     pull_request_url: str
     author_association: str
-    _links: dict
+    _links: Annotated[dict, "unstructured"]
 
     def __init__(self, payload: dict):
         self.payload = payload

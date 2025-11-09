@@ -1,6 +1,6 @@
 import json
 import os
-from typing import get_type_hints, get_origin, get_args
+from typing import get_type_hints, get_origin, get_args, Annotated, Union
 
 import pytest
 
@@ -32,10 +32,17 @@ def test_model_loads(event_name, fixture_loader):
 
 def check_model(data, obj):
     """
-    Checks if every key in the json is represented either as a dict or a nested object.
+    Checks if every key in the json is represented either as an Annotated[dict, "unstructured"] or a nested object.
+
+    This enforces that all dicts are intentionally marked as unstructured, preventing accidental
+    use of plain dicts where model classes should exist.
+
     :param data: The JSON dictionary
     :param obj: The Class Object for the dictionary
     """
+    # Get type hints with annotations preserved
+    hints = get_type_hints(type(obj), include_extras=True)
+
     for key in data:
         json_value = data[key]
         try:
@@ -48,9 +55,19 @@ def check_model(data, obj):
 
         # When the nested object is another dictionary
         if isinstance(json_value, dict):
-            # If it's a plain dict, that's fine - it's intentionally unstructured data
-            # If it's a model object, recursively check it
-            if not isinstance(obj_value, dict):
+            type_hint = hints.get(key)
+
+            if _is_unstructured_dict(type_hint):
+                # Intentionally unstructured - skip validation
+                continue
+            elif isinstance(obj_value, dict):
+                # Plain dict without "unstructured" annotation - ERROR!
+                raise AttributeError(
+                    f"Plain dict for '{key}' in {type(obj).__name__} - "
+                    f"should be a model class or Annotated[dict, 'unstructured']"
+                )
+            else:
+                # It's a model class - recursively validate
                 check_model(json_value, obj_value)
 
         # When the nested object is a list of objects
@@ -106,6 +123,37 @@ def test_all_event_actions_are_in_enum(path):
         WebhookEventAction(action)
 
 
+def _is_unstructured_dict(type_hint) -> bool:
+    """
+    Check if a type hint is Annotated[dict, "unstructured"].
+
+    Handles both direct annotation and Optional[Annotated[dict, "unstructured"]].
+
+    Args:
+        type_hint: Type hint to check
+
+    Returns:
+        bool: True if it's an unstructured dict annotation
+    """
+    origin = get_origin(type_hint)
+
+    # Handle Optional[Annotated[dict, "unstructured"]]
+    if origin is Union:
+        args = get_args(type_hint)
+        # Check non-None args
+        for arg in args:
+            if arg is not type(None):
+                return _is_unstructured_dict(arg)
+
+    # Check if it's Annotated[dict, "unstructured"]
+    if origin is Annotated:
+        args = get_args(type_hint)
+        # First arg is the actual type, rest are metadata
+        return args[0] is dict and "unstructured" in args[1:]
+
+    return False
+
+
 def _is_primitive_type(type_hint):
     """
     Check if a type hint represents a primitive type.
@@ -114,10 +162,13 @@ def _is_primitive_type(type_hint):
         type_hint: Type hint to check
 
     Returns:
-        bool: True if the type is primitive (str, int, None, bool, dict)
+        bool: True if the type is primitive (str, int, None, bool, or Annotated[dict, "unstructured"])
     """
-    primitives = [str, int, type(None), bool, dict]
-    return type_hint in primitives
+    primitives = [str, int, type(None), bool]
+    if type_hint in primitives:
+        return True
+    # Also treat unstructured dicts as primitives
+    return _is_unstructured_dict(type_hint)
 
 
 def _validate_simple_type(obj, attr, type_hint, obj_value):
@@ -133,7 +184,30 @@ def _validate_simple_type(obj, attr, type_hint, obj_value):
     Raises:
         TypeHintError: If the type doesn't match
     """
-    if isinstance(obj_value, type_hint):
+    # Handle None values for Optional types
+    if obj_value is None and type(None) in get_args(type_hint):
+        return  # None is valid for Optional types
+
+    # Extract actual type from Annotated if needed
+    # Handle both Annotated[dict, "unstructured"] and Optional[Annotated[dict, "unstructured"]]
+    check_type = type_hint
+    origin = get_origin(type_hint)
+
+    if origin is Annotated:
+        check_type = get_args(type_hint)[0]
+    elif origin is Union:
+        # For Optional/Union, extract the non-None type
+        args = get_args(type_hint)
+        for arg in args:
+            if arg is not type(None):
+                # Check if this arg is Annotated
+                if get_origin(arg) is Annotated:
+                    check_type = get_args(arg)[0]
+                else:
+                    check_type = arg
+                break
+
+    if isinstance(obj_value, check_type):
         # Recursively validate nested objects (non-primitives without None in Union)
         # Example: For PullRequest type, recursively validate its nested User objects
         # Skip primitives (str, int, etc.) and Optional types (which include None)
@@ -216,7 +290,7 @@ def check_type_hints(obj):
         TypeHintError: If any type hint doesn't match the actual runtime type
         AssertionError: If the object doesn't have a 'payload' attribute
     """
-    hints = get_type_hints(type(obj))
+    hints = get_type_hints(type(obj), include_extras=True)
 
     # All webhook objects should have a payload attribute
     assert "payload" in hints.keys()
