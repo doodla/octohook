@@ -22,7 +22,10 @@ This document outlines the complete migration of Octohook from manual class init
 - **Models Affected:** ~40 model classes + ~40 event classes
 - **Template URL Fields:** ~60 fields across all models
 - **Dependencies:** Add `pydantic>=2.0.0`
-- **Breaking Changes:** None (public API preserved)
+- **Breaking Changes:**
+  - **Immutability**: Models frozen after creation (`frozen=True`) - user code cannot modify attributes
+  - **Strict typing**: No type coercion (`strict=True`) - may catch issues if GitHub API sends wrong types
+  - Public API preserved - all existing methods and attributes remain accessible
 
 ---
 
@@ -71,7 +74,6 @@ class BaseGithubModel(BaseModel):
         populate_by_name=True,        # Allow both alias and field name
         strict=True,                  # Strict type checking (no coercion)
         frozen=True,                  # Immutable after creation
-        validate_assignment=False,    # N/A since frozen=True
         str_strip_whitespace=False,   # Preserve exact GitHub data
         use_enum_values=False,        # Keep enum instances for type safety
         validate_default=False,       # Trust our defaults
@@ -79,6 +81,16 @@ class BaseGithubModel(BaseModel):
         protected_namespaces=('model_',), # Prevent conflicts with Pydantic internals
     )
 ```
+
+**Critical configuration notes:**
+
+- **`strict=True`**: GitHub must send correct types (no coercion). If GitHub sends `"123"` for an `int` field, validation will fail. This is intentional - catches API changes early.
+
+- **`frozen=True`**: Models are immutable after creation. Any code that tries to modify attributes will fail with `ValidationError`. This is a potential breaking change if user code modifies models post-creation.
+
+- **`extra='allow'`**: Unknown fields are stored in `__pydantic_extra__` dict. Tests check this is empty to ensure all fields are defined.
+
+- **`validate_assignment=False`**: Removed from original plan - redundant since `frozen=True` already prevents assignment.
 
 **Verification:** Import should work without errors
 
@@ -92,6 +104,8 @@ class BaseGithubModel(BaseModel):
 
 **Add:**
 ```python
+from __future__ import annotations  # Enable forward references for type hints
+
 from typing import Optional, List, Any
 from pydantic import BaseModel, ConfigDict, Field
 ```
@@ -103,6 +117,8 @@ from typing import TypeVar, Type
 
 T = TypeVar("T")
 ```
+
+**Note on forward references:** The `from __future__ import annotations` import enables using class names in type hints before they're defined (e.g., `User` can reference `Organization` even if `Organization` is defined later). This prevents circular dependency issues and is a Python best practice for type hints.
 
 ---
 
@@ -128,16 +144,18 @@ def _transform(url: str, local_variables: dict) -> str:
     Handles patterns like:
     - {param} -> value
     - {/param} -> /value
-    - Stops at first None value
+    - Stops at first None or empty value
     """
     local_variables.pop("self", None)
 
     for key, value in local_variables.items():
-        # Convert value to string if needed (handles int, etc.)
+        # CRITICAL: Check for None and empty string explicitly
+        # Don't use "if not value:" - that would incorrectly catch 0 and False
         if value is None or value == "":
             url = url.split(f"{{/{key}}}")[0]
             break
 
+        # Convert value to string if needed (handles int, etc.)
         value_str = str(value) if not isinstance(value, str) else value
 
         if f"{{{key}}}" in url:
@@ -147,6 +165,8 @@ def _transform(url: str, local_variables: dict) -> str:
 
     return url
 ```
+
+**Critical fix:** The original code uses `if not value:` which incorrectly treats `0`, `False`, and empty strings as stop conditions. The updated version explicitly checks for `None` and empty string only.
 
 ---
 
@@ -210,7 +230,8 @@ class Enterprise(BaseGithubModel):
 - ✅ Remove `payload: dict` field
 - ✅ Remove `__init__` method entirely
 - ✅ Add `= None` defaults for all `Optional` fields
-- ✅ Keep `__str__`, `__repr__`, `__eq__` and other methods
+- ✅ Keep `__str__`, `__repr__`, `__eq__`, `__hash__` and other custom methods
+- ⚠️ **Important:** Only `Label` class (lines 914-922) has custom `__eq__` and `__repr__` - preserve these!
 
 ---
 
@@ -245,9 +266,49 @@ class Repository(BaseGithubModel):
 **Key changes:**
 - ✅ Nested models: Just type as `User`, Pydantic handles instantiation
 - ✅ Optional nested: `Optional[Permissions] = None`
-- ✅ Lists with defaults: `List[str] = []`
+- ✅ Lists with defaults: `List[str] = []` (Pydantic V2 handles this safely)
 - ✅ Lists of models: `List[User]` - Pydantic auto-validates each item
 - ✅ No manual instantiation needed (`User(...)` or `_optional(...)`)
+- ✅ No list comprehensions needed (`[User(x) for x in ...]` becomes just the type hint)
+
+---
+
+#### Pattern for Models with List Comprehensions
+
+**Before:**
+```python
+class Thread(BaseGithubModel):
+    payload: dict
+    node_id: str
+    comments: List[Comment]
+
+    def __init__(self, payload: dict):
+        self.payload = payload
+        self.node_id = payload.get("node_id")
+        self.comments = [Comment(comment) for comment in payload.get("comments")]
+```
+
+**After:**
+```python
+class Thread(BaseGithubModel):
+    node_id: str
+    comments: List[Comment]  # Pydantic auto-validates each Comment
+```
+
+**Key pattern:**
+- ✅ Remove list comprehension entirely
+- ✅ Pydantic automatically validates each list item against the model type
+- ✅ Works for: `List[Comment]`, `List[Label]`, `List[User]`, etc.
+- ✅ For empty list defaults: Use `List[Comment] = []` (safe with Pydantic V2)
+
+**Models with list comprehensions to migrate:**
+- `Thread.comments` (line 548): `[Comment(comment) for comment in ...]`
+- `Issue.labels` (line 1000): `[Label(label) for label in ...]`
+- `Issue.assignees` (line 1004): `[User(assignee) for assignee in ...]`
+- `Release.assets` (line 1220): `[Asset(asset) for asset in payload.get("assets", [])]`
+- `PullRequest.assignees` (line 1546): `[User(assignee) for assignee in ...]`
+- `PullRequest.labels` (line 1551): `[Label(item) for item in ...]`
+- `StatusCommit.parents` (line 1859): `[StatusBranchCommit(parent) for parent in ...]`
 
 ---
 
@@ -365,6 +426,10 @@ class Deployment(BaseGithubModel):
 
 ### Step 2.4: Complete Model Migration List
 
+**Migration order strategy:** Migrate in dependency order - models with no dependencies first, then models that depend on them. The list below is organized by complexity for learning, but verify dependencies when actually migrating.
+
+**Critical:** Before migrating a model, ensure all models it references are already migrated (e.g., migrate `User` before `Repository` since `Repository` has a `owner: User` field).
+
 Migrate these models in order (simplest to most complex):
 
 **Simple models (no template URLs, no nested objects):**
@@ -446,8 +511,12 @@ Migrate these models in order (simplest to most complex):
 
 **Add:**
 ```python
-from pydantic import BaseModel, ConfigDict
+from __future__ import annotations  # Enable forward references
+
+from pydantic import BaseModel, ConfigDict, ValidationError
 ```
+
+**Note:** `ValidationError` needed for updated `parse()` function
 
 ---
 
@@ -641,8 +710,6 @@ def parse(event_name, payload: dict):
 
 **After:**
 ```python
-from pydantic import ValidationError
-
 def parse(event_name, payload: dict):
     try:
         event_class = event_map[WebhookEvent(event_name)]
@@ -651,6 +718,8 @@ def parse(event_name, payload: dict):
         logger.exception(f"Could not parse event {event_name}: {e}")
         return BaseWebhookEvent.model_validate(payload)
 ```
+
+**Note:** `ValidationError` was already added in Step 3.1
 
 **Key changes:**
 - ✅ Use `model_validate()` instead of direct instantiation `()`
@@ -701,7 +770,11 @@ def check_no_extra_fields(obj):
     When extra='allow', Pydantic stores undefined fields in __pydantic_extra__.
     This test ensures we've defined all fields that GitHub sends.
     """
-    from octohook.models import BaseGithubModel
+    from pydantic import BaseModel
+
+    # Only check Pydantic models
+    if not isinstance(obj, BaseModel):
+        return
 
     extra_fields = getattr(obj, '__pydantic_extra__', None)
 
@@ -722,6 +795,12 @@ def check_no_extra_fields(obj):
                 if isinstance(item, BaseModel):
                     check_no_extra_fields(item)
 ```
+
+**Key changes from old `check_model()`:**
+- Only checks Pydantic models (isinstance check at start)
+- Uses `__pydantic_extra__` instead of manual dict inspection
+- Uses `obj.model_fields` instead of parsing type hints
+- Simpler and more reliable - lets Pydantic do the work
 
 ---
 
@@ -946,6 +1025,62 @@ uv run mypy octohook
 
 ---
 
+## Critical Gotchas and Edge Cases Summary
+
+Before starting migration, review these critical issues:
+
+### 1. `_transform()` Function Bug
+**Current code:** Uses `if not value:` which incorrectly treats `0`, `False`, and empty strings as None
+**Fix:** Use explicit check `if value is None or value == ""`
+**Impact:** URL template methods may break for numeric parameters
+
+### 2. List Comprehensions
+**Pattern:** `[Comment(c) for c in payload.get("comments")]`
+**Migration:** Delete comprehension entirely - just use `comments: List[Comment]`
+**Impact:** 7 models affected (Thread, Issue, PullRequest, Release, StatusCommit)
+
+### 3. Immutability (`frozen=True`)
+**Impact:** Models cannot be modified after creation
+**Breaking:** User code that modifies model attributes will fail
+**Example:** `user.name = "new"` will raise `ValidationError`
+
+### 4. Strict Type Checking (`strict=True`)
+**Impact:** No type coercion - GitHub must send exact types
+**Example:** String `"123"` for `int` field will fail validation
+**Benefit:** Catches API changes early
+
+### 5. Field Name Collisions
+**Issue:** `Deployment.payload` collides with Pydantic's payload parameter
+**Fix:** Rename to `payload_data` with `Field(alias="payload")`
+**Impact:** Only affects Deployment model
+
+### 6. Fields Starting with Underscore
+**Issue:** Pydantic prohibits field names starting with `_`
+**Examples:** `_links` fields in Comment, Review models
+**Fix:** Rename to `links_` with `Field(alias="_links")`
+
+### 7. Forward References
+**Solution:** Add `from __future__ import annotations` at top of both files
+**Benefit:** Prevents circular dependency issues
+**Impact:** Required for type hints referencing later-defined classes
+
+### 8. Empty List Defaults
+**Pattern:** `payload.get("assets", [])`
+**Migration:** Use `assets: List[Asset] = []`
+**Safe:** Pydantic V2 handles mutable defaults correctly (doesn't share instances)
+
+### 9. Custom Methods Preservation
+**Keep:** `__str__`, `__eq__`, `__repr__`, `__hash__` methods
+**Only affected model:** `Label` class (has custom `__eq__` and `__repr__`)
+**Action:** Preserve these when migrating Label
+
+### 10. Migration Order
+**Rule:** Migrate dependencies first
+**Example:** Migrate `User` before `Repository` (Repository references User)
+**Strategy:** Follow the order in Step 2.4, but verify dependencies
+
+---
+
 ## Migration Checklist
 
 ### Pre-Migration
@@ -1080,6 +1215,25 @@ uv run mypy octohook
 ### Pitfall 6: Nested Model Validation
 **Error:** `ValidationError: value is not a valid dict`
 **Solution:** Ensure nested data is dict, not None (or use Optional)
+
+### Pitfall 7: Immutability Breaking User Code
+**Error:** `ValidationError: "Model" is frozen`
+**Context:** With `frozen=True`, models are immutable
+**Solution:** This is intentional. User code must not modify model attributes after creation. Document as breaking change if needed.
+
+### Pitfall 8: Type Coercion Failures
+**Error:** `ValidationError: Input should be a valid integer`
+**Context:** With `strict=True`, GitHub sending `"123"` for an `int` field will fail
+**Solution:** This is intentional for catching API changes. Verify GitHub actually sends correct types in fixtures.
+
+### Pitfall 9: List Comprehension Removal
+**Error:** Forgetting to remove list comprehension from `__init__`
+**Solution:** When you see `[Model(x) for x in payload.get("field")]`, just delete the entire `__init__` - Pydantic handles it automatically
+
+### Pitfall 10: Empty List Defaults
+**Error:** `ValidationError: field required` for list fields
+**Context:** Lists that might be missing in payload
+**Solution:** Use `List[Model] = []` for lists that can be empty/missing. Pydantic V2 handles this safely (doesn't share mutable defaults)
 
 ---
 
