@@ -81,3 +81,25 @@ uv run pytest -v
 # Build the package
 uv build
 ```
+
+## Documentation Standards
+
+### Code Documentation
+
+**Public API functions** (exported in `__all__`):
+- Google-style docstrings with Args, Raises, Example sections
+- Include at least one runnable usage example
+- Type hints required on all signatures
+
+### User Documentation
+
+**Tone:**
+- Direct and technical - assume reader competence
+- No marketing language or superlatives
+- Imperative mood for instructions
+- Explain "why" before "how"
+
+**Content:**
+- Show real, runnable examples first
+- Link to external docs rather than duplicating them
+- Keep explanations concise
