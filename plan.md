@@ -231,7 +231,7 @@ class Enterprise(BaseGithubModel):
 - ✅ Remove `__init__` method entirely
 - ✅ Add `= None` defaults for all `Optional` fields
 - ✅ Keep `__str__`, `__repr__`, `__eq__`, `__hash__` and other custom methods
-- ⚠️ **Important:** Only `Label` class (lines 914-922) has custom `__eq__` and `__repr__` - preserve these!
+- ⚠️ **Important:** Only `Label` class has custom `__eq__` and `__repr__` methods - preserve these!
 
 ---
 
@@ -302,13 +302,13 @@ class Thread(BaseGithubModel):
 - ✅ For empty list defaults: Use `List[Comment] = []` (safe with Pydantic V2)
 
 **Models with list comprehensions to migrate:**
-- `Thread.comments` (line 548): `[Comment(comment) for comment in ...]`
-- `Issue.labels` (line 1000): `[Label(label) for label in ...]`
-- `Issue.assignees` (line 1004): `[User(assignee) for assignee in ...]`
-- `Release.assets` (line 1220): `[Asset(asset) for asset in payload.get("assets", [])]`
-- `PullRequest.assignees` (line 1546): `[User(assignee) for assignee in ...]`
-- `PullRequest.labels` (line 1551): `[Label(item) for item in ...]`
-- `StatusCommit.parents` (line 1859): `[StatusBranchCommit(parent) for parent in ...]`
+- `Thread.comments`: `[Comment(comment) for comment in ...]`
+- `Issue.labels`: `[Label(label) for label in ...]`
+- `Issue.assignees`: `[User(assignee) for assignee in ...]`
+- `Release.assets`: `[Asset(asset) for asset in payload.get("assets", [])]`
+- `PullRequest.assignees`: `[User(assignee) for assignee in ...]`
+- `PullRequest.labels`: `[Label(item) for item in ...]`
+- `StatusCommit.parents`: `[StatusBranchCommit(parent) for parent in ...]`
 
 ---
 
@@ -433,73 +433,73 @@ class Deployment(BaseGithubModel):
 Migrate these models in order (simplest to most complex):
 
 **Simple models (no template URLs, no nested objects):**
-1. `CommitUser` (lines 597-608)
-2. `ShortRepository` (lines 140-158)
-3. `ShortInstallation` (lines 738-747)
-4. `PackageVersionInfo` (lines 1643-1650)
-5. `VulnerablePackage` (lines 1632-1641)
-6. `SecurityVulnerabilityIdentifier` (lines 1669-1678)
-7. `SecurityAdvisoryReference` (lines 1680-1687)
+1. `CommitUser`
+2. `ShortRepository`
+3. `ShortInstallation`
+4. `PackageVersionInfo`
+5. `VulnerablePackage`
+6. `SecurityVulnerabilityIdentifier`
+7. `SecurityAdvisoryReference`
 
 **Models with nested objects only:**
-8. `Permissions` (lines 160-209)
-9. `Enterprise` (lines 54-82)
-10. `StatusBranchCommit` (lines 1762-1773)
-11. `StatusNestedCommitUser` (lines 1803-1814)
-12. `StatusCommitVerification` (lines 1788-1801)
-13. `PurchaseAccount` (lines 1017-1030)
-14. `Plan` (lines 1032-1057)
+8. `Permissions`
+9. `Enterprise`
+10. `StatusBranchCommit`
+11. `StatusNestedCommitUser`
+12. `StatusCommitVerification`
+13. `PurchaseAccount`
+14. `Plan`
 
 **Models with template URLs:**
-15. `User` (lines 84-138) - 4 template URLs
-16. `Organization` (lines 440-476) - 2 template URLs
-17. `Repository` (lines 211-437) - 19 template URLs
-18. `Issue` (lines 963-1016) - 1 template URL
-19. `Team` (lines 1080-1108) - 1 template URL
-20. `PullRequest` (lines 1475-1582) - 1 template URL
+15. `User` - 4 template URLs
+16. `Organization` - 2 template URLs
+17. `Repository` - 19 template URLs
+18. `Issue` - 1 template URL
+19. `Team` - 1 template URL
+20. `PullRequest` - 1 template URL
 
 **Models with unstructured dicts:**
-21. `Comment` (lines 478-538) - has `_links`, `reactions`
-22. `Hook` (lines 1110-1131) - has `config`
-23. `PageBuild` (lines 1344-1365) - has `error`
-24. `Review` (lines 1584-1611) - has `_links`
-25. `ChecksPullRequest` (lines 580-595) - has `head`, `base`
+21. `Comment` - has `_links`, `reactions`
+22. `Hook` - has `config`
+23. `PageBuild` - has `error`
+24. `Review` - has `_links`
+25. `ChecksPullRequest` - has `head`, `base`
 
 **Complex models (multiple features):**
-26. `Commit` (lines 610-637)
-27. `CheckSuite` (lines 639-678)
-28. `CheckRunOutput` (lines 680-695)
-29. `CheckRun` (lines 697-736)
-30. `Installation` (lines 749-784)
-31. `DeployKey` (lines 786-805)
-32. `Deployment` (lines 807-842) - **has field name collision!**
-33. `DeploymentStatus` (lines 844-873)
-34. `Page` (lines 875-892)
-35. `Label` (lines 894-922)
-36. `Milestone` (lines 924-961)
-37. `MarketplacePurchase` (lines 1059-1078)
-38. `Membership` (lines 1133-1148)
-39. `Asset` (lines 1150-1181)
-40. `Release` (lines 1183-1224)
-41. `PackageFile` (lines 1226-1253)
-42. `PackageVersion` (lines 1255-1300)
-43. `Registry` (lines 1302-1317)
-44. `Package` (lines 1319-1342)
-45. `ProjectCard` (lines 1367-1398)
-46. `ProjectColumn` (lines 1400-1423)
-47. `Project` (lines 1425-1456)
-48. `Ref` (lines 1458-1473)
-49. `VulnerabilityAlert` (lines 1613-1630)
-50. `Vulnerability` (lines 1652-1667)
-51. `SecurityAdvisory` (lines 1689-1722)
-52. `SponsorshipTier` (lines 1724-1741)
-53. `Sponsorship` (lines 1743-1760)
-54. `Branch` (lines 1775-1786)
-55. `StatusNestedCommit` (lines 1816-1835)
-56. `StatusCommit` (lines 1837-1860)
-57. `Rule` (lines 1861-1946)
-58. `ChecksApp` (lines 551-578)
-59. `Thread` (lines 540-549)
+26. `Commit`
+27. `CheckSuite`
+28. `CheckRunOutput`
+29. `CheckRun`
+30. `Installation`
+31. `DeployKey`
+32. `Deployment` - **has field name collision!**
+33. `DeploymentStatus`
+34. `Page`
+35. `Label`
+36. `Milestone`
+37. `MarketplacePurchase`
+38. `Membership`
+39. `Asset`
+40. `Release`
+41. `PackageFile`
+42. `PackageVersion`
+43. `Registry`
+44. `Package`
+45. `ProjectCard`
+46. `ProjectColumn`
+47. `Project`
+48. `Ref`
+49. `VulnerabilityAlert`
+50. `Vulnerability`
+51. `SecurityAdvisory`
+52. `SponsorshipTier`
+53. `Sponsorship`
+54. `Branch`
+55. `StatusNestedCommit`
+56. `StatusCommit`
+57. `Rule`
+58. `ChecksApp`
+59. `Thread`
 
 ---
 
@@ -522,7 +522,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 ### Step 3.2: Update BaseWebhookEvent
 
-**Before (lines 49-75):**
+**Before:**
 ```python
 class BaseWebhookEvent:
     payload: dict
@@ -637,7 +637,7 @@ class PullRequestEvent(BaseWebhookEvent):
 
 ### Step 3.4: Complete Event Migration List
 
-Migrate all event classes (lines 77-785 in events.py):
+Migrate all event classes in `events.py`:
 
 1. `BranchProtectionRuleEvent`
 2. `CheckRunEvent`
@@ -688,7 +688,7 @@ Migrate all event classes (lines 77-785 in events.py):
 47. `WatchEvent`
 48. `PingEvent`
 
-**Special case:** `SecurityAdvisoryEvent` (lines 663-676) doesn't inherit from `BaseWebhookEvent`. Apply same pattern but without the inheritance benefits.
+**Special case:** `SecurityAdvisoryEvent` doesn't inherit from `BaseWebhookEvent`. Apply same pattern but without the inheritance benefits.
 
 ---
 
@@ -696,7 +696,7 @@ Migrate all event classes (lines 77-785 in events.py):
 
 ### Step 4.1: Update parse() Function
 
-**File:** `octohook/events.py` (lines 986-992)
+**File:** `octohook/events.py`
 
 **Before:**
 ```python
@@ -750,7 +750,7 @@ from typing import get_origin, get_args, Annotated, Union
 
 #### Change 2: Replace check_model() Function
 
-**Remove (lines 33-86):**
+**Remove:**
 ```python
 def check_model(data, obj):
     """
@@ -806,7 +806,7 @@ def check_no_extra_fields(obj):
 
 #### Change 3: Update test_model_has_all_keys_in_json
 
-**Before (lines 88-99):**
+**Before:**
 ```python
 @pytest.mark.parametrize("event_name", testcases)
 def test_model_has_all_keys_in_json(event_name, fixture_loader):
@@ -839,10 +839,10 @@ def test_model_has_all_keys_in_json(event_name, fixture_loader):
 
 #### Change 4: Remove Utility Functions
 
-**Remove entirely (lines 126-206):**
-- `_unwrap_annotated()` (lines 126-158)
-- `_is_unstructured_dict()` (lines 160-189)
-- `_is_primitive_type()` (lines 191-206)
+**Remove entirely:**
+- `_unwrap_annotated()`
+- `_is_unstructured_dict()`
+- `_is_primitive_type()`
 
 These are no longer needed - Pydantic handles type validation.
 
@@ -850,12 +850,12 @@ These are no longer needed - Pydantic handles type validation.
 
 #### Change 5: Remove Type Hint Validation
 
-**Remove entirely (lines 208-342):**
-- `_validate_simple_type()` (lines 208-238)
-- `_validate_list_items()` (lines 240-265)
-- `_validate_complex_type()` (lines 267-295)
-- `check_type_hints()` (lines 297-328)
-- `test_all_type_hints_are_correct()` (lines 330-342)
+**Remove entirely:**
+- `_validate_simple_type()`
+- `_validate_list_items()`
+- `_validate_complex_type()`
+- `check_type_hints()`
+- `test_all_type_hints_are_correct()`
 
 **Rationale:** Pydantic V2's strict mode provides more thorough type validation than our custom checker.
 
@@ -863,7 +863,7 @@ These are no longer needed - Pydantic handles type validation.
 
 #### Change 6: Remove Unannotated Dict Test
 
-**Remove entirely (lines 358-384):**
+**Remove entirely:**
 ```python
 def test_unannotated_dict_enforcement():
     """
@@ -1025,218 +1025,6 @@ uv run mypy octohook
 
 ---
 
-## Critical Gotchas and Edge Cases Summary
-
-Before starting migration, review these critical issues:
-
-### 1. `_transform()` Function Bug
-**Current code:** Uses `if not value:` which incorrectly treats `0`, `False`, and empty strings as None
-**Fix:** Use explicit check `if value is None or value == ""`
-**Impact:** URL template methods may break for numeric parameters
-
-### 2. List Comprehensions
-**Pattern:** `[Comment(c) for c in payload.get("comments")]`
-**Migration:** Delete comprehension entirely - just use `comments: List[Comment]`
-**Impact:** 7 models affected (Thread, Issue, PullRequest, Release, StatusCommit)
-
-### 3. Immutability (`frozen=True`)
-**Impact:** Models cannot be modified after creation
-**Breaking:** User code that modifies model attributes will fail
-**Example:** `user.name = "new"` will raise `ValidationError`
-
-### 4. Strict Type Checking (`strict=True`)
-**Impact:** No type coercion - GitHub must send exact types
-**Example:** String `"123"` for `int` field will fail validation
-**Benefit:** Catches API changes early
-
-### 5. Field Name Collisions
-**Issue:** `Deployment.payload` collides with Pydantic's payload parameter
-**Fix:** Rename to `payload_data` with `Field(alias="payload")`
-**Impact:** Only affects Deployment model
-
-### 6. Fields Starting with Underscore
-**Issue:** Pydantic prohibits field names starting with `_`
-**Examples:** `_links` fields in Comment, Review models
-**Fix:** Rename to `links_` with `Field(alias="_links")`
-
-### 7. Forward References
-**Solution:** Add `from __future__ import annotations` at top of both files
-**Benefit:** Prevents circular dependency issues
-**Impact:** Required for type hints referencing later-defined classes
-
-### 8. Empty List Defaults
-**Pattern:** `payload.get("assets", [])`
-**Migration:** Use `assets: List[Asset] = []`
-**Safe:** Pydantic V2 handles mutable defaults correctly (doesn't share instances)
-
-### 9. Custom Methods Preservation
-**Keep:** `__str__`, `__eq__`, `__repr__`, `__hash__` methods
-**Only affected model:** `Label` class (has custom `__eq__` and `__repr__`)
-**Action:** Preserve these when migrating Label
-
-### 10. Migration Order
-**Rule:** Migrate dependencies first
-**Example:** Migrate `User` before `Repository` (Repository references User)
-**Strategy:** Follow the order in Step 2.4, but verify dependencies
-
----
-
-## Migration Checklist
-
-### Pre-Migration
-- [ ] Read and understand entire plan
-- [ ] Create backup branch
-- [ ] Ensure all tests pass on current code
-
-### Phase 1: Setup
-- [ ] Add pydantic>=2.0.0 to pyproject.toml
-- [ ] Run `uv lock && uv sync`
-- [ ] Update BaseGithubModel with ConfigDict
-- [ ] Verify imports work
-
-### Phase 2: Models (octohook/models.py)
-- [ ] Update imports (add pydantic, remove ABC)
-- [ ] Remove `_optional()` helper
-- [ ] Update `_transform()` for robustness
-- [ ] Migrate simple models (7 models)
-- [ ] Migrate models with nested objects (7 models)
-- [ ] Migrate models with template URLs (6 models)
-- [ ] Migrate models with unstructured dicts (5 models)
-- [ ] Migrate complex models (34 models)
-- [ ] Verify all 59 models migrated
-- [ ] Run tests: `uv run pytest tests/test_models.py -v`
-
-### Phase 3: Events (octohook/events.py)
-- [ ] Update imports (add pydantic)
-- [ ] Update BaseWebhookEvent to inherit BaseModel
-- [ ] Remove BaseWebhookEvent.__init__
-- [ ] Migrate all 48 event classes
-- [ ] Update parse() to use model_validate()
-- [ ] Run tests: `uv run pytest tests/ -v -k event`
-
-### Phase 4: Tests (tests/test_models.py)
-- [ ] Update imports
-- [ ] Replace check_model() with check_no_extra_fields()
-- [ ] Update test_model_has_all_keys_in_json
-- [ ] Remove utility functions (_unwrap_annotated, etc.)
-- [ ] Remove check_type_hints and related code
-- [ ] Remove test_unannotated_dict_enforcement
-- [ ] Run full test suite: `uv run pytest -v`
-
-### Phase 5: Cleanup
-- [ ] Remove unused imports from models.py
-- [ ] Remove unused imports from events.py
-- [ ] Verify __init__.py exports
-- [ ] Run final test suite: `uv run pytest -v`
-- [ ] Run coverage: `uv run pytest --cov=octohook`
-- [ ] (Optional) Add mypy and run type checking
-
-### Post-Migration
-- [ ] Review all changes
-- [ ] Update CHANGELOG (if applicable)
-- [ ] Commit with clear message
-- [ ] Create PR with migration summary
-
----
-
-## Estimated Effort
-
-| Phase | Estimated Time |
-|-------|----------------|
-| Phase 1: Setup | 30 minutes |
-| Phase 2: Models (59 classes) | 10 hours |
-| Phase 3: Events (48 classes) | 3.5 hours |
-| Phase 4: Tests | 2 hours |
-| Phase 5: Cleanup & Verification | 2 hours |
-| **Total** | **~18 hours** |
-
-**Breakdown by complexity:**
-- Simple models (5-10 min each): 7 × 7 min = ~50 min
-- Nested models (10-15 min each): 7 × 12 min = ~85 min
-- Template URL models (20-30 min each): 6 × 25 min = ~150 min
-- Unstructured dict models (10-15 min each): 5 × 12 min = ~60 min
-- Complex models (15-25 min each): 34 × 20 min = ~680 min
-- Event classes (5 min each): 48 × 5 min = ~240 min
-
----
-
-## Risk Mitigation Strategies
-
-1. **Incremental Migration**
-   - Start with simplest models
-   - Build confidence with patterns
-   - Test frequently
-
-2. **Test-Driven Approach**
-   - Run tests after each model
-   - Fix issues immediately
-   - Don't accumulate errors
-
-3. **Version Control**
-   - Small, atomic commits
-   - Clear commit messages
-   - Easy to revert if needed
-
-4. **Pattern Consistency**
-   - Follow examples exactly
-   - Document deviations
-   - Review before moving on
-
-5. **Validation Checkpoints**
-   - After Phase 2: `pytest tests/test_models.py`
-   - After Phase 3: `pytest tests/test_decorator.py`
-   - After Phase 4: `pytest tests/`
-   - After Phase 5: `pytest --cov`
-
----
-
-## Common Pitfalls & Solutions
-
-### Pitfall 1: Forgetting `= None` for Optional Fields
-**Error:** `ValidationError: field required`
-**Solution:** All `Optional[X]` fields need `= None` default
-
-### Pitfall 2: Wrong Field Alias
-**Error:** Extra fields in `__pydantic_extra__`
-**Solution:** Check JSON key name matches `Field(alias="...")`
-
-### Pitfall 3: Forgetting to Update Method Bodies
-**Error:** `KeyError: 'following_url'` in template methods
-**Solution:** Update `self.payload["x"]` to `self.x_template`
-
-### Pitfall 4: Fields Starting with Underscore
-**Error:** `ValueError: "_links" is not a valid field name`
-**Solution:** Rename to `links_` with `Field(alias="_links")`
-
-### Pitfall 5: List Defaults
-**Error:** Mutable default argument warning
-**Solution:** Use `List[str] = []` - Pydantic handles this safely
-
-### Pitfall 6: Nested Model Validation
-**Error:** `ValidationError: value is not a valid dict`
-**Solution:** Ensure nested data is dict, not None (or use Optional)
-
-### Pitfall 7: Immutability Breaking User Code
-**Error:** `ValidationError: "Model" is frozen`
-**Context:** With `frozen=True`, models are immutable
-**Solution:** This is intentional. User code must not modify model attributes after creation. Document as breaking change if needed.
-
-### Pitfall 8: Type Coercion Failures
-**Error:** `ValidationError: Input should be a valid integer`
-**Context:** With `strict=True`, GitHub sending `"123"` for an `int` field will fail
-**Solution:** This is intentional for catching API changes. Verify GitHub actually sends correct types in fixtures.
-
-### Pitfall 9: List Comprehension Removal
-**Error:** Forgetting to remove list comprehension from `__init__`
-**Solution:** When you see `[Model(x) for x in payload.get("field")]`, just delete the entire `__init__` - Pydantic handles it automatically
-
-### Pitfall 10: Empty List Defaults
-**Error:** `ValidationError: field required` for list fields
-**Context:** Lists that might be missing in payload
-**Solution:** Use `List[Model] = []` for lists that can be empty/missing. Pydantic V2 handles this safely (doesn't share mutable defaults)
-
----
-
 ## Success Criteria
 
 Migration is complete when:
@@ -1254,82 +1042,3 @@ Migration is complete when:
 - ✅ Code reduced by ~60%
 
 ---
-
-## Post-Migration Opportunities
-
-After successful migration, consider:
-
-1. **JSON Schema Export**
-   ```python
-   from octohook.models import User
-   schema = User.model_json_schema()
-   ```
-
-2. **Serialization Improvements**
-   ```python
-   user.model_dump()  # Dict
-   user.model_dump_json()  # JSON string
-   ```
-
-3. **Validation Utilities**
-   ```python
-   try:
-       event = PullRequestEvent.model_validate(payload)
-   except ValidationError as e:
-       print(e.json())  # Detailed error info
-   ```
-
-4. **Documentation Generation**
-   - Auto-generate API docs from Pydantic schemas
-   - Field descriptions via `Field(description="...")`
-
-5. **Performance Monitoring**
-   - Pydantic V2 is faster than manual parsing
-   - Consider benchmarking before/after
-
----
-
-## Rollback Plan
-
-If critical issues arise:
-
-1. **Identify the issue**
-   - Check error messages
-   - Review recent commits
-   - Isolate failing tests
-
-2. **Attempt fix**
-   - Review pattern examples
-   - Check for typos in aliases
-   - Verify Optional fields have defaults
-
-3. **If unfixable, rollback**
-   ```bash
-   git reset --hard HEAD~1  # Last commit
-   # or
-   git revert <commit-hash>  # Specific commit
-   ```
-
-4. **Document issue**
-   - What went wrong
-   - Why it happened
-   - How to prevent next time
-
----
-
-## Questions & Support
-
-For issues during migration:
-
-1. Review relevant section of this plan
-2. Check pattern examples
-3. Review Pydantic V2 docs: https://docs.pydantic.dev/latest/
-4. Check test failures for clues
-5. Document and report blockers
-
----
-
-**Document Version:** 1.0
-**Created:** 2025-11-10
-**Author:** Claude (Anthropic)
-**Status:** Ready for Implementation
