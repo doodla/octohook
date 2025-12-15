@@ -2,46 +2,51 @@
 
 # Octohook
 
-Octohook makes working with incoming [Github Webhooks](https://developer.github.com/v3/activity/events/types/) extremely easy. 
+Octohook parses [GitHub webhook](https://docs.github.com/en/webhooks) payloads into typed Python classes and provides a decorator-based system for routing webhooks to handlers.
 
-It parses the incoming payload into Python classes to allow for auto-complete and other goodies. For example, `octohook` provides functions for payload values which require string interpolation.
+## Installation
 
-For example, almost every repository payload has an `archive_url` with some required and conditional parameters.
-```json
-{
-  "repository" : {
-    "archive_url": "https://api.github.com/repos/doodla/octohook-playground/{archive_format}{/ref}"
-  }
-}
-
+```bash
+pip install octohook
 ```
 
-The `Repository` model provides an `archive_url()` method which has `archive_format` as an argument and `ref` as an optional variable.
+## Quick Start
 
+Define a handler for pull request events:
+
+```python
+# handlers.py
+from octohook import hook, WebhookEvent, WebhookEventAction
+from octohook.events import PullRequestEvent
+
+@hook(WebhookEvent.PULL_REQUEST, [WebhookEventAction.OPENED])
+def on_pr_opened(event: PullRequestEvent):
+    print(f"PR opened: {event.pull_request.title}")
 ```
->>> repo.archive_url("hello")
-https://api.github.com/repos/doodla/octohook-playground/hello
->>> repo.archive_url("hello","world")
-https://api.github.com/repos/doodla/octohook-playground/hello/world"
+
+Wire it up in your web framework (example using Flask):
+
+```python
+# app.py
+from flask import Flask, request, Response
+import octohook
+
+app = Flask(__name__)
+octohook.setup(modules=["handlers"])
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    github_event = request.headers.get('X-GitHub-Event')
+    octohook.handle_webhook(event_name=github_event, payload=request.json)
+    return Response("OK", status=200)
 ```
 
-## Gotchas
+## Usage
 
-Github doesn't send consistent payloads for each model necessitating that the non-optional model type hints conform to the least common denominator. 
+### Manual Parsing
 
-Depending on the event type, you can get more information for a particular model, or less.
-For example, Github sends a `changes` key with some payloads with the `edited` action. For other actions, the key is not present. In such cases, our `event.changes` is `None`.
+Use `octohook.parse()` when you want direct control over webhook handling:
 
-This can happen for arbitrary payloads, so I'd suggest tailoring your code to the expected incoming webhook.
-
-If anyone has a good suggestion on how to tackle this issue, feel free to email me, or create a PR!
-
-Because Github sends different payloads for a combination of `event type` and `action`, unless I have access to all the variations, I cannot be sure that the corresponding model is correct.
-
-Current coverage is documented [here](tests/TestCases.md). If you can provide any of the missing events, please make a PR.
-## Sample Usage
-
-#### app.py
 ```python
 from flask import Flask, request, Response
 import octohook
@@ -51,70 +56,135 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    github_event = request.headers.get('X-GitHub-Event') # pull_request
-    
-    # Assuming the incoming event was a PullRequestEvent
-    event : PullRequestEvent = octohook.parse(github_event, request.json)
+    github_event = request.headers.get('X-GitHub-Event')
+    event = octohook.parse(github_event, request.json)
 
-    # Do work with this event
+    if isinstance(event, PullRequestEvent):
+        return Response(event.pull_request.title, status=200)
 
-    return Response(event.pull_request.head.user.name, status=200)
+    return Response("OK", status=200)
 ```
 
-### @hook
-Alternatively, you can also let `octohook` do the heavy lifting of finding and executing the appropriate handlers for any given webhook.
+### Decorator Routing
 
-The `@hook` decorator takes in four parameters, the `WebhookEvent`, a list of `WebhookEventAction`s, an optional list of repositories and a `debug` flag (defaults to `False`).
+Use `@hook` when you have multiple handlers or want cleaner routing. The decorator takes four parameters:
 
-Any function this decorator is applied to is invoked whenever you receive an event with the specified `WebhookEvent` and a listed `WebhookEventAction`.
-
-If present, the hook can be filtered for one or more repositories in a multi-repository set up.
-```
-Note: The "full_name" of the repositories are used. Ex: "doodla/octohook"
-```
-If you set `debug=True` on any `@hook`, only those hooks fire for the corresponding webhook event.
+- `event`: A `WebhookEvent` enum value (required)
+- `actions`: List of `WebhookEventAction` values (optional - omit to match any action)
+- `repositories`: List of repository full names to filter on (optional)
+- `debug`: When `True`, only debug hooks fire for that event (default: `False`)
 
 ```python
-@hook(WebhookEvent.PULL_REQUEST,[WebhookEventAction.CREATED, WebhookEventAction.EDITED])
-def work(event: PullRequestEvent):
-    pass
+from octohook import hook, WebhookEvent, WebhookEventAction
+from octohook.events import PullRequestEvent
+
+@hook(WebhookEvent.PULL_REQUEST, [WebhookEventAction.OPENED, WebhookEventAction.EDITED])
+def on_pr_change(event: PullRequestEvent):
+    print(event.pull_request.title)
 ```
 
-`work()` is automatically called with the parsed `PullRequestEvent` anytime you receive a webhook event with `X-Github-Event: pull_request` and it has any of the `created` or `edited` actions.
+`on_pr_change()` is called with the parsed `PullRequestEvent` whenever a `pull_request` webhook arrives with an `opened` or `edited` action.
 
-If you don't specify a list of actions, then the function is invoked for _any_ action. For some events like `Push`, which do not have an `action`, take care not to specify any actions in the decorator.
+If you omit the actions parameter, the handler fires for any action. For events like `push` that have no action field, always omit actions.
 
-#### hooks/do_something.py
+#### Handler Discovery
+
+Use `setup()` to load handlers from your modules:
+
 ```python
-from octohook import hook,WebhookEvent,WebhookEventAction
-from octohook.events import LabelEvent,PullRequestEvent
+import octohook
+
+# Recursively imports handlers from the specified modules
+octohook.setup(modules=["hooks", "webhooks.github"])
+```
+
+#### Repository Filtering
+
+Filter hooks to specific repositories using their full name (e.g., `"owner/repo"`):
+
+```python
+from octohook import hook, WebhookEvent
+from octohook.events import PushEvent
+
+@hook(WebhookEvent.PUSH, repositories=["myorg/backend", "myorg/frontend"])
+def on_push(event: PushEvent):
+    print(f"Push to {event.repository.full_name}")
+```
+
+#### Debug Mode
+
+Set `debug=True` on any hook to make only debug hooks fire for that event type:
+
+```python
+from octohook import hook, WebhookEvent
+from octohook.events import PullRequestEvent
+
+@hook(WebhookEvent.PULL_REQUEST, debug=True)
+def debug_pr(event: PullRequestEvent):
+    print(event)  # Only this runs for PR events when debug=True
+```
+
+#### Complete Example
+
+```python
+# hooks/github.py
+from octohook import hook, WebhookEvent, WebhookEventAction
+from octohook.events import LabelEvent, PullRequestEvent
 
 @hook(WebhookEvent.LABEL, [WebhookEventAction.CREATED])
-def runs_when_label_event_with_created_action_is_received(event: LabelEvent):
-    print(event.label.name)
+def on_label_created(event: LabelEvent):
+    print(f"Label created: {event.label.name}")
 
 @hook(WebhookEvent.PULL_REQUEST)
-def runs_when_pull_request_event_with_any_action_is_received(event: PullRequestEvent):
-    print(event.changes)
+def on_any_pr_event(event: PullRequestEvent):
+    print(f"PR #{event.number}: {event.action}")
 ```
-#### app.py
-```python
-from flask import Flask, request, Response
 
+```python
+# app.py
+from flask import Flask, request, Response
 import octohook
 
 app = Flask(__name__)
 
-# Load webhook handlers from the hooks module
 octohook.setup(modules=["hooks"])
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     github_event = request.headers.get('X-GitHub-Event')
-
     octohook.handle_webhook(event_name=github_event, payload=request.json)
-
     return Response("OK", status=200)
 ```
 
-`handle_webhook` goes through all the handlers sequentially and blocks till everything is done. Any exceptions are logged to `logging.getLogger('octohook')`. You can configure the output stream of this logger to capture the logs.
+- `handle_webhook` runs handlers sequentially and blocks until complete.
+- Exceptions are logged to `logging.getLogger('octohook')` but don't stop execution.
+
+## URL Helpers
+
+GitHub webhook payloads include URL templates with placeholders:
+
+```json
+{
+  "repository": {
+    "archive_url": "https://api.github.com/repos/owner/repo/{archive_format}{/ref}"
+  }
+}
+```
+
+Octohook models provide methods to interpolate these templates:
+
+```python
+# event.repository is a Repository model with helper methods
+>>> event.repository.archive_url("tarball")
+'https://api.github.com/repos/owner/repo/tarball'
+>>> event.repository.archive_url("tarball", "main")
+'https://api.github.com/repos/owner/repo/tarball/main'
+```
+
+## Limitations
+
+GitHub sends different payload structures depending on the event type and action. Not all fields are present in all payloads, so octohook uses `Optional` types extensively. Fields are only marked as required if they appear in all known payloads for that model.
+
+For example, the `changes` key only appears with `edited` actions. For other actions, `event.changes` is `None`.
+
+Current test coverage is documented in [tests/TestCases.md](tests/TestCases.md). PRs adding missing event payloads are welcome.
