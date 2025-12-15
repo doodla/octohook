@@ -25,6 +25,11 @@ T = TypeVar("T")
 
 
 def _optional(payload: dict, key: str, class_type: Type[T]) -> Optional[T]:
+    """Create an instance of class_type from payload[key] if the key exists.
+
+    Returns None if the key is missing or falsy, otherwise returns an instance
+    of class_type initialized with the payload value.
+    """
     if payload.get(key):
         return class_type(payload[key])
     else:
@@ -32,6 +37,12 @@ def _optional(payload: dict, key: str, class_type: Type[T]) -> Optional[T]:
 
 
 def _transform(url: str, local_variables: dict) -> str:
+    """Interpolate URL template placeholders with provided values.
+
+    Handles GitHub's URL template syntax: {var} for required params and {/var}
+    for optional path segments. If a value is None, the URL is truncated at
+    that placeholder.
+    """
     local_variables.pop("self", None)
 
     for key, value in local_variables.items():
@@ -48,10 +59,13 @@ def _transform(url: str, local_variables: dict) -> str:
 
 
 class BaseGithubModel(ABC):
+    """Abstract base class for all GitHub webhook model classes."""
     pass
 
 
 class Enterprise(BaseGithubModel):
+    """A GitHub Enterprise account."""
+
     payload: dict
     id: int
     slug: str
@@ -82,6 +96,11 @@ class Enterprise(BaseGithubModel):
 
 
 class User(BaseGithubModel):
+    """A GitHub user or organization account.
+
+    Includes URL helper methods for constructing API endpoints.
+    """
+
     payload: dict
     name: Optional[str]
     login: str
@@ -138,6 +157,8 @@ class User(BaseGithubModel):
 
 
 class ShortRepository(BaseGithubModel):
+    """A minimal repository representation used in installation events."""
+
     payload: dict
     id: int
     node_id: str
@@ -158,6 +179,8 @@ class ShortRepository(BaseGithubModel):
 
 
 class Permissions(BaseGithubModel):
+    """Permission levels for a GitHub App installation or repository access."""
+
     payload: dict
     metadata: str
     contents: str
@@ -209,6 +232,12 @@ class Permissions(BaseGithubModel):
 
 
 class Repository(BaseGithubModel):
+    """A GitHub repository.
+
+    Includes URL helper methods for constructing API endpoints like issues,
+    pulls, commits, etc.
+    """
+
     payload: dict
     id: int
     node_id: str
@@ -438,6 +467,8 @@ class Repository(BaseGithubModel):
 
 
 class Organization(BaseGithubModel):
+    """A GitHub organization."""
+
     payload: dict
     login: str
     id: int
@@ -476,6 +507,8 @@ class Organization(BaseGithubModel):
 
 
 class Comment(BaseGithubModel):
+    """A comment on an issue, pull request, or commit."""
+
     payload: dict
     url: str
     html_url: str
@@ -538,6 +571,8 @@ class Comment(BaseGithubModel):
 
 
 class Thread(BaseGithubModel):
+    """A conversation thread on a pull request review."""
+
     payload: dict
     node_id: str
     comments: List[Comment]
@@ -549,6 +584,8 @@ class Thread(BaseGithubModel):
 
 
 class ChecksApp(BaseGithubModel):
+    """A GitHub App that runs checks."""
+
     payload: dict
     id: int
     node_id: str
@@ -578,6 +615,8 @@ class ChecksApp(BaseGithubModel):
 
 
 class ChecksPullRequest(BaseGithubModel):
+    """A minimal pull request representation in check events."""
+
     payload: dict
     url: str
     id: int
@@ -595,6 +634,8 @@ class ChecksPullRequest(BaseGithubModel):
 
 
 class CommitUser(BaseGithubModel):
+    """Author or committer information from a commit."""
+
     payload: dict
     name: str
     email: str
@@ -608,6 +649,8 @@ class CommitUser(BaseGithubModel):
 
 
 class Commit(BaseGithubModel):
+    """A git commit from a push event."""
+
     payload: dict
     id: str
     tree_id: str
@@ -637,6 +680,8 @@ class Commit(BaseGithubModel):
 
 
 class CheckSuite(BaseGithubModel):
+    """A collection of check runs for a specific commit."""
+
     payload: dict
     id: int
     node_id: str
@@ -678,6 +723,8 @@ class CheckSuite(BaseGithubModel):
 
 
 class CheckRunOutput(BaseGithubModel):
+    """Output details from a check run including title, summary, and annotations."""
+
     payload: dict
     title: Optional[str]
     summary: Optional[str]
@@ -695,6 +742,8 @@ class CheckRunOutput(BaseGithubModel):
 
 
 class CheckRun(BaseGithubModel):
+    """An individual CI check run within a check suite."""
+
     payload: dict
     id: int
     node_id: str
@@ -736,6 +785,8 @@ class CheckRun(BaseGithubModel):
 
 
 class ShortInstallation(BaseGithubModel):
+    """A minimal GitHub App installation reference."""
+
     payload: dict
     id: int
     node_id: str
@@ -747,6 +798,8 @@ class ShortInstallation(BaseGithubModel):
 
 
 class Installation(BaseGithubModel):
+    """A GitHub App installation on an account or organization."""
+
     payload: dict
     id: int
     node_id: Optional[str]
@@ -784,6 +837,8 @@ class Installation(BaseGithubModel):
 
 
 class DeployKey(BaseGithubModel):
+    """An SSH deploy key for a repository."""
+
     payload: dict
     id: int
     key: str
@@ -805,6 +860,8 @@ class DeployKey(BaseGithubModel):
 
 
 class Deployment(BaseGithubModel):
+    """A deployment of code to an environment."""
+
     payload: dict
     url: str
     id: int
@@ -842,6 +899,8 @@ class Deployment(BaseGithubModel):
 
 
 class DeploymentStatus(BaseGithubModel):
+    """The status of a deployment (e.g., pending, success, failure)."""
+
     payload: dict
     url: str
     id: int
@@ -873,6 +932,8 @@ class DeploymentStatus(BaseGithubModel):
 
 
 class Page(BaseGithubModel):
+    """A wiki page from a gollum event."""
+
     payload: dict
     page_name: str
     title: str
@@ -892,6 +953,8 @@ class Page(BaseGithubModel):
 
 
 class Label(BaseGithubModel):
+    """A label that can be applied to issues and pull requests."""
+
     payload: dict
     id: int
     node_id: str
@@ -922,6 +985,8 @@ class Label(BaseGithubModel):
 
 
 class Milestone(BaseGithubModel):
+    """A milestone for tracking issue progress."""
+
     payload: dict
     url: str
     html_url: str
@@ -961,6 +1026,8 @@ class Milestone(BaseGithubModel):
 
 
 class Issue(BaseGithubModel):
+    """A GitHub issue."""
+
     payload: dict
     url: str
     repository_url: str
@@ -1078,6 +1145,8 @@ class MarketplacePurchase(BaseGithubModel):
 
 
 class Team(BaseGithubModel):
+    """A GitHub organization team."""
+
     payload: dict
     name: str
     id: int
@@ -1108,6 +1177,8 @@ class Team(BaseGithubModel):
 
 
 class Hook(BaseGithubModel):
+    """A webhook configuration."""
+
     payload: dict
     type: str
     id: int
@@ -1181,6 +1252,8 @@ class Asset(BaseGithubModel):
 
 
 class Release(BaseGithubModel):
+    """A GitHub release with optional assets."""
+
     payload: dict
     url: str
     assets_url: Optional[str]
@@ -1473,6 +1546,8 @@ class Ref(BaseGithubModel):
 
 
 class PullRequest(BaseGithubModel):
+    """A GitHub pull request."""
+
     payload: dict
     url: str
     id: int
@@ -1582,6 +1657,8 @@ class PullRequest(BaseGithubModel):
 
 
 class Review(BaseGithubModel):
+    """A pull request review."""
+
     payload: dict
     id: int
     node_id: str

@@ -47,6 +47,12 @@ from octohook.models import (
 logger = logging.getLogger("octohook")
 
 class BaseWebhookEvent:
+    """Base class for all GitHub webhook events.
+
+    Provides common fields present in most webhook payloads: sender, repository,
+    organization, and enterprise. Subclasses add event-specific fields.
+    """
+
     payload: dict
     action: Optional[str] = None
     sender: Optional[User]
@@ -75,6 +81,12 @@ class BaseWebhookEvent:
 
 
 class BranchProtectionRuleEvent(BaseWebhookEvent):
+    """Triggered when a branch protection rule is created, edited, or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#branch_protection_rule
+    """
+
     payload: dict
     rule: Rule
     changes: Optional[Annotated[dict, "unstructured"]]
@@ -86,8 +98,12 @@ class BranchProtectionRuleEvent(BaseWebhookEvent):
 
 
 class CheckRunEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#checkrunevent
+    """Triggered when a check run is created, rerequested, completed, or has a requested action.
+
+    Check runs are individual CI jobs within a check suite.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#check_run
     """
 
     check_run: CheckRun
@@ -98,8 +114,12 @@ class CheckRunEvent(BaseWebhookEvent):
 
 
 class CheckSuiteEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#checksuiteevent
+    """Triggered when a check suite is completed, requested, or rerequested.
+
+    Check suites group related check runs for a specific commit.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#check_suite
     """
 
     check_suite: CheckSuite
@@ -110,8 +130,10 @@ class CheckSuiteEvent(BaseWebhookEvent):
 
 
 class CommitCommentEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#commitcommentevent
+    """Triggered when a commit comment is created.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#commit_comment
     """
 
     comment: Comment
@@ -122,8 +144,10 @@ class CommitCommentEvent(BaseWebhookEvent):
 
 
 class CreateEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#createevent
+    """Triggered when a branch or tag is created.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#create
     """
 
     ref: str
@@ -142,8 +166,10 @@ class CreateEvent(BaseWebhookEvent):
 
 
 class DeleteEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#deleteevent
+    """Triggered when a branch or tag is deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#delete
     """
 
     ref: str
@@ -158,8 +184,10 @@ class DeleteEvent(BaseWebhookEvent):
 
 
 class DeployKeyEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#deploykeyevent
+    """Triggered when a deploy key is created or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#deploy_key
     """
 
     key: DeployKey
@@ -170,8 +198,10 @@ class DeployKeyEvent(BaseWebhookEvent):
 
 
 class DeploymentEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#deploymentevent
+    """Triggered when a deployment is created.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#deployment
     """
 
     deployment: Deployment
@@ -183,8 +213,10 @@ class DeploymentEvent(BaseWebhookEvent):
 
 
 class DeploymentStatusEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#deploymentstatusevent
+    """Triggered when a deployment status is created.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#deployment_status
     """
 
     deployment_status: DeploymentStatus
@@ -197,8 +229,10 @@ class DeploymentStatusEvent(BaseWebhookEvent):
 
 
 class ForkEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#forkevent
+    """Triggered when a user forks a repository.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#fork
     """
 
     forkee: Repository
@@ -209,8 +243,10 @@ class ForkEvent(BaseWebhookEvent):
 
 
 class GitHubAppAuthorizationEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#forkapplyevent
+    """Triggered when a user revokes authorization of a GitHub App.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#github_app_authorization
     """
 
     def __init__(self, payload: dict):
@@ -218,8 +254,10 @@ class GitHubAppAuthorizationEvent(BaseWebhookEvent):
 
 
 class GollumEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#gollumevent
+    """Triggered when a wiki page is created or updated.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#gollum
     """
 
     pages: List[Page]
@@ -231,8 +269,10 @@ class GollumEvent(BaseWebhookEvent):
 
 
 class InstallationEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#installationevent
+    """Triggered when a GitHub App is installed, uninstalled, or has permissions changed.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#installation
     """
 
     installation: Installation
@@ -248,8 +288,10 @@ class InstallationEvent(BaseWebhookEvent):
 
 
 class InstallationRepositoriesEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#installationrepositoriesevent
+    """Triggered when repositories are added or removed from an installation.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#installation_repositories
     """
 
     installation: Installation
@@ -271,8 +313,10 @@ class InstallationRepositoriesEvent(BaseWebhookEvent):
 
 
 class IssueCommentEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#issuecommentevent
+    """Triggered when an issue or pull request comment is created, edited, or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#issue_comment
     """
 
     issue: Issue
@@ -287,8 +331,10 @@ class IssueCommentEvent(BaseWebhookEvent):
 
 
 class IssuesEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#issuesevent
+    """Triggered when an issue is opened, edited, deleted, transferred, pinned, and more.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#issues
     """
 
     issue: Issue
@@ -307,8 +353,10 @@ class IssuesEvent(BaseWebhookEvent):
 
 
 class LabelEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#labelevent
+    """Triggered when a label is created, edited, or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#label
     """
 
     label: Label
@@ -321,8 +369,10 @@ class LabelEvent(BaseWebhookEvent):
 
 
 class MarketplacePurchaseEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#marketplacepurchaseevent
+    """Triggered when a GitHub Marketplace plan is purchased, cancelled, or changed.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#marketplace_purchase
     """
 
     effective_date: str
@@ -337,8 +387,10 @@ class MarketplacePurchaseEvent(BaseWebhookEvent):
 
 
 class MemberEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#memberevent
+    """Triggered when a user is added or removed as a collaborator to a repository.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#member
     """
 
     member: User
@@ -349,8 +401,10 @@ class MemberEvent(BaseWebhookEvent):
 
 
 class MembershipEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#membershipevent
+    """Triggered when a user is added or removed from a team.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#membership
     """
 
     scope: str
@@ -365,8 +419,10 @@ class MembershipEvent(BaseWebhookEvent):
 
 
 class MetaEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#metaevent
+    """Triggered when a webhook is deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#meta
     """
 
     hook_id: int
@@ -379,8 +435,10 @@ class MetaEvent(BaseWebhookEvent):
 
 
 class MilestoneEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#milestoneevent
+    """Triggered when a milestone is created, closed, opened, edited, or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#milestone
     """
 
     milestone: Milestone
@@ -393,8 +451,10 @@ class MilestoneEvent(BaseWebhookEvent):
 
 
 class OrganizationEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#organizationevent
+    """Triggered when an organization is renamed or a user is added, removed, or invited.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#organization
     """
 
     invitation: Optional[Any]
@@ -407,8 +467,10 @@ class OrganizationEvent(BaseWebhookEvent):
 
 
 class OrgBlockEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#orgblockevent
+    """Triggered when an organization blocks or unblocks a user.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#org_block
     """
 
     blocked_user: User
@@ -419,8 +481,10 @@ class OrgBlockEvent(BaseWebhookEvent):
 
 
 class PackageEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#packageevent
+    """Triggered when a GitHub Package is published or updated.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#package
     """
 
     package: Package
@@ -431,8 +495,10 @@ class PackageEvent(BaseWebhookEvent):
 
 
 class PageBuildEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#pagebuildevent
+    """Triggered when a GitHub Pages build attempt is completed.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#page_build
     """
 
     id: int
@@ -445,8 +511,12 @@ class PageBuildEvent(BaseWebhookEvent):
 
 
 class ProjectCardEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#projectcardevent
+    """Triggered when a project card is created, edited, moved, converted, or deleted.
+
+    Note: This is for classic Projects. See projects_v2 events for new Projects.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#project_card
     """
 
     project_card: ProjectCard
@@ -459,8 +529,12 @@ class ProjectCardEvent(BaseWebhookEvent):
 
 
 class ProjectColumnEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#projectcolumnevent
+    """Triggered when a project column is created, updated, moved, or deleted.
+
+    Note: This is for classic Projects. See projects_v2 events for new Projects.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#project_column
     """
 
     project_column: ProjectColumn
@@ -473,8 +547,12 @@ class ProjectColumnEvent(BaseWebhookEvent):
 
 
 class ProjectEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#projectevent
+    """Triggered when a project is created, updated, closed, reopened, or deleted.
+
+    Note: This is for classic Projects. See projects_v2 events for new Projects.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#project
     """
 
     project: Project
@@ -485,8 +563,10 @@ class ProjectEvent(BaseWebhookEvent):
 
 
 class PublicEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#publicevent
+    """Triggered when a private repository is made public.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#public
     """
 
     def __init__(self, payload: dict):
@@ -494,8 +574,10 @@ class PublicEvent(BaseWebhookEvent):
 
 
 class PullRequestEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#pullrequestevent
+    """Triggered when a pull request is opened, closed, edited, assigned, and more.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request
     """
 
     number: int
@@ -520,8 +602,10 @@ class PullRequestEvent(BaseWebhookEvent):
 
 
 class PullRequestReviewEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#pullrequestreviewevent
+    """Triggered when a pull request review is submitted, edited, or dismissed.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request_review
     """
 
     review: Review
@@ -536,8 +620,10 @@ class PullRequestReviewEvent(BaseWebhookEvent):
 
 
 class PullRequestReviewCommentEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#pullrequestreviewcommentevent
+    """Triggered when a pull request review comment is created, edited, or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request_review_comment
     """
 
     comment: Comment
@@ -552,8 +638,10 @@ class PullRequestReviewCommentEvent(BaseWebhookEvent):
 
 
 class PullRequestReviewThreadEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#pullrequestreviewthreadevent
+    """Triggered when a pull request review thread is resolved or unresolved.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request_review_thread
     """
 
     pull_request: PullRequest
@@ -566,8 +654,10 @@ class PullRequestReviewThreadEvent(BaseWebhookEvent):
 
 
 class PushEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#pushevent
+    """Triggered when one or more commits are pushed to a repository branch or tag.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#push
     """
 
     ref: str
@@ -598,8 +688,10 @@ class PushEvent(BaseWebhookEvent):
 
 
 class ReleaseEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#releaseevent
+    """Triggered when a release is published, unpublished, created, edited, or deleted.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#release
     """
 
     release: Release
@@ -612,8 +704,12 @@ class ReleaseEvent(BaseWebhookEvent):
 
 
 class RepositoryDispatchEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#repositorydispatchevent
+    """Triggered when a repository dispatch event is created via the GitHub API.
+
+    Used to trigger workflows or other automation with custom event types.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_dispatch
     """
 
     branch: str
@@ -628,8 +724,10 @@ class RepositoryDispatchEvent(BaseWebhookEvent):
 
 
 class RepositoryEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#repositoryevent
+    """Triggered when a repository is created, deleted, archived, unarchived, and more.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository
     """
 
     def __init__(self, payload: dict):
@@ -637,8 +735,10 @@ class RepositoryEvent(BaseWebhookEvent):
 
 
 class RepositoryImportEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#repositoryimportevent
+    """Triggered when a repository import succeeds, fails, or is cancelled.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_import
     """
 
     status: str
@@ -649,8 +749,12 @@ class RepositoryImportEvent(BaseWebhookEvent):
 
 
 class RepositoryVulnerabilityAlertEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#repositoryvulnerabilityalertevent
+    """Triggered when a security vulnerability alert is created, dismissed, or resolved.
+
+    Note: This event is deprecated. Use dependabot_alert instead.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#repository_vulnerability_alert
     """
 
     alert: VulnerabilityAlert
@@ -661,8 +765,12 @@ class RepositoryVulnerabilityAlertEvent(BaseWebhookEvent):
 
 
 class SecurityAdvisoryEvent:
-    """
-    https://developer.github.com/v3/activity/events/types/#securityadvisoryevent
+    """Triggered when a security advisory is published, updated, or withdrawn.
+
+    Note: This event does not inherit from BaseWebhookEvent as it lacks common fields.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#security_advisory
     """
 
     payload: dict
@@ -676,8 +784,10 @@ class SecurityAdvisoryEvent:
 
 
 class SponsorshipEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#sponsorshipevent
+    """Triggered when a sponsorship is created, cancelled, edited, or has a tier change.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#sponsorship
     """
 
     sponsorship: Sponsorship
@@ -692,8 +802,10 @@ class SponsorshipEvent(BaseWebhookEvent):
 
 
 class StarEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#starevent
+    """Triggered when a user stars or unstars a repository.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#star
     """
 
     def __init__(self, payload: dict):
@@ -702,8 +814,10 @@ class StarEvent(BaseWebhookEvent):
 
 
 class StatusEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#statusevent
+    """Triggered when a commit status is created or updated.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#status
     """
 
     id: int
@@ -736,8 +850,10 @@ class StatusEvent(BaseWebhookEvent):
 
 
 class TeamEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#teamevent
+    """Triggered when a team is created, deleted, edited, or has repository access changed.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#team
     """
 
     team: Team
@@ -748,8 +864,10 @@ class TeamEvent(BaseWebhookEvent):
 
 
 class TeamAddEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#teamaddevent
+    """Triggered when a repository is added to a team.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#team_add
     """
 
     team: Team
@@ -760,8 +878,12 @@ class TeamAddEvent(BaseWebhookEvent):
 
 
 class WatchEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/v3/activity/events/types/#watchevent
+    """Triggered when a user watches a repository (subscribes to notifications).
+
+    Note: Despite the name, this fires when a user stars a repo. Use StarEvent instead.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#watch
     """
 
     def __init__(self, payload: dict):
@@ -769,8 +891,10 @@ class WatchEvent(BaseWebhookEvent):
 
 
 class PingEvent(BaseWebhookEvent):
-    """
-    https://developer.github.com/webhooks/#ping-event
+    """Triggered when a webhook is created to verify the endpoint is working.
+
+    See Also:
+        https://docs.github.com/en/webhooks/webhook-events-and-payloads#ping
     """
 
     zen: str
@@ -785,6 +909,11 @@ class PingEvent(BaseWebhookEvent):
 
 
 class WebhookEvent(Enum):
+    """Enumeration of all GitHub webhook event types.
+
+    Use these values with the @hook decorator to specify which events to handle.
+    """
+
     BRANCH_PROTECTION_CONFIGURATION = "branch_protection_configuration"
     BRANCH_PROTECTION_RULE = "branch_protection_rule"
     CHECK_RUN = "check_run"
@@ -862,6 +991,11 @@ class WebhookEvent(Enum):
 
 
 class WebhookEventAction(Enum):
+    """Enumeration of common GitHub webhook action types.
+
+    Use these values with the @hook decorator's actions parameter to filter events.
+    """
+
     ADDED = "added"
     ADDED_TO_REPOSITORY = "added_to_repository"
     ARCHIVED = "archived"
@@ -984,6 +1118,21 @@ event_map = {
 
 
 def parse(event_name, payload: dict):
+    """Parse a raw webhook payload into a typed event object.
+
+    Args:
+        event_name: The GitHub event name (from the X-GitHub-Event header).
+        payload: The raw webhook payload dictionary.
+
+    Returns:
+        A typed event object (e.g., PullRequestEvent, IssuesEvent) or
+        BaseWebhookEvent if the event type is not recognized.
+
+    Example:
+        event = parse("pull_request", request.json)
+        if isinstance(event, PullRequestEvent):
+            print(event.pull_request.title)
+    """
     try:
         return event_map[WebhookEvent(event_name)](payload)
     except Exception:

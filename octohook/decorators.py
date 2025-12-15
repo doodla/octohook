@@ -13,6 +13,12 @@ ANY_ACTION = "*"
 
 
 class _WebhookDecorator:
+    """Internal class managing webhook handler registration and dispatch.
+
+    Maintains a three-level handler registry: event -> action -> repository.
+    Handles debug mode where only debug handlers fire for an event.
+    """
+
     def __init__(self):
         self.handlers = defaultdict(  # event_name
             lambda: defaultdict(lambda: defaultdict(set))  # action  # repo  # handlers
@@ -25,6 +31,20 @@ class _WebhookDecorator:
         repositories: List[str] = None,
         debug=False,
     ):
+        """Decorator to register a function as a webhook handler.
+
+        Args:
+            event: The webhook event type to handle.
+            actions: Optional list of actions to filter on. If None, handles all actions.
+            repositories: Optional list of repository full names (owner/repo) to filter on.
+            debug: If True, only this handler runs for the event (other handlers are skipped).
+
+        Example:
+            @hook(WebhookEvent.PULL_REQUEST, actions=[WebhookEventAction.OPENED])
+            def on_pr_opened(event: PullRequestEvent):
+                print(f"PR opened: {event.pull_request.title}")
+        """
+
         def real_decorator(fn):
             @wraps(fn)
             def wrapper(*, event_name, payload):
@@ -58,6 +78,18 @@ class _WebhookDecorator:
         return real_decorator
 
     def handle_webhook(self, event_name: str, payload: dict):
+        """Dispatch a webhook payload to registered handlers.
+
+        Finds all matching handlers for the event/action/repository combination
+        and executes them sequentially. Exceptions are logged but don't stop execution.
+
+        Args:
+            event_name: The GitHub event name (e.g., "pull_request", "issues").
+            payload: The raw webhook payload dictionary from GitHub.
+
+        Example:
+            handle_webhook("pull_request", request.json)
+        """
         action_handlers = self.handlers[WebhookEvent(event_name)]
 
         # These handlers are invoked all the time.
